@@ -278,14 +278,17 @@ body[data-book-theme="academic"] #mergedBody p { text-indent: 2em; }
 
 /* ---------- print ---------- */
 @media print {
+  * { box-sizing: border-box; }
   #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #bookBar { display: none !important; }
-  #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; }
-  @page { margin: 24mm 22mm 22mm; }
+  #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; width: 100%; }
+  @page { size: A4; margin: 24mm 20mm 22mm; }
   body { margin: 0; overflow: visible; background: #fff; }
-  #mergedBody { max-width: 100%; padding: 0; }
+  #mergedBody { width: 100%; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  #mergedBody .book-title { text-align: center !important; font-size: 28px; margin: 0 0 30px !important; }
   #mergedBody hr.file-boundary { display: none; }
   #mergedBody hr { margin: 1.2em 0; }
-  .md-body { color: #000; background: #fff; padding: 0; }
+  .md-body { color: #000; background: #fff; padding: 0; max-width: 100%; }
+  .md-body p, .md-body li, .md-body h1, .md-body h2, .md-body h3, .md-body h4 { overflow-wrap: anywhere; word-break: break-word; }
   .book-front { max-width: 100%; padding: 0; }
   .book-cover {
     min-height: 297mm; box-sizing: border-box; margin: 0; padding: 0 26mm;
@@ -295,7 +298,7 @@ body[data-book-theme="academic"] #mergedBody p { text-indent: 2em; }
   .book-toc { border: none; margin: 0; padding: 0; page: tocpage; break-after: page; }
   #mergedBody .book-chapter { break-before: page; }
   h1, h2, h3, h4 { break-after: avoid; break-inside: avoid; }
-  img, pre, blockquote, table, figure { break-inside: avoid; }
+  img, pre, blockquote, table, figure { break-inside: avoid; max-width: 100%; }
   p, li { widows: 2; orphans: 2; }
   body[data-book-theme="modern"] #mergedBody h1 { border-left: none; padding-left: 0; }
 }
@@ -871,6 +874,7 @@ async function useRoot(handle) {
   }
   rootHandle = handle;
   await idbSet('root', handle);
+  await loadBookCfgFile();   // 从项目 setting.ini 读取成书设置
   imgCache.forEach(u => URL.revokeObjectURL(u)); imgCache.clear();
   selectedNode = null; current = null; multiSel = [];
   expanded = new Set();
@@ -896,8 +900,8 @@ async function scanDir(dirHandle, path) {
     if (name.startsWith('.')) continue;
     if (h.kind === 'directory') {
       dirs.push({ type: 'dir', name, handle: h, path: path ? path + '/' + name : name, children: [], draft: isDraftName(name) });
-    } else if (/\.(md|markdown|txt|css)$/i.test(name)) {
-      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name), aux: name === 'style.css' });
+    } else if (/\.(md|markdown|txt|css)$/i.test(name) || name === 'setting.ini') {
+      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name), aux: name === 'style.css' || name === 'setting.ini' });
     }
   }
   for (const d of dirs) d.children = await scanDir(d.handle, d.path);
@@ -911,6 +915,10 @@ async function scanDir(dirHandle, path) {
 function numOf(name) {
   const m = name.match(/^(\d+)(?=[.-]|$)/);
   return m ? parseInt(m[1], 10) : null;
+}
+// 清理文件名：去掉 Windows 不允许的字符 \ / : * ? " < > |，并去掉首尾空白与点
+function sanitizeFileName(name) {
+  return name.replace(/[\\/:*?"<>|]/g, '').replace(/^[\s.]+|[\s.]+$/g, '');
 }
 // 清理文件名用于显示：去掉开头的数字编号（110-）和扩展名（.txt/.md），与大纲视图一致
 function cleanName(name) {
@@ -945,7 +953,9 @@ function renderTree() {
     else if (multiSel.includes(node.path)) ico = '✓';
     else ico = '📄';
     row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (mutedOut ? '<span class="dtag">不输出</span>' : '');
-    row.title = (node.aux ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
+    row.title = (node.aux ? (node.name === 'style.css'
+        ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
+        : 'setting.ini 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n')
       : node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
       + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并用，Esc 或「取消选择」清空）；拖动可移动' : '拖动文件/文件夹到这里可移动');
     row.draggable = true;
@@ -980,6 +990,8 @@ function renderTree() {
         else expanded.add(node.path);
         renderTree();
         updateToolbar();   // 文件夹选中后重命名/删除等按钮应可用
+      } else if (node.name === 'setting.ini') {
+        openBookDlg();   // 点击成书设置文件直接打开设置对话框
       } else await openFile(node);
     };
     el.appendChild(row);
@@ -1280,7 +1292,50 @@ async function renderMerged() {
 const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false };
 let bookCfg = BOOK_DEFAULT_CFG;
 try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
-function saveBookCfg() { localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg)); }
+// 从项目根目录的 setting.ini 读取成书设置（INI 格式：key=value，; 开头为注释）
+async function loadBookCfgFile() {
+  if (!rootHandle) return;
+  try {
+    const text = await (await (await rootHandle.getFileHandle('setting.ini')).getFile()).text();
+    const m = {};
+    for (const line of text.split(/\r?\n/)) {
+      const t = line.trim();
+      if (!t || t.startsWith(';') || t.startsWith('[')) continue;
+      const eq = t.indexOf('=');
+      if (eq > 0) m[t.slice(0, eq).trim()] = t.slice(eq + 1).trim();
+    }
+    const bool = k => m[k] === undefined ? undefined : (m[k] === 'true');
+    bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, {
+      theme: m.theme || 'classic',
+      title: m.title || '', subtitle: m.subtitle || '', author: m.author || '', date: m.date || '',
+      cover: bool('cover'), toc: bool('toc'), chapterBreak: bool('chapterBreak'), headingNumber: bool('headingNumber')
+    });
+    localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
+  } catch (e) { /* 无 setting.ini 时用 localStorage / 默认值 */ }
+}
+// 保存成书设置：写入 localStorage 并同步到项目根目录 setting.ini
+async function saveBookCfg() {
+  localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
+  if (!rootHandle) return;
+  const ini =
+`; WriteTools 成书设置（保存在项目根目录，随项目一起备份）
+; 建议在「封面与成书设置」对话框中修改，勿手动编辑
+[book]
+theme=${bookCfg.theme}
+title=${bookCfg.title}
+subtitle=${bookCfg.subtitle}
+author=${bookCfg.author}
+date=${bookCfg.date}
+cover=${bookCfg.cover}
+toc=${bookCfg.toc}
+chapterBreak=${bookCfg.chapterBreak}
+headingNumber=${bookCfg.headingNumber}
+`;
+  try {
+    const fh = await rootHandle.getFileHandle('setting.ini', { create: true });
+    const w = await fh.createWritable(); await w.write(ini); await w.close();
+  } catch (e) { /* 磁盘不可用时仅存 localStorage */ }
+}
 function bookDate() {
   const d = new Date();
   const fmt = (y, m, day) => y + ' 年 ' + m + ' 月 ' + day + ' 日';
@@ -1528,7 +1583,7 @@ async function newDir() {
 async function renameNode() {
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
-  let newName = prompt('新名称（文件无后缀自动补 .txt）：', n.name);
+  let newName = sanitizeFileName(prompt('新名称（文件无后缀自动补 .txt）：', n.name) || '');
   if (!newName || newName === n.name) return;
   if (n.type === 'file' && !/\.\w+$/.test(newName)) newName += '.txt';
   try {
@@ -1559,7 +1614,7 @@ async function autoRename() {
   const first = (text.split('\n').find(l => l.trim()) || '').trim();
   if (!first) { toast('文件内容为空'); return; }
   let title = first.replace(/^#+\s*/, '').replace(/[*_`~[\]()#>!]/g, '').trim().slice(0, 16);
-  title = title.replace(/[\\/:*?"<>|.]/g, '').trim();
+  title = sanitizeFileName(title);
   if (!title) { toast('第一行没有可用文字'); return; }
   const ext = (n.name.match(/\.\w+$/) || ['.txt'])[0];
   // 保留草稿前缀（_、[草稿]、draft-），只替换/生成数字编号部分
@@ -2467,7 +2522,7 @@ function openBookDlg() {
   $('bkNumber').checked = !!bookCfg.headingNumber;
   $('dlgBook').showModal();
 }
-function readBookDlg() {
+async function readBookDlg() {
   const def = rootHandle ? rootHandle.name : '';
   bookCfg.theme = $('bkTheme').value;
   bookCfg.title = $('bkTitle').value.trim() === def.trim() ? '' : $('bkTitle').value.trim();
@@ -2478,7 +2533,7 @@ function readBookDlg() {
   bookCfg.toc = $('bkToc').checked;
   bookCfg.chapterBreak = $('bkBreak').checked;
   bookCfg.headingNumber = $('bkNumber').checked;
-  saveBookCfg();
+  await saveBookCfg();
 }
 async function applyBookCfgAndRender() {
   applyBookTheme();
@@ -2487,13 +2542,13 @@ async function applyBookCfgAndRender() {
 $('btnBookCfg').onclick = openBookDlg;
 $('bookThemeSel').onchange = async () => {
   bookCfg.theme = $('bookThemeSel').value;
-  saveBookCfg();
+  await saveBookCfg();
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
-$('bkSave').onclick = async () => { readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkSave').onclick = async () => { await readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
 $('bkPrint').onclick = async () => {
-  readBookDlg(); $('dlgBook').close();
+  await readBookDlg(); $('dlgBook').close();
   await applyBookCfgAndRender();
   toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
   setTimeout(() => window.print(), 600);
