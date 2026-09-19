@@ -52,14 +52,18 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .tb-row2 #searchBar { padding: 0; width: 250px; max-width: 100%; flex: none; }
 .tb-row2 .tabs { margin-left: 10px; }
 .tb-row2 #searchBar input { font-size: 13px; padding: 5px 9px; }
-#presetSel { font-size: 12.5px; padding: 4px 4px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+#presetSel, #bookThemeSel { font-size: 12.5px; padding: 4px 4px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+/* 模式分组：编辑组仅编辑模式可见，成书组仅预览/阅览/大纲可见（避免第三行） */
+#topbar .mode-edit, #topbar .mode-view { display: none; }
+body[data-mode="edit"] #topbar .mode-edit,
+body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-flex; gap: 5px; align-items: center; }
 #topbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 .tabs { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .tabs button { border: none; border-radius: 0; background: transparent; padding: 4px 14px; }
 .tabs button.active { background: var(--accent); color: #fff; }
 
 /* ---------- layout ---------- */
-#main { flex: 1; display: flex; min-height: 0; }
+#main { flex: 1; display: flex; min-height: 0; position: relative; }
 #sidebar {
   width: 250px; min-width: 120px; flex: none; background: var(--panel);
   display: flex; flex-direction: column; overflow: hidden; padding: 6px 4px;
@@ -79,14 +83,36 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .s-line { font-size: 12.5px; color: var(--text); word-break: break-all; }
 .s-line mark { background: #ffe58a; color: #000; border-radius: 2px; }
 .s-empty { color: var(--muted); font-size: 12px; padding: 10px 6px; }
+#sbHead {
+  display: flex; align-items: center; gap: 2px;
+  border-bottom: 1px solid var(--border); margin: 0 0 6px; padding-right: 6px;
+}
 #projName {
-  padding: 8px 10px 7px; font-weight: 600; font-size: 13.5px;
-  border-bottom: 1px solid var(--border); margin: 0 0 6px;
+  flex: 1; min-width: 0; padding: 8px 4px 7px 10px; font-weight: 600; font-size: 13.5px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .vdiv { flex: none; width: 5px; cursor: col-resize; position: relative; z-index: 5; }
 .vdiv::after { content: ''; position: absolute; left: 2px; top: 0; bottom: 0; width: 1px; background: var(--border); }
 .vdiv:hover::after { background: var(--accent); width: 2px; }
+/* 折叠目录：项目名标题行右侧的小方块按钮 */
+#sideCollapseBtn {
+  flex: none; width: 22px; height: 22px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
+  color: var(--muted); font-size: 13px; line-height: 1; cursor: pointer;
+}
+#sideCollapseBtn:hover { color: var(--accent); border-color: var(--accent); background: var(--hover); }
+/* 展开目录：侧栏折叠后贴 #main 左缘的竖页签 */
+#sideExpandBtn {
+  position: absolute; top: 50%; left: 0; transform: translateY(-50%);
+  width: 18px; height: 72px; z-index: 30; padding: 0; display: none;
+  align-items: center; justify-content: center;
+  background: var(--panel); border: 1px solid var(--border); border-left: none;
+  border-radius: 0 9px 9px 0; color: var(--muted); font-size: 15px; line-height: 1;
+  cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,.18);
+}
+#sideExpandBtn:hover { color: var(--accent); border-color: var(--accent); }
+#main.side-collapsed #sideExpandBtn { display: flex; }
 .tnode.multisel { background: color-mix(in srgb, var(--sel) 70%, transparent); }
 .tnode.multisel .ico { color: #4a9a58; font-weight: 700; }
 #workarea { flex: 1; display: flex; min-width: 0; position: relative; }
@@ -120,7 +146,8 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
   flex: 1; min-width: 0; border: none; outline: none; resize: none;
   background: var(--panel); color: var(--text);
   font-family: Consolas, "Microsoft YaHei", monospace;
-  font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 26px 30px; caret-color: var(--accent);
+  font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 26px 30px;
+  scrollbar-gutter: stable both-edges; caret-color: var(--accent);
 }
 #livePreview {
   width: 46%; min-width: 220px; flex: none; overflow: auto;
@@ -181,20 +208,11 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 
 /* ---------- book publishing (chrome only) ---------- */
 #readMain { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-#bookBar {
-  display: flex; align-items: center; gap: 10px; padding: 6px 14px; flex: none;
-  border-bottom: 1px solid var(--border); background: var(--toolbar); font-size: 12.5px;
-}
-#bookBar .hint { color: var(--muted); font-size: 11.5px; }
-#bookBar select {
-  font: inherit; font-size: 12.5px; color: var(--text); background: var(--bg);
-  border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px;
-}
 
 /* ---------- print (chrome: hide UI + baseline page) ---------- */
 @media print {
   * { box-sizing: border-box; }
-  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #bookBar { display: none !important; }
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #sideExpandBtn { display: none !important; }
   #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; width: 100%; }
   @page { size: A4; margin: 24mm 20mm 22mm; }
   body { margin: 0; overflow: visible; background: #fff; }
@@ -300,39 +318,9 @@ body.book-has-cover .md-body > .book-title { display: none; }
 /* 首行缩进：对所有内容区生效（实时预览/单文件预览/成书阅览） */
 body.book-indent .md-body p { text-indent: 2em; }
 
-/* ================= 成书版式（布局层，不写死颜色） ================= */
-
-/* classic 经典书籍：默认值即经典（居中标题），无需额外覆盖 */
-body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }
-
-/* modern 现代简洁：黑体、左对齐标题带竖线 */
-body[data-book-theme="modern"] {
-  --md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  --md-fs: 16px; --md-lh: 1.85;
-  --md-h1-fs: 26px;
-}
-body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-body-color); padding-left: 12px; margin-top: 2em; }
-body[data-book-theme="modern"] .md-body p { margin: 1em 0; }
-
-/* academic 学术：宋体小字紧凑 */
-body[data-book-theme="academic"] {
-  --md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
-  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
-  --md-fs: 15.5px; --md-lh: 1.75;
-  --md-h1-fs: 21px; --md-h2-fs: 17px; --md-h3-fs: 15.5px; --md-h4-fs: 15px;
-}
-body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }
-
-/* phone 手机阅览：黑体大字宽行距 */
-body[data-book-theme="phone"] {
-  --md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  --md-fs: 20px; --md-lh: 1.95;
-  --md-h1-fs: 27px; --md-h2-fs: 24px; --md-h3-fs: 22px;
-  --md-h4-fs: 20px; --md-h5-fs: 19px; --md-h6-fs: 18px;
-}
-body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }
+/* ================= 成书版式（布局层，不写死颜色） =================
+   四套版式的默认变量与标题结构规则由 JS（BOOK_THEMES）生成到
+   #bookThemeCss，本表不再手写；style.css 成书版式区可覆盖。 */
 
 /* ================= 封面与扉页目录（阅览视图） ================= */
 .book-front { max-width: 780px; margin: 0 auto; padding: 0 36px; }
@@ -343,13 +331,8 @@ body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em;
 .bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; }
 .bc-sub { font-size: 15px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
 .bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
-.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px; }
-.book-toc .toc-h { text-align: center; font-size: 19px; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
-.book-toc a { display: block; color: var(--md-body-color); text-decoration: none; font-size: 14px; line-height: 2.05; }
-.book-toc a.tl1 { font-weight: 700; margin-top: 7px; }
-.book-toc a.tl2 { padding-left: 1.6em; }
-.book-toc a.tl3 { padding-left: 3.2em; }
-.book-toc a.tl4 { padding-left: 4.8em; }
+
+/* 目录（.book-toc）样式已移至成书版式区（BOOK_THEMES / style.css），随 --md-fs 联动 */
 
 /* modern 封面布局 */
 body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 130px; }
@@ -361,8 +344,6 @@ body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 70px 20px
 body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
 body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
 body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
-body[data-book-theme="phone"] .book-toc .toc-h { font-size: 23px; }
-body[data-book-theme="phone"] .book-toc a { font-size: 19px; line-height: 1.95; color: var(--md-body-color); }
 
 /* ---------- print: 内容相关 ---------- */
 @media print {
@@ -475,7 +456,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   max-height: 90px; overflow: auto;
 }
 </style>
-<!-- style.css 注入位（应用内仅亮色主题生效，排在内容默认之后） -->
+<!-- 四套成书版式默认规则（JS 由 BOOK_THEMES 生成，导出 HTML 一并带上） -->
+<style id="bookThemeCss"></style>
+<!-- style.css 注入位（原样注入，分区自带作用域） -->
 <style id="userCssStyle"></style>
 </head>
 <body>
@@ -491,15 +474,16 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnRename" disabled>重命名</button>
   <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
   <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
+  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">👁</button>
   <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy（同名时自动依次为 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
   <span class="sep"></span>
-  <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
-  <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
-  <button id="btnLayout" disabled title="进入成书排版预览：可调整模板、封面设置，再导出 PDF 或 HTML">排版输出</button>
+  <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
+  <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
+  <button id="btnFontReset" title="重置字号：编辑模式恢复编辑器默认字号（15px），预览/阅览恢复版式默认字号（缩放 100%）">↺</button>
   <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
   <button id="btnAbout" title="软件使用说明">说明</button>
   <button id="btnTheme" title="切换明暗主题">🌙</button>
@@ -512,12 +496,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button data-mode="read" disabled>阅览</button>
      <button data-mode="outline" disabled>大纲</button>
    </div>
-   <button id="btnSide" title="隐藏/显示左侧文件目录">隐藏目录</button>
    <button id="btnRefresh" disabled>刷新</button>
-   <button id="btnHistory" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">历史</button>
    <span class="sep"></span>
    <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
-   <select id="presetSel" disabled title="选择内置配色：写入项目根目录 style.css 并立即生效（只管颜色；可再点“样式”微调）">
+   <select id="presetSel" disabled title="选择内置配色：只替换 style.css 配色区（正文与标题颜色），点“样式”可微调任意内容">
      <option value="">内置配色…</option>
      <option value="classic">经典黑</option>
      <option value="red">典雅红</option>
@@ -530,17 +512,37 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <button id="btnPrev" disabled title="上一个文件">◀</button>
    <button id="btnNext" disabled title="下一个文件">▶</button>
    <span class="sep"></span>
-   <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
-   <button id="btnTable" disabled>插入表格</button>
-   <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
-   <button id="btnFullSpace" disabled title="插入中文全角空格（　），用于中文排版">全角空格</button>
-   <button id="btnReplace" disabled title="查找替换：可在当前文件或整个项目中进行">替换</button>
+   <!-- 编辑模式：编辑工具组 -->
+   <div class="mode-edit">
+     <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
+     <button id="btnTable" disabled>插入表格</button>
+     <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
+     <button id="btnFullSpace" disabled title="插入中文全角空格（　），用于中文排版">插入空格</button>
+     <button id="btnInsertComment" disabled title="在光标处插入 HTML 注释 &lt;!--注释--&gt;，仅写作时可见，阅览与导出中不显示">插入注释</button>
+     <button id="btnReplace" disabled title="查找替换：可在当前文件或整个项目中进行">替换</button>
+     <button id="btnHistory" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">历史</button>
+   </div>
+   <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
+   <div class="mode-view">
+     <select id="bookThemeSel" title="成书版式：替换 style.css 成书版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
+       <option value="classic">经典书籍</option>
+       <option value="modern">现代简洁</option>
+       <option value="academic">学术</option>
+       <option value="phone">手机阅览</option>
+     </select>
+     <button id="btnBookCfg" title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
+     <button id="btnExportPdf" class="primary" disabled title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
+     <button id="btnExportHtml" disabled title="导出为单文件 HTML（含左侧目录、自定义样式）">导出 HTML</button>
+   </div>
  </div>
 </header>
 
 <div id="main">
   <aside id="sidebar">
-    <div id="projName" class="hidden"></div>
+    <div id="sbHead" class="hidden">
+      <div id="projName"></div>
+      <button id="sideCollapseBtn" title="折叠文件目录（腾出编辑空间）" aria-label="折叠文件目录">‹</button>
+    </div>
     <div id="tree"></div>
     <div id="searchResults" class="hidden"></div>
   </aside>
@@ -577,19 +579,6 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <nav id="tocPanel"><div class="toc-title">目 录</div><div id="tocList"></div></nav>
       <div class="vdiv" id="divRead"></div>
       <div id="readMain">
-        <div id="bookBar">
-          <b>成书</b>
-          <select id="bookThemeSel" title="成书版式：只管布局（字号/行距/对齐/分页），颜色由内置配色决定">
-            <option value="classic">经典书籍</option>
-            <option value="modern">现代简洁</option>
-            <option value="academic">学术</option>
-            <option value="phone">手机阅览</option>
-          </select>
-          <button id="btnBookCfg">封面与成书设置</button>
-          <button id="btnExportPdf" class="primary" title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
-          <button id="btnExportHtml" title="导出为单文件 HTML（含左侧目录、自定义样式）">导出 HTML</button>
-          <span class="hint">调整模板与封面设置后预览，确认无误再点「导出 PDF」或「导出 HTML」</span>
-        </div>
         <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
       </div>
     </div>
@@ -601,6 +590,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <div id="outlineScroll"><div id="outlineCards"></div></div>
     </div>
   </section>
+  <button id="sideExpandBtn" title="展开文件目录" aria-label="展开文件目录">›</button>
 </div>
 
 <footer id="statusbar">
@@ -692,6 +682,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>调色盘</b>：选颜色确认后把色值插到光标处。</li>
       <li><b>◀ / ▶</b>：按目录顺序快速切换上一个 / 下一个文件（草稿除外），编辑、预览、阅览模式下都可用。</li>
       <li><b>全角空格</b>：在光标处插入一个中文全角空格（　），用于中文排版。</li>
+      <li><b>插入注释</b>：在光标处插入 <b>&lt;!--注释--&gt;</b>，占位文字自动选中可直接输入；HTML 注释只在编辑源码时可见，阅览、PDF、导出 HTML 中均不显示（导出 MD 原文保留）。</li>
       <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认）。<b>替换前的内容会自动存入「历史版本」，可随时恢复。</b></li>
       <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
       <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
@@ -699,14 +690,15 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
     <h4>样式与显示</h4>
     <ul>
-      <li>样式是两个互相独立、可任意组合的维度：<b>① 配色（只管颜色）</b>——「内置配色」下拉框提供经典黑、典雅红、学术蓝、护眼绿、暖阳橙、典雅紫六套，选中后写入项目根目录的 style.css，点「样式」可直接编辑它继续微调；<b>② 成书版式（只管布局：字体字号/行距/对齐/分页/封面/目录）</b>——「阅览」页顶部切换经典书籍 / 现代简洁 / 学术 / 手机阅览。编辑实时预览、阅览、导出 PDF/HTML 共用同一份样式表，所见即所得。style.css 为浅色背景设计：应用内暗色主题下自动停用并回退暗色配色，导出的 HTML 中始终保持原色。</li>
-      <li><b>A- / A+</b>：编辑模式调编辑器字号；其他模式等比缩放内容字号（标题/目录同步、对所有版式生效）；🌙 切换明暗主题。</li>
+      <li>样式集中在项目根目录的 <b>style.css</b>（点「样式」随时编辑，保存即生效），文件内分为四个程序管理分区和一个自定义区：<b>配色区</b>（正文与各级标题颜色）、<b>成书版式区</b>（字体/字号/行距/标题对齐）、<b>页眉页脚区</b>（打印 PDF 的页眉书名、页脚日期页码）、<b>缩放区</b>（A+/A- 写入的缩放倍率）。分区都带 <code>═══ … START/END ═══</code> 标记注释，程序更新时<b>只替换对应分区</b>，分区外的内容永不改动；分区内的参数你也可以直接手改。「内置配色」下拉（六套）只更新配色区；「成书版式」（经典/现代/学术/手机）只更新版式区与页眉页脚区。编辑实时预览、阅览、导出 PDF/HTML 共用同一份样式，所见即所得。配色为浅色背景设计：应用内暗色主题下自动停用并回退暗色配色，导出的 HTML 中始终保持原色。</li>
+      <li><b>A- / A+</b>：编辑模式调编辑器字号（浏览器记忆）；其他模式按 ±1px 调整内容字号，等比写入 style.css 缩放区（正文/标题/目录同步缩放，可在文件中手动输入任意倍率）；点 <b>↺</b> 恢复默认字号（编辑模式回 15px，预览/阅览缩放回 100%）；🌙 切换明暗主题。</li>
     </ul>
     <h4>输出</h4>
     <ul>
-      <li><b>排版输出</b>：点顶部「排版输出」进入成书预览（自动折叠左侧目录树），在阅览页顶部可切换<b>经典书籍 / 现代简洁 / 学术 / 手机阅览</b>四套模板（手机阅览为大字号宽行距，适合在手机浏览器阅读）、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、首行缩进、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>（保存时自动填好「项目名-日期」文件名），<b>不要选「Microsoft Print to PDF」</b>（Win11 已知缺陷：其保存对话框文件名为空）；边距选“默认”、关闭浏览器自带页眉页脚，PDF 页面自动带输出日期，需 Chrome/Edge 131+。或直接「导出 HTML」。</li>
+      <li>点「阅览」标签即进入成书预览；第二行工具栏会自动换成成书组：切换<b>经典书籍 / 现代简洁 / 学术 / 手机阅览</b>四套版式（手机阅览为大字号宽行距，适合在手机浏览器阅读）、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、首行缩进、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>（保存时自动填好「项目名-日期」文件名），<b>不要选「Microsoft Print to PDF」</b>（Win11 已知缺陷：其保存对话框文件名为空）；边距选“默认”、关闭浏览器自带页眉页脚，PDF 页面自动带输出日期，需 Chrome/Edge 131+。或直接「导出 HTML」。</li>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
+      <li><b>👁 快速隐藏</b>：选中任意文件或文件夹点眼睛按钮，名称前会加上 <code>_</code> 立即退出输出（阅览/PDF/HTML/MD 均不含）；选中已隐藏项目时按钮变成 🙈，再点恢复，适合临时控制输出内容（若目标位置已有同名文件会中止并提示）。</li>
     </ul>
     <h4>回收站与历史版本</h4>
     <ul>
@@ -752,7 +744,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgBook">
-  <h3>封面与成书设置</h3>
+  <h3>排版设置</h3>
   <div class="row"><label style="width:72px">模板</label>
     <select id="bkTheme" style="flex:1">
       <option value="classic">经典书籍（宋体正文、居中章节、首行缩进）</option>
@@ -871,7 +863,8 @@ let tree = [];                  // 目录树节点
 let selectedNode = null;        // 树中选中的节点（文件或文件夹）
 let multiSel = [];              // 多选文件路径（用于合并），按点击顺序
 let current = null;             // { node, content, dirty }
-let mode = 'edit';              // edit | preview | read
+let mode = 'edit';              // edit | preview | read | outline
+document.body.dataset.mode = 'edit';
 let expanded = new Set();       // 已展开的文件夹 path
 let imgCache = new Map();       // baseDirPath::src -> blobUrl
 let saveTimer = null, previewTimer = null;
@@ -971,8 +964,9 @@ async function useRoot(handle) {
   imgCache.forEach(u => URL.revokeObjectURL(u)); imgCache.clear();
   selectedNode = null; current = null; multiSel = [];
   expanded = new Set();
-  $('projName').textContent = '📖 ' + handle.name;
+  $('projName').textContent = '📕 ' + handle.name;
   $('projName').classList.remove('hidden');
+  $('sbHead').classList.remove('hidden');
   await refreshTree();
   await loadUserCss();
   $('welcome').classList.add('hidden');
@@ -1237,28 +1231,127 @@ async function resolveImg(src, baseDirPath) {
 }
 
 /* ================= 自定义CSS ================= */
-const CSS_TEMPLATE = `/* ===== WriteTools 自定义样式 (style.css) =====
-   保存在项目根目录，保存即生效，导出 HTML 也会带上。
-   本文件整体作用于 :root（仅亮色主题）：
-   1) 顶部可直接写 CSS 变量（不要加 :root{} 外壳），覆盖内容配色/字号；
-   2) 下方可写普通规则（.md-body 开头只影响内容区，不影响工具界面）。 */
-
-/* --md-body-color: #222;  正文颜色 */
-/* --md-h1-color: #8f1d1d; --md-h2-color: #a82b26;  各级标题颜色 */
-/* --md-fs: 17px;  正文字号    --md-lh: 2;  行距 */
-
-.md-body blockquote { color: #777; }
-`;
+/* ================= style.css 分区管理 =================
+   style.css 由四个程序管理分区 + 自定义区组成：
+   配色区（内置配色）/ 成书版式区（成书版式下拉）/
+   页眉页脚区（@page，书名副标题日期自动更新）/ 缩放区（A+/A-）。
+   各操作只替换自己的分区；分区外的规则程序永不改动。 */
+const SEC_COLOR = '配色区', SEC_THEME = '成书版式区', SEC_PAGE = '页眉页脚区', SEC_ZOOM = '缩放区';
+function secMark(label, end) { return '/* ═══ ' + label + (end ? ' END ═══ */' : ' START ═══ */'); }
+function buildSection(label, content) { return secMark(label) + '\n' + content.trim() + '\n' + secMark(label, true); }
+// 取分区内容；无 START 标记返回 null（视为纯自定义文件，程序不写入）
+function getSection(css, label) {
+  const si = css.indexOf(label + ' START');
+  if (si < 0) return null;
+  const bodyStart = css.indexOf('\n', si) + 1;
+  const ei = css.indexOf(label + ' END', si);
+  if (ei < 0) return css.slice(bodyStart).trim();
+  const eLine = css.lastIndexOf('\n', ei);
+  return css.slice(bodyStart, eLine > bodyStart ? eLine : ei).trim();
+}
+// 替换分区；无标记时追加到文件末尾（不破坏任何已有内容）
+function upsertSection(css, label, content) {
+  const block = buildSection(label, content);
+  const si = css.indexOf(label + ' START');
+  if (si < 0) return css.replace(/\s*$/, '\n\n') + block + '\n';
+  const lineStart = css.lastIndexOf('\n', si) + 1;
+  const ei = css.indexOf(label + ' END', si);
+  if (ei < 0) return css.slice(0, lineStart) + block + '\n';
+  const after = css.indexOf('\n', ei);
+  return css.slice(0, lineStart) + block + (after < 0 ? '\n' : css.slice(after));
+}
+// 四套成书版式默认值（单一来源：生成 #bookThemeCss 默认表 + style.css 成书版式区）
+// vars 每行一个变量，便于在 style.css 中直接阅读与手改
+const BOOK_THEMES = {
+  classic: {
+    name: '经典',
+    vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;\n  --md-fs: 16.5px;\n  --md-lh: 1.9;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 22px;\n  --md-h3-fs: 19px;\n  --md-h4-fs: 17px;\n  --md-h5-fs: 15px;\n  --md-h6-fs: 14px;',
+    rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="classic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+  },
+  modern: {
+    name: '现代',
+    vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
+    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-body-color); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="modern"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+  },
+  academic: {
+    name: '学术',
+    vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-fs: 15.5px;\n  --md-lh: 1.75;\n  --md-h1-fs: 21px;\n  --md-h2-fs: 17px;\n  --md-h3-fs: 15.5px;\n  --md-h4-fs: 15px;',
+    rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="academic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+  },
+  phone: {
+    name: '手机',
+    vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 20px;\n  --md-lh: 1.95;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 24px;\n  --md-h3-fs: 22px;\n  --md-h4-fs: 20px;\n  --md-h5-fs: 19px;\n  --md-h6-fs: 18px;',
+    rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="phone"] .book-toc a { font-size: calc(var(--md-fs) * 0.95); line-height: 1.95; color: var(--md-body-color); }'
+  }
+};
+// 目录共享结构（与版式无关：容器/缩进/对齐，所有版式共用；字号在各主题 rules 中随 --md-fs 联动）
+const TOC_BASE_CSS =
+`.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px; }
+.book-toc .toc-h { text-align: center; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
+.book-toc a { display: block; color: var(--md-body-color); text-decoration: none; }
+.book-toc a.tl1 { font-weight: 700; margin-top: 7px; }
+.book-toc a.tl2 { padding-left: 1.6em; }
+.book-toc a.tl3 { padding-left: 3.2em; }
+.book-toc a.tl4 { padding-left: 4.8em; }`;
+function themeSectionCss(theme) {
+  const t = BOOK_THEMES[theme] || BOOK_THEMES.classic;
+  // 数据已保证每行一个变量；此处仅做去空白+统一 2 空格缩进，防止手改时格式漂移
+  const vars = t.vars.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => '  ' + l).join('\n');
+  return 'body[data-book-theme="' + theme + '"] {\n'
+    + '  /* 版式：' + t.name + '（字体 / 字号 / 行距可自由修改） */\n'
+    + vars + '\n}\n' + t.rules;
+}
+function colorSectionCss(p) {
+  let s = ':root:not([data-theme="dark"]) {\n  /* 配色：' + p.name + '（浅色背景专用；暗色主题回退系统配色） */\n  --md-body-color: ' + p.body + ';';
+  p.h.forEach((c, i) => { s += '\n  --md-h' + (i + 1) + '-color: ' + c + ';'; });
+  return s + '\n}';
+}
+function styleTemplate(theme) {
+  const t = BOOK_THEMES[theme] ? theme : 'classic';
+  return '/* ═══════════ WriteTools 项目样式 style.css ═══════════\n' +
+    '   保存即生效；阅览、打印 PDF、导出 HTML 共用本文件。\n' +
+    '   四个 ═══ 分区由程序管理（内置配色 / 成书版式 / 页眉页脚 / A+A- 缩放），\n' +
+    '   分区内的参数可自由修改（程序更新时会被对应功能覆盖），\n' +
+    '   分区外的规则程序永不改动。 */\n\n' +
+    buildSection(SEC_COLOR, colorSectionCss(PRESETS[0])) + '\n\n' +
+    buildSection(SEC_THEME, TOC_BASE_CSS + '\n' + themeSectionCss(t)) + '\n\n' +
+    buildSection(SEC_PAGE, pageCssFor(t, bookTitle(), bookCfg.subtitle || '')) + '\n\n' +
+    buildSection(SEC_ZOOM, ':root { --md-zoom: 1; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */') + '\n\n' +
+    '/* ═══════ 自定义区：程序永不修改，把你的规则写在这里 ═══════ */\n';
+}
+async function readStyleCssText() {
+  try { return (await (await (await rootHandle.getFileHandle('style.css')).getFile()).text()).replace(/^\uFEFF/, ''); }
+  catch (e) { return null; }
+}
+async function saveStyleCss(css) {
+  const fh = await rootHandle.getFileHandle('style.css', { create: true });
+  const w = await fh.createWritable(); await w.write(css); await w.close();
+  applyUserCss(css);
+  syncOpenStyleEditor(css);
+}
+// style.css 正在编辑时同步编辑器内容，避免旧内容回存覆盖
+function syncOpenStyleEditor(css) {
+  if (current && current.node.name === 'style.css' && !parentPath(current.node.path)) {
+    current.content = css; current.dirty = false;
+    $('editor').value = css; updateStatus();
+  }
+}
 function applyUserCss(cssText) {
-  // style.css 里的颜色为浅色背景设计：应用内只在亮色主题生效，暗色主题回退到系统配色（导出 HTML 始终用原色）
-  $('userCssStyle').textContent = cssText ? ':root:not([data-theme="dark"]){\n' + cssText + '\n}' : '';
+  // style.css 原样注入：配色区自带“仅亮色生效”作用域，@page 等顶层规则也合法
+  $('userCssStyle').textContent = cssText || '';
 }
 async function loadUserCss() {
   applyUserCss('');
   if (!rootHandle) return;
   try {
     const fh = await rootHandle.getFileHandle('style.css');
-    applyUserCss((await (await fh.getFile()).text()).replace(/^\uFEFF/, ''));
+    let css = (await (await fh.getFile()).text()).replace(/^\uFEFF/, '');
+    // 带分区的文件若缺页眉页脚区（书名/日期可能已变）补齐一次；纯自定义文件不动
+    if (css.indexOf(SEC_THEME + ' START') >= 0 && getSection(css, SEC_PAGE) === null) {
+      css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || ''));
+      const w = await fh.createWritable(); await w.write(css); await w.close();
+    }
+    applyUserCss(css);
   } catch (e) {}
 }
 async function openStyleCss() {
@@ -1268,7 +1361,7 @@ async function openStyleCss() {
   catch (e) {
     try {
       fh = await rootHandle.getFileHandle('style.css', { create: true });
-      const w = await fh.createWritable(); await w.write(CSS_TEMPLATE); await w.close();
+      const w = await fh.createWritable(); await w.write(styleTemplate(bookCfg.theme)); await w.close();
       await refreshTree();
       toast('已在项目根目录创建 style.css');
     } catch (e2) { toast('创建失败：' + e2.message); return; }
@@ -1286,37 +1379,23 @@ const PRESETS = [
   { key: 'purple',   name: '典雅紫', body: '#2e2a35', h: ['#5b3a8c','#6c4aa0','#7d5bb0','#8d6dc0','#9d80cd','#ae93d8'] },
   { key: 'red',      name: '典雅红', body: '#332827', h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
 ];
-function buildPresetCss(p) {
-  // 裸变量声明：applyUserCss 会统一包上 :root（仅亮色主题）；导出时该作用域始终生效
-  let s = '/* 配色：' + p.name + '（由 WriteTools 生成，可在此基础上继续修改） */\n';
-  s += '--md-body-color: ' + p.body + ';\n';
-  p.h.forEach((c, i) => { s += '--md-h' + (i + 1) + '-color: ' + c + ';\n'; });
-  return s;
-}
 $('presetSel').onchange = async () => {
   const key = $('presetSel').value;
   $('presetSel').value = '';
   if (!key || !rootHandle) return;
   const p = PRESETS.find(x => x.key === key);
   if (!p) return;
-  let exists = false;
-  try { await rootHandle.getFileHandle('style.css'); exists = true; } catch (e) {}
-  if (exists && !confirm('将用内置配色「' + p.name + '」覆盖项目根目录的 style.css，原有自定义内容会被替换。确定继续吗？')) return;
   try {
-    const css = buildPresetCss(p);
-    const fh = await rootHandle.getFileHandle('style.css', { create: true });
-    const w = await fh.createWritable(); await w.write(css); await w.close();
-    applyUserCss(css);
-    // 若 style.css 正打开着，同步编辑器内容，避免旧内容回存覆盖
-    if (current && current.node.name === 'style.css') {
-      current.content = css; current.dirty = false;
-      $('editor').value = css; updateStatus();
-    }
+    let css = await readStyleCssText();
+    const created = css === null;
+    if (created) css = styleTemplate(bookCfg.theme);   // 无 style.css：按当前版式生成完整模板
+    css = upsertSection(css, SEC_COLOR, colorSectionCss(p));  // 只更新配色区，其余内容不动
+    await saveStyleCss(css);
     await refreshTree();
     if (mode === 'read') await renderMerged();
     else if (mode === 'preview') renderSinglePreview();
     else renderLivePreview();
-    toast('已应用内置配色：' + p.name + '（可点“样式”继续微调）');
+    toast(created ? '已创建 style.css 并应用配色：' + p.name : '配色「' + p.name + '」已写入配色区（点“样式”可微调）');
   } catch (e) { toast('应用样式失败：' + e.message); }
 };
 
@@ -1483,44 +1562,129 @@ function renderBookFront(body, tocItems) {
   }
   body.insertBefore(front, body.firstChild);
 }
-// 动态 @page 规则：页眉书名/副标题、输出日期与页脚页码随模板与设置变化（Chrome/Edge 131+）
+// @page 规则：页眉书名/副标题、输出日期与页脚页码随版式与设置变化（Chrome/Edge 131+）
+// 输出为多行缩进格式，每个 @page / margin-box / 属性各占一行，方便在 style.css 中阅读与手改
 function pageCssFor(theme, title, sub) {
   const t = cssStr(title), s = cssStr(sub);
   const d = new Date();
   const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  let main, cover, toc;
   if (theme === 'modern') {
-    return '@page { size: A4; margin: 20mm 18mm 18mm;'
-      + '@top-left { content: "' + t + '"; font: 8.5pt "Microsoft YaHei",sans-serif; color: #999; }'
-      + '@top-right { content: "' + date + '"; font: 8.5pt "Microsoft YaHei",sans-serif; color: #999; }'
-      + '@bottom-right { content: counter(page); font: 9pt "Microsoft YaHei",sans-serif; color: #666; } }'
-      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-right { content: none; } }'
-      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } }';
+    main =
+`@page {
+  size: A4;
+  margin: 20mm 18mm 18mm;
+  @top-left {
+    content: "${t}";
+    font: 8.5pt "Microsoft YaHei", sans-serif;
+    color: #999;
   }
-  if (theme === 'academic') {
-    return '@page { size: A4; margin: 25mm 24mm 23mm;'
-      + '@top-left { content: "' + t + '"; font: 8.5pt SimSun,serif; color: #666; }'
-      + (s ? '@top-right { content: "' + s + '"; font: 8.5pt SimSun,serif; color: #666; }' : '')
-      + '@bottom-left { content: "' + date + '"; font: 9pt SimSun,serif; color: #444; }'
-      + '@bottom-center { content: "第 " counter(page) " 页"; font: 9pt SimSun,serif; color: #444; } }'
-      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } }'
-      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } @bottom-left { content: none; } }';
+  @top-right {
+    content: "${date}";
+    font: 8.5pt "Microsoft YaHei", sans-serif;
+    color: #999;
   }
-  // classic（默认；phone 屏幕主题打印时沿用）
-  return '@page { size: A4; margin: 24mm 22mm 22mm;'
-    + '@top-center { content: "' + t + '"; font: 9pt Georgia,"Noto Serif SC",SimSun,serif; color: #777; letter-spacing: .2em; }'
-    + '@bottom-left { content: "' + date + '"; font: 9pt Georgia,"Noto Serif SC",SimSun,serif; color: #777; }'
-    + '@bottom-center { content: counter(page); font: 10pt Georgia,serif; color: #444; } }'
-    + '@page cover { margin: 0; @top-center { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } }'
-    + '@page tocpage { @top-center { content: none; } }';
+  @bottom-right {
+    content: counter(page);
+    font: 9pt "Microsoft YaHei", sans-serif;
+    color: #666;
+  }
+}`;
+    cover =
+`@page cover {
+  margin: 0;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-right { content: none; }
+}`;
+    toc =
+`@page tocpage {
+  @top-left { content: none; }
+  @top-right { content: none; }
+}`;
+  } else if (theme === 'academic') {
+    const topRight = s
+      ? `  @top-right {\n    content: "${s}";\n    font: 8.5pt SimSun, serif;\n    color: #666;\n  }\n`
+      : '';
+    main =
+`@page {
+  size: A4;
+  margin: 25mm 24mm 23mm;
+  @top-left {
+    content: "${t}";
+    font: 8.5pt SimSun, serif;
+    color: #666;
+  }
+${topRight}  @bottom-left {
+    content: "${date}";
+    font: 9pt SimSun, serif;
+    color: #444;
+  }
+  @bottom-center {
+    content: "第 " counter(page) " 页";
+    font: 9pt SimSun, serif;
+    color: #444;
+  }
+}`;
+    cover =
+`@page cover {
+  margin: 0;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-left { content: none; }
+  @bottom-center { content: none; }
+}`;
+    toc =
+`@page tocpage {
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-left { content: none; }
+}`;
+  } else {
+    // classic（默认；phone 屏幕主题打印时沿用）
+    main =
+`@page {
+  size: A4;
+  margin: 24mm 22mm 22mm;
+  @top-center {
+    content: "${t}";
+    font: 9pt Georgia, "Noto Serif SC", SimSun, serif;
+    color: #777;
+    letter-spacing: .2em;
+  }
+  @bottom-left {
+    content: "${date}";
+    font: 9pt Georgia, "Noto Serif SC", SimSun, serif;
+    color: #777;
+  }
+  @bottom-center {
+    content: counter(page);
+    font: 10pt Georgia, serif;
+    color: #444;
+  }
+}`;
+    cover =
+`@page cover {
+  margin: 0;
+  @top-center { content: none; }
+  @bottom-left { content: none; }
+  @bottom-center { content: none; }
+}`;
+    toc =
+`@page tocpage {
+  @top-center { content: none; }
+}`;
+  }
+  return [main, cover, toc].join('\n');
 }
 function applyBookTheme() {
   document.body.dataset.bookTheme = bookCfg.theme;
   document.body.classList.toggle('book-indent', bookCfg.indent !== false);
-  let st = document.getElementById('bookPageStyle');
-  if (!st) { st = document.createElement('style'); st.id = 'bookPageStyle'; document.head.appendChild(st); }
-  st.textContent = pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || '');
   $('bookThemeSel').value = bookCfg.theme;
+  // @page 页眉页脚不再动态注入：来自 style.css 页眉页脚区（内容CSS中有无 style.css 时的默认兜底）
 }
+// 初始化：把四套版式默认规则生成到 #bookThemeCss（在内容默认之后、style.css 之前）
+$('bookThemeCss').textContent = TOC_BASE_CSS + '\n' + Object.keys(BOOK_THEMES).map(k => themeSectionCss(k)).join('\n');
 
 /* ================= export merged html（统一出口） =================
    导出文档直接复用应用内 contentCss（内容样式单一来源）+ userCssStyle，
@@ -1597,12 +1761,14 @@ async function exportMerged() {
       });
     } catch (e) { img.removeAttribute('src'); }
   }
-  // 直接复用应用内生效的样式表：外壳 + 内容（单一来源）+ style.css
+  // 直接复用应用内生效的样式表：外壳 + 内容（单一来源）+ 版式默认 + style.css 原文（含 @page）
   const contentCss = serializeStyle($('contentCss'));
-  const userCss = serializeStyle($('userCssStyle'));
+  const themeCss = serializeStyle($('bookThemeCss'));
+  const userCss = $('userCssStyle').textContent;
   const bodyCls = bookCfg.indent !== false ? ' class="book-indent"' : '';
   const doc = '<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="UTF-8"><title>' +
     esc(rootHandle.name) + '</title><style>' + EXPORT_SHELL_CSS + '</style><style>' + contentCss + '</style>' +
+    '<style>' + themeCss + '</style>' +
     (userCss ? '<style>' + userCss + '</style>' : '') +
     '</head><body data-book-theme="' + bookCfg.theme + '"' + bodyCls + '><div class="wrap">' + tocHtml +
     '<main class="book md-body">' + clone.innerHTML + '</main></div>' +
@@ -1714,6 +1880,46 @@ async function renameNode() {
     await refreshTree(); renderTree(); updateToolbar(); updateStatus();
     toast('已重命名');
   } catch (e) { toast('重命名失败：' + e.message); }
+}
+// 快速切换文件/文件夹的输出状态：名称前加/去 _（草稿不参与阅览、PDF、导出）
+async function toggleHidden() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!n) return;
+  const hide = !n.name.startsWith('_');
+  const newName = hide ? '_' + n.name : n.name.slice(1);
+  if (!newName || newName === n.name) return;
+  await flushSave();
+  const dirPath = parentPath(n.path);
+  try {
+    const dir = await getDirHandleByPath(dirPath);
+    // 重名保护：目标已存在则中止，避免覆盖
+    try {
+      if (n.type === 'file') await dir.getFileHandle(newName);
+      else await dir.getDirectoryHandle(newName);
+      toast('已存在同名' + (n.type === 'file' ? '文件' : '文件夹') + '：' + newName);
+      return;
+    } catch (e) { if (e.name !== 'NotFoundError') throw e; }
+    const wasCurrent = current && current.node === n;
+    if (n.type === 'file') {
+      const f = await n.handle.getFile();
+      const nh = await dir.getFileHandle(newName, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+      await dir.removeEntry(n.name);
+      if (wasCurrent) current = null;
+    } else {
+      await copyDir(n.handle, await dir.getDirectoryHandle(newName, { create: true }));
+      await dir.removeEntry(n.name, { recursive: true });
+    }
+    selectedNode = null;
+    await refreshTree();
+    const fullPath = dirPath ? dirPath + '/' + newName : newName;
+    const node = findNode(tree, fullPath);
+    if (node) { selectedNode = node; if (wasCurrent) await openFile(node); }
+    renderTree(); updateToolbar();
+    if (mode === 'read') await renderMerged();
+    else if (mode === 'outline') renderOutline();
+    toast(hide ? '已隐藏，不参与输出：' + newName : '已取消隐藏：' + newName);
+  } catch (e) { toast('操作失败：' + e.message); }
 }
 async function autoRename() {
   const n = (selectedNode && selectedNode.type === 'file') ? selectedNode : (current ? current.node : null);
@@ -2123,6 +2329,15 @@ function insertAtCursor(text) {
     ed.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
+// 插入 HTML 注释，并把光标选中占位文字「注释」，可直接输入替换
+function insertComment() {
+  const ed = $('editor');
+  ed.focus();
+  const s = ed.selectionStart;
+  ed.setRangeText('<!--注释-->', s, ed.selectionEnd, 'start');
+  ed.setSelectionRange(s + 4, s + 6);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
 $('editor').addEventListener('paste', async e => {
   const items = [...(e.clipboardData?.items || [])];
   const imgs = items.filter(i => i.type.startsWith('image/'));
@@ -2519,6 +2734,7 @@ async function outlineDrop(src, target, pos) {
 /* ================= modes ================= */
 function setMode(m) {
   mode = m;
+  document.body.dataset.mode = m;
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
   $('editView').classList.toggle('hidden', m !== 'edit');
   $('previewView').classList.toggle('hidden', m !== 'preview');
@@ -2554,6 +2770,7 @@ function updateToolbar() {
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
   $('btnFullSpace').disabled = !current;
+  $('btnInsertComment').disabled = !current;
   $('btnNewTxt').disabled = !hasRoot;
   $('btnNewMd').disabled = !hasRoot;
   $('btnNewDir').disabled = !hasRoot;
@@ -2563,10 +2780,22 @@ function updateToolbar() {
   $('btnTrash').disabled = !hasRoot;
   $('btnInsertImg').disabled = !current;
   $('btnTable').disabled = !current;
-  $('btnLayout').disabled = !hasRoot;
   $('btnExportMd').disabled = !hasRoot;
   $('btnCss').disabled = !hasRoot;
   $('presetSel').disabled = !hasRoot;
+  // 👁 隐藏/取消隐藏：图标与提示反映选中节点的当前状态
+  const selN = selectedNode || (current ? current.node : null);
+  const tbHide = $('btnToggleHide');
+  tbHide.disabled = !selN;
+  tbHide.textContent = selN && selN.name.startsWith('_') ? '🙈' : '👁';
+  tbHide.title = selN && selN.name.startsWith('_')
+    ? '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）'
+    : '隐藏：名称前加 _，不参与阅览/PDF/导出';
+  // 成书组（非编辑模式可见）
+  $('bookThemeSel').disabled = !hasRoot;
+  $('btnBookCfg').disabled = !hasRoot;
+  $('btnExportPdf').disabled = !hasRoot;
+  $('btnExportHtml').disabled = !hasRoot;
   $('btnRenumber').disabled = !(hasRoot && (selectedNode || current));
   const activeFile = (selectedNode && selectedNode.type === 'file') ? selectedNode : (current ? current.node : null);
   const hasFile = hasRoot && !!activeFile;
@@ -2591,6 +2820,7 @@ $('btnNewTxt').onclick = () => newFile('txt');
 $('btnNewMd').onclick = () => newFile('md');
 $('btnNewDir').onclick = newDir;
 $('btnRename').onclick = renameNode;
+$('btnToggleHide').onclick = toggleHidden;
 $('btnCopy').onclick = copySelected;
 $('btnDelete').onclick = deleteNode;
 $('btnMerge').onclick = mergeSelected;
@@ -2615,47 +2845,64 @@ async function navFile(dir) {
 }
 $('btnPrev').onclick = () => navFile(-1);
 $('btnNext').onclick = () => navFile(1);
-$('btnFullSpace').onclick = () => { insertAtCursor('\u3000'); };
-// 字号调节：编辑模式调编辑器字号；其他模式调内容缩放倍率 --md-zoom（对所有版式等比生效）
-let fsBody = parseFloat(localStorage.getItem('wt-fs')) || 16.5;
+$('btnFullSpace').onclick = () => { insertAtCursor('　'); };
+$('btnInsertComment').onclick = insertComment;
+// 字号调节：编辑模式调编辑器字号（浏览器记忆）；其他模式调内容缩放，写入 style.css 缩放区 --md-zoom
 let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
 function applyFs() {
-  // zoom 以默认正文 16.5px 为基准等比缩放（含标题/目录/封面相关字号）
-  document.documentElement.style.setProperty('--md-zoom', (fsBody / 16.5).toFixed(3));
   document.documentElement.style.setProperty('--fs-editor', fsEditor + 'px');
-  localStorage.setItem('wt-fs', String(fsBody));
   localStorage.setItem('wt-efs', String(fsEditor));
 }
 applyFs();
+const ZOOM_BASE = 16.5;   // 兜底基准：版式区缺少 --md-fs 时使用
+async function zoomContent(dir) {
+  if (!rootHandle) return;
+  try {
+    let css = await readStyleCssText();
+    if (css === null) css = styleTemplate(bookCfg.theme);
+    // 缩放基准取版式区当前正文字号，保证 A+/A- 精确 ±1px（即使用户手改过字号）
+    let mdFs = ZOOM_BASE;
+    const tsec = getSection(css, SEC_THEME);
+    if (tsec) { const mm = tsec.match(/--md-fs\s*:\s*([0-9.]+)\s*px/); if (mm) mdFs = parseFloat(mm[1]); }
+    let fs = mdFs;
+    const sec = getSection(css, SEC_ZOOM);
+    if (sec) { const m = sec.match(/--md-zoom\s*:\s*([0-9.]+)/); if (m) fs = Math.round(parseFloat(m[1]) * mdFs * 10) / 10; }
+    fs = Math.min(26, Math.max(13, fs + dir));
+    css = upsertSection(css, SEC_ZOOM, ':root { --md-zoom: ' + (fs / mdFs).toFixed(3) + '; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
+    await saveStyleCss(css);
+  } catch (e) { toast('调节字号失败：' + e.message); }
+}
 $('btnFontUp').onclick = () => {
-  if (mode === 'edit') fsEditor = Math.min(28, fsEditor + 1); else fsBody = Math.min(26, fsBody + 1);
-  applyFs();
+  if (mode === 'edit') { fsEditor = Math.min(28, fsEditor + 1); applyFs(); } else zoomContent(1);
 };
 $('btnFontDown').onclick = () => {
-  if (mode === 'edit') fsEditor = Math.max(12, fsEditor - 1); else fsBody = Math.max(13, fsBody - 1);
-  applyFs();
+  if (mode === 'edit') { fsEditor = Math.max(12, fsEditor - 1); applyFs(); } else zoomContent(-1);
 };
-// 隐藏/显示左侧文件目录
+// ↺ 重置字号：编辑模式回编辑器默认；其他模式缩放区回 1（即版式默认字号）
+$('btnFontReset').onclick = async () => {
+  if (mode === 'edit') { fsEditor = 15; applyFs(); return; }
+  if (!rootHandle) return;
+  try {
+    let css = await readStyleCssText();
+    if (css === null) css = styleTemplate(bookCfg.theme);
+    css = upsertSection(css, SEC_ZOOM, ':root { --md-zoom: 1; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
+    await saveStyleCss(css);
+  } catch (e) { toast('重置字号失败：' + e.message); }
+};
+// 隐藏/显示左侧文件目录（边缘页签触发，状态记忆）
 function applySideHidden() {
   const hid = localStorage.getItem('wt-side-hidden') === '1';
   $('sidebar').classList.toggle('hidden', hid);
   $('divSidebar').classList.toggle('hidden', hid);
-  $('btnSide').textContent = hid ? '展开目录' : '隐藏目录';
+  $('main').classList.toggle('side-collapsed', hid);
 }
-$('btnSide').onclick = () => {
+function toggleSidebar() {
   localStorage.setItem('wt-side-hidden', localStorage.getItem('wt-side-hidden') === '1' ? '0' : '1');
   applySideHidden();
-};
+}
+$('sideCollapseBtn').onclick = toggleSidebar;
+$('sideExpandBtn').onclick = toggleSidebar;
 applySideHidden();
-// 排版输出：进入阅览模式，折叠目录树，显示成书工具条（不弹对话框，由用户预览后再导出）
-$('btnLayout').onclick = () => {
-  if (!rootHandle) return;
-  if (mode !== 'read') setMode('read'); else renderMerged();
-  if (localStorage.getItem('wt-side-hidden') !== '1') {
-    localStorage.setItem('wt-side-hidden', '1');
-    applySideHidden();
-  }
-};
 $('btnExportPdf').onclick = () => {
   if (mode !== 'read') setMode('read'); else renderMerged();
   // 打印另存为 PDF 时浏览器用 document.title 作默认文件名，临时设为「项目名-日期」
@@ -2708,14 +2955,32 @@ async function applyBookCfgAndRender() {
   if (mode === 'read') await renderMerged();
 }
 $('btnBookCfg').onclick = openBookDlg;
+// 把版式与页眉页脚写入 style.css 对应分区（无文件则按该版式建完整模板）
+async function syncStyleSections(updateTheme) {
+  let css = await readStyleCssText();
+  const created = css === null;
+  if (created) css = styleTemplate(bookCfg.theme);
+  else if (updateTheme) css = upsertSection(css, SEC_THEME, themeSectionCss(bookCfg.theme));
+  css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || ''));
+  await saveStyleCss(css);
+  if (created) await refreshTree();
+  return created;
+}
 $('bookThemeSel').onchange = async () => {
   bookCfg.theme = $('bookThemeSel').value;
   await saveBookCfg();
-  await refreshTree();
+  try { await syncStyleSections(true); } catch (e) { toast('写入 style.css 失败：' + e.message); }
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
-$('bkSave').onclick = async () => { await readBookDlg(); $('dlgBook').close(); await refreshTree(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkSave').onclick = async () => {
+  await readBookDlg();
+  $('dlgBook').close();
+  try { await syncStyleSections(false); } catch (e) {}   // 书名/副标题/日期进 @page 页眉页脚；版式区不动
+  await refreshTree();
+  await applyBookCfgAndRender();
+  toast('成书设置已保存');
+};
 $('btnExportMd').onclick = exportMd;
 $('btnTheme').onclick = () => {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
