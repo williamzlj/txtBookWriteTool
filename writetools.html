@@ -257,8 +257,10 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .book-toc a.tl3 { padding-left: 3.2em; font-size: 13px; color: var(--muted); }
 .book-toc a.tl4 { padding-left: 4.8em; font-size: 12.5px; color: var(--muted); }
 body.book-has-cover #mergedBody > .book-title { display: none; }
-/* 三套成书主题（屏幕阅览同样生效） */
-body.book-indent #mergedBody p { text-indent: 2em; }
+/* 四套成书主题（屏幕阅览同样生效） */
+/* 首行缩进：成书阅览 + 编辑模式右侧实时预览均生效 */
+body.book-indent #mergedBody p,
+body.book-indent #livePreview p { text-indent: 2em; }
 body[data-book-theme="classic"] #mergedBody h1 { text-align: center; margin-top: 2.4em; }
 body[data-book-theme="modern"] #mergedBody,
 body[data-book-theme="modern"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
@@ -274,6 +276,25 @@ body[data-book-theme="academic"] #mergedBody { font-size: 15.5px; line-height: 1
 body[data-book-theme="academic"] #mergedBody h1 { text-align: center; font-size: 21px; margin-top: 2em; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
 body[data-book-theme="academic"] #mergedBody h2 { font-size: 17px; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
 body[data-book-theme="academic"] #mergedBody h3 { font-size: 15.5px; }
+/* 手机阅览：黑体、大字号、宽行距，适合窄屏手机浏览器 */
+body[data-book-theme="phone"] #mergedBody,
+body[data-book-theme="phone"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
+body[data-book-theme="phone"] #mergedBody { font-size: 20px; line-height: 1.95; }
+body[data-book-theme="phone"] #mergedBody h1 { text-align: center; font-size: 27px; margin-top: 2em; }
+body[data-book-theme="phone"] #mergedBody h2 { font-size: 24px; }
+body[data-book-theme="phone"] #mergedBody h3 { font-size: 22px; }
+/* 手机阅览：封面（书名/副标题/作者/日期）同步放大 */
+body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 70px 20px 60px; }
+body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
+body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
+body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
+/* 手机阅览：目录（扉页内）同步放大，各级别条目都覆盖 */
+body[data-book-theme="phone"] .book-toc .toc-h { font-size: 23px; }
+body[data-book-theme="phone"] .book-toc a,
+body[data-book-theme="phone"] .book-toc a.tl1,
+body[data-book-theme="phone"] .book-toc a.tl2,
+body[data-book-theme="phone"] .book-toc a.tl3,
+body[data-book-theme="phone"] .book-toc a.tl4 { font-size: 19px; line-height: 1.95; color: var(--text); }
 
 /* ---------- print ---------- */
 @media print {
@@ -403,6 +424,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnRename" disabled>重命名</button>
   <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
   <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
+  <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy（同名时自动依次为 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
@@ -494,6 +516,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
             <option value="classic">经典书籍</option>
             <option value="modern">现代简洁</option>
             <option value="academic">学术</option>
+            <option value="phone">手机阅览</option>
           </select>
           <button id="btnBookCfg">封面与成书设置</button>
           <button id="btnExportPdf" class="primary" title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
@@ -614,7 +637,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
     <h4>输出</h4>
     <ul>
-      <li><b>排版输出</b>：点顶部「排版输出」进入成书预览（自动折叠左侧目录树），在阅览页顶部可切换<b>经典书籍 / 现代简洁 / 学术</b>三套模板、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」（打印窗口选“另存为 PDF”，边距选“默认”，关闭浏览器自带页眉页脚，需 Chrome/Edge 131+）或「导出 HTML」。</li>
+      <li><b>排版输出</b>：点顶部「排版输出」进入成书预览（自动折叠左侧目录树），在阅览页顶部可切换<b>经典书籍 / 现代简洁 / 学术 / 手机阅览</b>四套模板（手机阅览为大字号宽行距，适合在手机浏览器阅读）、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、首行缩进、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>（保存时自动填好「项目名-日期」文件名），<b>不要选「Microsoft Print to PDF」</b>（Win11 已知缺陷：其保存对话框文件名为空）；边距选“默认”、关闭浏览器自带页眉页脚，PDF 页面自动带输出日期，需 Chrome/Edge 131+。或直接「导出 HTML」。</li>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
     </ul>
@@ -662,12 +685,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgBook">
-  <h3>成书设置（打印 / 另存 PDF）</h3>
+  <h3>封面与成书设置</h3>
   <div class="row"><label style="width:72px">模板</label>
     <select id="bkTheme" style="flex:1">
       <option value="classic">经典书籍（宋体正文、居中章节、首行缩进）</option>
       <option value="modern">现代简洁（黑体、大留白、左对齐标题）</option>
       <option value="academic">学术（宋体小字、紧凑排版、页眉带书名/副标题）</option>
+      <option value="phone">手机阅览（大字号、宽行距，适合手机浏览器阅读）</option>
     </select>
   </div>
   <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" placeholder="留空则用项目文件夹名"></div>
@@ -683,13 +707,12 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <label><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
   </div>
   <div class="row"><label style="width:72px">正文排版</label>
-    <label><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF 与 HTML 统一生效）</label>
+    <label><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF、HTML、编辑预览统一生效）</label>
   </div>
   <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
   <div class="btns">
     <button id="bkCancel">取消</button>
-    <button id="bkSave">保存</button>
-    <button id="bkPrint" class="primary">保存并打印 / PDF</button>
+    <button id="bkSave" class="primary">保存</button>
   </div>
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
@@ -876,7 +899,8 @@ async function useRoot(handle) {
   }
   rootHandle = handle;
   await idbSet('root', handle);
-  await loadBookCfgFile();   // 从项目 setting.ini 读取成书设置
+  await loadBookCfgFile();   // 从 settings.json 读取成书设置
+  document.body.classList.toggle('book-indent', bookCfg.indent !== false);
   imgCache.forEach(u => URL.revokeObjectURL(u)); imgCache.clear();
   selectedNode = null; current = null; multiSel = [];
   expanded = new Set();
@@ -902,8 +926,11 @@ async function scanDir(dirHandle, path) {
     if (name.startsWith('.')) continue;
     if (h.kind === 'directory') {
       dirs.push({ type: 'dir', name, handle: h, path: path ? path + '/' + name : name, children: [], draft: isDraftName(name) });
-    } else if (/\.(md|markdown|txt|css)$/i.test(name) || name === 'setting.ini') {
-      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name), aux: name === 'style.css' || name === 'setting.ini' });
+    } else if (/\.(md|markdown|txt)$/i.test(name) || name === 'style.css' || name === BOOK_CFG_NAME) {
+      // 规则：只有 .md / .markdown / .txt 会被解析输出；docx/xlsx/pptx/子目录css 等其他文件全部忽略
+      // style.css 与成书设置为工具辅助文件（aux），可见但不输出
+      const aux = name === 'style.css' || name === BOOK_CFG_NAME;
+      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name), aux });
     }
   }
   for (const d of dirs) d.children = await scanDir(d.handle, d.path);
@@ -945,6 +972,7 @@ function renderTree() {
   const mk = (node, depth) => {
     const mutedOut = node.draft || node.aux;   // 草稿或 style.css：弱化显示且不输出
     const row = document.createElement('div');
+    row.dataset.path = node.path;
     row.className = 'tnode ' + node.type
       + (selectedNode === node ? ' selected' : '')
       + (multiSel.includes(node.path) ? ' multisel' : '')
@@ -957,7 +985,7 @@ function renderTree() {
     row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (mutedOut ? '<span class="dtag">不输出</span>' : '');
     row.title = (node.aux ? (node.name === 'style.css'
         ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
-        : 'setting.ini 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n')
+        : node.name + ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n')
       : node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
       + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并用，Esc 或「取消选择」清空）；拖动可移动' : '拖动文件/文件夹到这里可移动');
     row.draggable = true;
@@ -987,12 +1015,13 @@ function renderTree() {
         return;
       }
       selectedNode = node;
+      syncTreeSelected();   // 立即移动高亮条，无需整树重建
       if (node.type === 'dir') {
         if (expanded.has(node.path)) expanded.delete(node.path);
         else expanded.add(node.path);
         renderTree();
         updateToolbar();   // 文件夹选中后重命名/删除等按钮应可用
-      } else if (node.name === 'setting.ini') {
+      } else if (node.name === BOOK_CFG_NAME) {
         openBookDlg();   // 点击成书设置文件直接打开设置对话框
       } else await openFile(node);
     };
@@ -1000,6 +1029,12 @@ function renderTree() {
     if (node.type === 'dir' && expanded.has(node.path)) node.children.forEach(c => mk(c, depth + 1));
   };
   tree.forEach(n => mk(n, 0));
+}
+// 不重建整树，仅按 selectedNode 移动 .selected 高亮条（行上已记录 data-path）
+function syncTreeSelected() {
+  const sp = selectedNode ? selectedNode.path : null;
+  document.querySelectorAll('#tree .tnode').forEach(r =>
+    r.classList.toggle('selected', r.dataset.path === sp));
 }
 
 async function moveNode(src, destDirNode) {
@@ -1053,6 +1088,7 @@ async function openFile(node) {
     expandedAddTo(node.path);
     $('editor').value = text;
     setMode(mode);            // refresh view content
+    syncTreeSelected();       // 大纲卡片/搜索结果跳转时同步目录树高亮
     updateStatus(); updateToolbar();
     schedulePreview();
   } catch (e) { toast('读取失败：' + e.message); }
@@ -1222,7 +1258,8 @@ function collectFiles(nodes, out = [], includeDraft = false) {
       if (!includeDraft && n.draft) continue;
       collectFiles(n.children, out, includeDraft);
     }
-    else if (!/\.css$/i.test(n.name) && (includeDraft || !n.draft)) out.push(n);
+    // 仅 md/txt 正文文件可输出；辅助文件（style.css、成书设置）一律跳过
+    else if (!n.aux && /\.(md|markdown|txt)$/i.test(n.name) && (includeDraft || !n.draft)) out.push(n);
   }
   return out;
 }
@@ -1290,50 +1327,27 @@ async function renderMerged() {
 }
 
 /* ================= book publishing ================= */
+// 成书设置文件名 settings.json（标准 JSON 内容）。
+// 不用 .ini/.cfg/.local：Chromium 在 Windows 把这些后缀划为 DANGEROUS，
+// File System Access API 会以 "Name is not allowed." 拒绝创建/写入。
+const BOOK_CFG_NAME = 'settings.json';
 const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false, indent: true };
 let bookCfg = BOOK_DEFAULT_CFG;
 try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
-// 从项目根目录的 setting.ini 读取成书设置（INI 格式：key=value，; 开头为注释）
+// 从项目根目录的 settings.json 读取成书设置
 async function loadBookCfgFile() {
   if (!rootHandle) return;
   try {
-    const text = await (await (await rootHandle.getFileHandle('setting.ini')).getFile()).text();
-    const m = {};
-    for (const line of text.split(/\r?\n/)) {
-      const t = line.trim();
-      if (!t || t.startsWith(';') || t.startsWith('[')) continue;
-      const eq = t.indexOf('=');
-      if (eq > 0) m[t.slice(0, eq).trim()] = t.slice(eq + 1).trim();
-    }
-    const bool = k => m[k] === undefined ? undefined : (m[k] === 'true');
-    bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, {
-      theme: m.theme || 'classic',
-      title: m.title || '', subtitle: m.subtitle || '', author: m.author || '', date: m.date || '',
-      cover: bool('cover'), toc: bool('toc'), chapterBreak: bool('chapterBreak'), headingNumber: bool('headingNumber'),
-      indent: m.indent === undefined ? true : (m.indent === 'true')
-    });
+    const text = await (await (await rootHandle.getFileHandle(BOOK_CFG_NAME)).getFile()).text();
+    bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(text));
     localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
-  } catch (e) { /* 无 setting.ini 时用 localStorage / 默认值 */ }
+  } catch (e) { /* 无 settings.json：沿用 localStorage / 默认值 */ }
 }
-// 保存成书设置：写入 localStorage 并同步到项目根目录 setting.ini
+// 保存成书设置：写入 localStorage 并同步到项目根目录 settings.json
 async function saveBookCfg() {
   localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
   if (!rootHandle) return;
-  const ini =
-`; WriteTools 成书设置（保存在项目根目录，随项目一起备份）
-; 建议在「封面与成书设置」对话框中修改，勿手动编辑
-[book]
-theme=${bookCfg.theme}
-title=${bookCfg.title}
-subtitle=${bookCfg.subtitle}
-author=${bookCfg.author}
-date=${bookCfg.date}
-cover=${bookCfg.cover}
-toc=${bookCfg.toc}
-chapterBreak=${bookCfg.chapterBreak}
-headingNumber=${bookCfg.headingNumber}
-indent=${bookCfg.indent}
-`;
+  const json = JSON.stringify(bookCfg, null, 2) + '\n';
   try {
     // 确保持有文件夹读写权限（重连后可能失效）
     let perm = 'prompt';
@@ -1342,15 +1356,15 @@ indent=${bookCfg.indent}
       perm = await rootHandle.requestPermission({ mode: 'readwrite' });
     }
     let fh;
-    try { fh = await rootHandle.getFileHandle('setting.ini'); }
+    try { fh = await rootHandle.getFileHandle(BOOK_CFG_NAME); }
     catch (e) {
       // 不存在则创建
-      fh = await rootHandle.getFileHandle('setting.ini', { create: true });
+      fh = await rootHandle.getFileHandle(BOOK_CFG_NAME, { create: true });
     }
-    const w = await fh.createWritable(); await w.write(ini); await w.close();
+    const w = await fh.createWritable(); await w.write(json); await w.close();
   } catch (e) {
-    console.error('setting.ini 写入失败', e);
-    toast('setting.ini 写入失败：' + e.message + '（设置仍已暂存浏览器，关闭会丢失）');
+    console.error(BOOK_CFG_NAME + ' 写入失败', e);
+    toast(BOOK_CFG_NAME + ' 写入失败：' + e.message + '（设置仍已暂存浏览器，关闭会丢失）');
   }
 }
 function bookDate() {
@@ -1398,28 +1412,34 @@ function renderBookFront(body, tocItems) {
   }
   body.insertBefore(front, body.firstChild);
 }
-// 动态 @page 规则：页眉书名/副标题与页脚页码随模板与设置变化（Chrome/Edge 131+）
+// 动态 @page 规则：页眉书名/副标题、输出日期与页脚页码随模板与设置变化（Chrome/Edge 131+）
 function pageCssFor(theme, title, sub) {
   const t = cssStr(title), s = cssStr(sub);
+  const d = new Date();
+  const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   if (theme === 'modern') {
     return '@page { size: A4; margin: 20mm 18mm 18mm;'
       + '@top-left { content: "' + t + '"; font: 8.5pt "Microsoft YaHei",sans-serif; color: #999; }'
+      + '@top-right { content: "' + date + '"; font: 8.5pt "Microsoft YaHei",sans-serif; color: #999; }'
       + '@bottom-right { content: counter(page); font: 9pt "Microsoft YaHei",sans-serif; color: #666; } }'
-      + '@page cover { margin: 0; @top-left { content: none; } @bottom-right { content: none; } }'
-      + '@page tocpage { @top-left { content: none; } }';
+      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-right { content: none; } }'
+      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } }';
   }
   if (theme === 'academic') {
     return '@page { size: A4; margin: 25mm 24mm 23mm;'
       + '@top-left { content: "' + t + '"; font: 8.5pt SimSun,serif; color: #666; }'
       + (s ? '@top-right { content: "' + s + '"; font: 8.5pt SimSun,serif; color: #666; }' : '')
+      + '@bottom-left { content: "' + date + '"; font: 9pt SimSun,serif; color: #444; }'
       + '@bottom-center { content: "第 " counter(page) " 页"; font: 9pt SimSun,serif; color: #444; } }'
-      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }'
-      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } }';
+      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } }'
+      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } @bottom-left { content: none; } }';
   }
+  // classic（默认；phone 屏幕主题打印时沿用）
   return '@page { size: A4; margin: 24mm 22mm 22mm;'
     + '@top-center { content: "' + t + '"; font: 9pt Georgia,"Noto Serif SC",SimSun,serif; color: #777; letter-spacing: .2em; }'
+    + '@bottom-left { content: "' + date + '"; font: 9pt Georgia,"Noto Serif SC",SimSun,serif; color: #777; }'
     + '@bottom-center { content: counter(page); font: 10pt Georgia,serif; color: #444; } }'
-    + '@page cover { margin: 0; @top-center { content: none; } @bottom-center { content: none; } }'
+    + '@page cover { margin: 0; @top-center { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } }'
     + '@page tocpage { @top-center { content: none; } }';
 }
 function applyBookTheme() {
@@ -1545,6 +1565,15 @@ function exportThemeCss(theme) {
 .book h1{text-align:center;font-size:21px;margin-top:2em;font-family:${serif};}
 .book h2{font-size:17px;font-family:${serif}}.book h3{font-size:15.5px;font-family:${serif}}.book h4{font-family:${serif}}
 .book-title{font-family:${serif}}.exp-sub{font-family:${serif}}.exp-meta{font-family:${serif}}`;
+  }
+  if (theme === 'phone') {
+    return `.book{font-family:${sans};font-size:20px;line-height:1.95;}
+.book h1{text-align:center;font-size:27px;margin-top:2em;font-family:${sans};}
+.book h2{font-size:24px;font-family:${sans}}.book h3{font-size:22px;font-family:${sans}}.book h4{font-family:${sans}}
+.book-title{font-family:${sans};font-size:40px}
+.exp-sub{font-family:${sans};font-size:20px}
+.exp-meta{font-family:${sans};font-size:19px;line-height:2.2;margin-bottom:44px}
+.toc-h{font-size:20px}.toc a,.toc a.tl4{font-size:18px;line-height:1.9;color:#26282b}`;
   }
   // classic（默认）
   return `.book{font-family:${serif};font-size:16.5px;line-height:2.0;}
@@ -1930,6 +1959,49 @@ async function listHistory(node) {
   vers.sort((a, b) => b.name.localeCompare(a.name));
   return vers;
 }
+// 副本名称：扩展名（文件）前插入 -copy；重名时依次 -copy2、-copy3…
+function copyCandidateName(name, kind, i) {
+  const tag = '-copy' + (i > 1 ? i : '');
+  if (kind === 'file') {
+    const m = name.match(/^([\s\S]*)(\.[^.]+)$/);
+    return m ? m[1] + tag + m[2] : name + tag;
+  }
+  return name + tag;
+}
+async function entryExists(dir, name, kind) {
+  try {
+    if (kind === 'file') await dir.getFileHandle(name); else await dir.getDirectoryHandle(name);
+    return true;
+  } catch (e) { return false; }
+}
+// 复制选中的文件/文件夹到同一目录
+async function copySelected() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!n) return;
+  await flushSave();
+  const dir = await getDirHandleByPath(parentPath(n.path));
+  let newName = '';
+  for (let i = 1; i < 1000; i++) {
+    const cand = copyCandidateName(n.name, n.type, i);
+    if (!await entryExists(dir, cand, n.type)) { newName = cand; break; }
+  }
+  if (!newName) { toast('副本数量过多'); return; }
+  try {
+    if (n.type === 'file') {
+      const f = await n.handle.getFile();
+      const nh = await dir.getFileHandle(newName, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+    } else {
+      await copyDir(n.handle, await dir.getDirectoryHandle(newName, { create: true }));
+    }
+    await refreshTree();
+    const np = parentPath(n.path) ? parentPath(n.path) + '/' + newName : newName;
+    const node = findNode(tree, np);
+    if (node) { selectedNode = node; syncTreeSelected(); }
+    updateToolbar();
+    toast('已复制：' + newName);
+  } catch (e) { toast('复制失败：' + e.message); }
+}
 async function deleteNode() {
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
@@ -2233,7 +2305,8 @@ async function renderOutline() {
   const pending = [];
   const walk = (nodes, depth) => {
     for (const n of nodes) {
-      if (n.aux) continue;   // style.css 不是书稿内容
+      if (n.aux) continue;   // style.css / settings.json 不是书稿内容
+      if (n.type === 'file' && !/\.(md|markdown|txt)$/i.test(n.name)) continue;  // 非 md/txt 一律不进大纲
       const card = document.createElement('div');
       card.className = 'ol-card ' + (n.type === 'dir' ? 'ol-dir' : 'ol-file') + (n.draft ? ' ol-draft' : '');
       card.dataset.path = n.path;
@@ -2448,6 +2521,7 @@ function updateToolbar() {
   $('btnNewMd').disabled = !hasRoot;
   $('btnNewDir').disabled = !hasRoot;
   $('btnRename').disabled = !hasSel;
+  $('btnCopy').disabled = !hasSel;
   $('btnDelete').disabled = !hasSel;
   $('btnTrash').disabled = !hasRoot;
   $('btnInsertImg').disabled = !current;
@@ -2480,6 +2554,7 @@ $('btnNewTxt').onclick = () => newFile('txt');
 $('btnNewMd').onclick = () => newFile('md');
 $('btnNewDir').onclick = newDir;
 $('btnRename').onclick = renameNode;
+$('btnCopy').onclick = copySelected;
 $('btnDelete').onclick = deleteNode;
 $('btnMerge').onclick = mergeSelected;
 $('btnUnsel').onclick = () => { multiSel = []; renderTree(); updateToolbar(); };
@@ -2545,7 +2620,15 @@ $('btnLayout').onclick = () => {
 };
 $('btnExportPdf').onclick = () => {
   if (mode !== 'read') setMode('read'); else renderMerged();
-  toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”，目标可选“另存为 PDF”');
+  // 打印另存为 PDF 时浏览器用 document.title 作默认文件名，临时设为「项目名-日期」
+  const d = new Date();
+  const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const projName = (bookCfg.title || (rootHandle ? rootHandle.name : '') || '成书').replace(/[\\/:*?"<>|]/g, '');
+  const prevTitle = document.title;
+  document.title = projName + '-' + dateStr;
+  toast('目标务必选内置「另存为 PDF」（会自动填文件名 ' + projName + '-' + dateStr + '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）', 6000);
+  const restore = () => { document.title = prevTitle; window.removeEventListener('afterprint', restore); };
+  window.addEventListener('afterprint', restore);
   setTimeout(() => window.print(), 500);
 };
 $('btnExportHtml').onclick = () => exportMerged();
@@ -2595,13 +2678,6 @@ $('bookThemeSel').onchange = async () => {
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
 $('bkSave').onclick = async () => { await readBookDlg(); $('dlgBook').close(); await refreshTree(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
-$('bkPrint').onclick = async () => {
-  await readBookDlg(); $('dlgBook').close();
-  await refreshTree();
-  await applyBookCfgAndRender();
-  toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
-  setTimeout(() => window.print(), 600);
-};
 $('btnExportMd').onclick = exportMd;
 $('btnTheme').onclick = () => {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
