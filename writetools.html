@@ -393,7 +393,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 <header id="topbar">
  <div class="tb-row tb-row1">
   <button id="btnOpen">打开文件夹</button>
-  <button id="btnReconnect" class="hidden">继续上次：<span id="lastName"></span></button>
+  <button id="btnReconnect" class="hidden" title="继续上次打开的文件夹">继续上次</button>
   <span class="sep"></span>
   <button id="btnNewTxt" class="primary" disabled title="新建 .txt 文件（按 Markdown 解析），自动编号 +10">新建txt</button>
   <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
@@ -430,18 +430,21 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <select id="presetSel" disabled title="选择内置样式：写入 style.css 并立即生效（可再点“样式”微调）">
      <option value="">内置样式…</option>
      <option value="classic">经典黑</option>
+     <option value="red">典雅红</option>
      <option value="academic">学术蓝</option>
      <option value="green">护眼绿</option>
      <option value="warm">暖阳橙</option>
      <option value="purple">典雅紫</option>
-    <option value="red">典雅红</option>
    </select>
+   <span class="sep"></span>
+   <button id="btnPrev" disabled title="上一个文件">◀</button>
+   <button id="btnNext" disabled title="下一个文件">▶</button>
    <span class="sep"></span>
    <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
    <button id="btnTable" disabled>插入表格</button>
    <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
-   <button id="btnReplaceFile" disabled title="在当前文件中查找替换（替换前确认）">文档内替换</button>
-   <button id="btnReplaceProject" disabled title="在项目全部 md/txt 文件中查找替换（替换前确认，不可撤销）">项目内替换</button>
+   <button id="btnFullSpace" disabled title="插入中文全角空格（　），用于中文排版">全角空格</button>
+   <button id="btnReplace" disabled title="查找替换：可在当前文件或整个项目中进行">替换</button>
  </div>
 </header>
 
@@ -545,7 +548,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgReplace">
-  <h3 id="rpTitle">替换</h3>
+  <h3 id="rpTitle">查找替换</h3>
+  <div class="row" style="gap:18px">
+    <label><input type="radio" name="rpScope" value="file"> 仅当前文件</label>
+    <label><input type="radio" name="rpScope" value="project"> 整个项目（全部 md/txt）</label>
+  </div>
   <div class="row"><label style="width:64px">查找：</label><input id="rpFind" style="flex:1" placeholder="要查找的文字"></div>
   <div class="row"><label style="width:64px">替换为：</label><input id="rpTo" style="flex:1" placeholder="替换为（留空即删除）"></div>
   <div id="rpInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0"></div>
@@ -590,14 +597,16 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>图片</b>：直接粘贴或拖入即自动存入 assets 并插入；语法 <code>![](路径 =600x400 center)</code>，可只写宽或高，对齐用 center/left/right。</li>
       <li><b>表格</b>：插入表格对话框；光标在表格内时浮出工具条可增删行列。</li>
       <li><b>调色盘</b>：选颜色确认后把色值插到光标处。</li>
-      <li><b>替换</b>：文档内替换作用于当前文件；项目内替换批量作用于全部 md/txt 文件（草稿也包含，替换前需确认，不可撤销）。</li>
+      <li><b>◀ / ▶</b>：按目录顺序快速切换上一个 / 下一个文件（草稿除外），编辑、预览、阅览模式下都可用。</li>
+      <li><b>全角空格</b>：在光标处插入一个中文全角空格（　），用于中文排版。</li>
+      <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认，项目替换会自动留档历史版本）。</li>
       <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
       <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
       <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
     </ul>
     <h4>样式与显示</h4>
     <ul>
-      <li><b>样式</b>：编辑项目根目录的 style.css，保存即生效；<b>内置样式</b>下拉框提供经典黑、学术蓝、护眼绿、暖阳橙、典雅紫、典雅红六套，可在其基础上微调。暗色主题下自定义颜色自动转为浅色，导出时保持原色。</li>
+      <li><b>样式</b>：编辑项目根目录的 style.css，保存即生效；<b>内置样式</b>下拉框提供经典黑、典雅红、学术蓝、护眼绿、暖阳橙、典雅紫六套，可在其基础上微调。暗色主题下自定义颜色自动转为浅色，导出时保持原色。</li>
       <li><b>A- / A+</b>：编辑模式调编辑器字号，预览/阅览调正文字号；🌙 切换明暗主题。</li>
     </ul>
     <h4>输出</h4>
@@ -666,6 +675,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <label><input type="checkbox" id="bkCover"> 封面页</label>
     <label><input type="checkbox" id="bkToc"> 目录页</label>
     <label><input type="checkbox" id="bkBreak"> 每章另起一页</label>
+  </div>
+  <div class="row"><label style="width:72px">导出 HTML</label>
+    <label><input type="checkbox" id="bkNumber"> 标题自动编号（1、1.1、1.1.1…）</label>
   </div>
   <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
   <div class="btns">
@@ -1247,7 +1259,7 @@ async function renderMerged() {
 }
 
 /* ================= book publishing ================= */
-const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true };
+const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false };
 let bookCfg = BOOK_DEFAULT_CFG;
 try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
 function saveBookCfg() { localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg)); }
@@ -1336,6 +1348,19 @@ async function exportMerged() {
   const clone = $('mergedBody').cloneNode(true);
   // 导出为整体：去掉文件分隔线；生成仅含标题（不含文件名）的目录
   clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
+  // 标题自动编号（1、1.1、1.1.1…，连续编号）
+  if (bookCfg.headingNumber) {
+    const c = [0, 0, 0, 0, 0, 0];
+    for (const h of clone.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
+      const lv = +h.tagName[1] - 1;
+      c[lv]++;
+      for (let i = lv + 1; i < 6; i++) c[i] = 0;
+      // 跳过的层级（如 h1 后直接 h3）视为 1
+      for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
+      const parts = c.slice(0, lv + 1);
+      h.textContent = parts.join('.') + '　' + h.textContent;
+    }
+  }
   const heads = [];
   for (const h of clone.querySelectorAll('h1,h2,h3,h4')) {
     if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
@@ -1374,10 +1399,10 @@ async function exportMerged() {
   toast('已导出 ' + a.download);
 }
 const EXPORT_CSS = `
-body{margin:0px 32px 0px 32px;max-width:1000px;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
-.wrap{display:flex;align-items:flex-start;gap:36px;max-width:1160px;margin:0 auto;padding:50px 120px 120px 32px;}
-.book{flex:1;min-width:0;font-size:16.5px;line-height:1.9;}
-@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
+body{margin:0 48px;max-width:1000px;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
+.wrap{display:flex;align-items:flex-start;gap:40px;max-width:1080px;margin:0 auto;padding:56px 40px 120px 32px;}
+.book{flex:1;min-width:0;max-width:700px;font-size:16.5px;line-height:2.0;}
+@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
 h1,h2,h3,h4,h5,h6{font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.4;margin:1.4em 0 .7em;}
 h1{font-size:27px}h2{font-size:22px}h3{font-size:19px}
 p{margin:.8em 0}a{color:#3b7dd8}img{max-width:100%;border-radius:4px;display:block;margin:14px auto}
@@ -2289,8 +2314,10 @@ function updateToolbar() {
   $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   $('btnPalette').disabled = !current;
-  $('btnReplaceFile').disabled = !current;
-  $('btnReplaceProject').disabled = !hasRoot;
+  $('btnReplace').disabled = !hasRoot;
+  $('btnPrev').disabled = !hasRoot;
+  $('btnNext').disabled = !hasRoot;
+  $('btnFullSpace').disabled = !current;
   $('btnNewTxt').disabled = !hasRoot;
   $('btnNewMd').disabled = !hasRoot;
   $('btnNewDir').disabled = !hasRoot;
@@ -2334,7 +2361,24 @@ $('btnUnsel').onclick = () => { multiSel = []; renderTree(); updateToolbar(); };
 $('btnAutoName').onclick = autoRename;
 $('btnRenumber').onclick = renumberAll;
 $('btnCss').onclick = openStyleCss;
-$('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') renderMerged(); toast('已刷新'); };
+$('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') await renderMerged(); if (mode === 'outline') renderOutline(); toast('已刷新'); };
+// 上一个 / 下一个文件
+async function navFile(dir) {
+  if (!rootHandle) return;
+  const files = collectFiles(tree);
+  if (!files.length) { toast('没有可切换的文件'); return; }
+  let idx = current ? files.findIndex(f => f.path === current.node.path) : -1;
+  if (idx < 0) idx = 0;
+  else idx = (idx + dir + files.length) % files.length;
+  selectedNode = files[idx];
+  await openFile(files[idx]);
+  if (mode === 'read') await renderMerged();
+  else if (mode === 'preview') renderSinglePreview();
+  renderTree(); updateToolbar();
+}
+$('btnPrev').onclick = () => navFile(-1);
+$('btnNext').onclick = () => navFile(1);
+$('btnFullSpace').onclick = () => { insertAtCursor('\u3000'); };
 $('btnExport').onclick = exportMerged;
 // 字号调节：编辑模式调编辑器字号，预览/阅览调内容字号
 let fsBody = parseFloat(localStorage.getItem('wt-fs')) || 16.5;
@@ -2388,6 +2432,7 @@ function openBookDlg() {
   $('bkCover').checked = bookCfg.cover;
   $('bkToc').checked = bookCfg.toc;
   $('bkBreak').checked = bookCfg.chapterBreak;
+  $('bkNumber').checked = !!bookCfg.headingNumber;
   $('dlgBook').showModal();
 }
 function readBookDlg() {
@@ -2400,6 +2445,7 @@ function readBookDlg() {
   bookCfg.cover = $('bkCover').checked;
   bookCfg.toc = $('bkToc').checked;
   bookCfg.chapterBreak = $('bkBreak').checked;
+  bookCfg.headingNumber = $('bkNumber').checked;
   saveBookCfg();
 }
 async function applyBookCfgAndRender() {
@@ -2668,28 +2714,35 @@ $('palCancel').onclick = () => $('dlgPalette').close();
 $('palCustom').oninput = e => { palSel = e.target.value; renderPalette(); };
 $('palOk').onclick = () => { $('dlgPalette').close(); insertAtCursor(palSel); toast('已插入 ' + palSel); };
 
-let rpMode = 'file';
 function countOcc(hay, needle) {
   if (!needle) return 0;
   let n = 0, i = 0;
   while ((i = hay.indexOf(needle, i)) >= 0) { n++; i += needle.length; }
   return n;
 }
-function openReplace(m) {
-  if (m === 'file' && !current) { toast('请先打开文件'); return; }
-  if (m === 'project' && !rootHandle) return;
-  rpMode = m;
-  $('rpTitle').textContent = m === 'file' ? '替换（当前文件：' + current.node.name + '）' : '替换（整个项目）';
-  $('rpInfo').textContent = m === 'file' ? '' : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片）';
+function openReplace() {
+  if (!rootHandle) return;
+  const scope = current ? 'file' : 'project';
+  document.querySelector('input[name="rpScope"][value="' + scope + '"]').checked = true;
+  $('rpInfo').textContent = scope === 'file'
+    ? '作用于当前文件：' + (current ? current.node.name : '')
+    : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）';
   $('dlgReplace').showModal();
 }
-$('btnReplaceFile').onclick = () => openReplace('file');
-$('btnReplaceProject').onclick = () => openReplace('project');
+document.querySelectorAll('input[name="rpScope"]').forEach(r => r.onchange = () => {
+  const m = document.querySelector('input[name="rpScope"]:checked').value;
+  $('rpInfo').textContent = m === 'file'
+    ? '作用于当前文件：' + (current ? current.node.name : '')
+    : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）';
+});
+$('btnReplace').onclick = openReplace;
 $('rpCancel').onclick = () => $('dlgReplace').close();
 $('rpOk').onclick = async () => {
   const find = $('rpFind').value;
   if (!find) { toast('请输入查找内容'); return; }
+  const rpMode = document.querySelector('input[name="rpScope"]:checked').value;
   const to = $('rpTo').value;
+  if (rpMode === 'file' && !current) { toast('请先打开文件'); return; }
   try {
     if (rpMode === 'file') {
       await flushSave();
@@ -2767,7 +2820,6 @@ document.addEventListener('keydown', e => {
   try {
     const saved = await idbGet('root');
     if (saved && saved.name) {
-      $('lastName').textContent = saved.name;
       $('btnReconnect').classList.remove('hidden');
       // 新版浏览器（Chrome/Edge 122+）持久授权：静默自动恢复，无需点击
       const perm = await saved.queryPermission({ mode: 'readwrite' });
