@@ -32,6 +32,8 @@ button {
 button:hover:not(:disabled) { background: var(--hover); }
 button:disabled { opacity: .45; cursor: default; }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: #c0392b; border-color: #e3a8a0; }
+[data-theme="dark"] button.danger { color: #e88; border-color: #6a3a38; }
 .hidden { display: none !important; }
 .flex { flex: 1; }
 
@@ -257,6 +259,25 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 #palGrid .sw { width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
 #palGrid .sw.on { border-color: var(--accent); transform: scale(1.12); }
 
+/* ---------- 回收站 / 历史版本 ---------- */
+.recycle-list { max-height: 50vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
+.trash-batch { padding: 5px 10px; background: var(--bg); font-size: 12px; color: var(--muted); position: sticky; top: 0; border-bottom: 1px solid var(--border); z-index: 1; }
+.trash-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.trash-item:last-child { border-bottom: none; }
+.trash-item .p { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trash-item button { padding: 2px 9px; font-size: 12px; }
+.trash-empty { padding: 28px 10px; text-align: center; color: var(--muted); font-size: 13px; }
+#dlgHistory { width: min(780px, 94vw); }
+.hist-wrap { display: flex; gap: 12px; margin-top: 10px; }
+#histList { width: 230px; max-height: 48vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; flex: none; }
+.hist-ver { padding: 6px 10px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.hist-ver:last-child { border-bottom: none; }
+.hist-ver:hover { background: var(--sel); }
+.hist-ver.on { background: var(--sel); font-weight: 600; }
+.hist-ver .t { color: var(--muted); font-size: 11px; margin-top: 1px; }
+#histView { width: 100%; height: 42vh; box-sizing: border-box; margin-top: 0; font: 12.5px/1.6 Consolas, "Microsoft YaHei", monospace; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; white-space: pre-wrap; word-break: break-word; overflow: auto; }
+#histMeta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
 /* ---------- back to top ---------- */
 #toTop {
   position: fixed; right: 26px; bottom: 34px; width: 40px; height: 40px;
@@ -295,6 +316,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
   <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
   <button id="btnDelete" disabled>删除</button>
+  <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
   <span class="sep"></span>
@@ -315,6 +337,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    </div>
    <button id="btnSide" title="隐藏/显示左侧文件目录">隐藏目录</button>
    <button id="btnRefresh" disabled>刷新</button>
+   <button id="btnHistory" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">历史</button>
    <span class="sep"></span>
    <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
    <select id="presetSel" disabled title="选择内置样式：写入 style.css 并立即生效（可再点“样式”微调）">
@@ -476,9 +499,15 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），双击即可在浏览器阅读。</li>
       <li><b>打印/PDF</b>：在打印窗口选“另存为 PDF”；边距选“默认”，并取消勾选“页眉和页脚”。</li>
     </ul>
+    <h4>回收站与历史版本</h4>
+    <ul>
+      <li><b>回收站</b>：删除文件/文件夹、以及合并时被并入的文件，都会先移到项目内的 <code>.trash</code> 文件夹；点「回收站」可恢复、彻底删除单项或清空。</li>
+      <li><b>历史版本</b>：每次自动保存时若内容有变化，旧内容自动存入项目内的 <code>.history</code>，每个文件保留最近 20 版；选中文件点「历史」可查看、恢复任意旧版（恢复前当前内容也会先存一版）。项目内批量替换前同样自动留档。</li>
+      <li><code>.trash</code> 和 <code>.history</code> 在本工具中自动隐藏，不参与阅览和导出；在 Windows 资源管理器中可见，备份项目时一并复制即可。</li>
+    </ul>
     <h4>注意</h4>
     <ul>
-      <li>删除、合并、重新编号等操作直接改动本地文件，浏览器不经过回收站，执行前请确认（确认框会列出影响范围）。</li>
+      <li>「清空回收站」和「彻底删除」不可恢复；普通删除和合并都可在回收站找回。重要书稿建议定期把整个项目文件夹复制备份。</li>
     </ul>
     <div class="author">
       <div class="name">张亮军　无锡·海岸城</div>
@@ -487,6 +516,30 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="btns">
     <button id="aboutOk" class="primary">知道了</button>
+  </div>
+</dialog>
+<dialog id="dlgTrash">
+  <h3>回收站</h3>
+  <div style="font-size:12.5px;color:var(--muted)">删除或合并掉的文件/文件夹先移到这里（项目文件夹内的 .trash 目录），可恢复；清空后不可找回。</div>
+  <div id="trashList" class="recycle-list"></div>
+  <div class="btns">
+    <button id="trashEmpty" class="danger">清空回收站</button>
+    <button id="trashClose" class="primary">关闭</button>
+  </div>
+</dialog>
+<dialog id="dlgHistory">
+  <h3>历史版本 · <span id="histFile" style="font-weight:400;color:var(--muted)"></span></h3>
+  <div style="font-size:12.5px;color:var(--muted)">每次自动保存时，若内容有变化，旧版本自动留存（每个文件最近 20 个，存于项目内 .history 目录）。</div>
+  <div class="hist-wrap">
+    <div id="histList"></div>
+    <div style="flex:1;min-width:0">
+      <div id="histMeta">点击左侧版本查看内容</div>
+      <div id="histView"></div>
+      <div style="margin-top:8px"><button id="histRestore" class="primary" disabled>恢复此版本</button></div>
+    </div>
+  </div>
+  <div class="btns">
+    <button id="histClose" class="primary">关闭</button>
   </div>
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
@@ -625,6 +678,12 @@ async function getDirHandleByPath(rel) {
   if (!rel) return rootHandle;
   let dir = rootHandle;
   for (const seg of rel.split('/')) dir = await dir.getDirectoryHandle(seg);
+  return dir;
+}
+async function ensureDirByPath(rel) {
+  if (!rel) return rootHandle;
+  let dir = rootHandle;
+  for (const seg of rel.split('/')) dir = await dir.getDirectoryHandle(seg, { create: true });
   return dir;
 }
 function countChars(text) {
@@ -846,6 +905,11 @@ async function flushSave() {
 async function saveCurrent() {
   if (!current) return;
   try {
+    // 写入前：磁盘旧内容与新内容不同则留存历史版本
+    try {
+      const oldText = await (await current.node.handle.getFile()).text();
+      if (oldText !== current.content) await backupHistory(current.node, oldText);
+    } catch (e) {}
     const w = await current.node.handle.createWritable();
     await w.write(current.content); await w.close();
     current.dirty = false;
@@ -1094,7 +1158,7 @@ async function exportMerged() {
 }
 const EXPORT_CSS = `
 body{margin:0;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
-.wrap{display:flex;align-items:flex-start;gap:36px;max-width:1160px;margin:0 auto;padding:50px 72px 120px 32px;}
+.wrap{display:flex;align-items:flex-start;gap:36px;max-width:1160px;margin:0 auto;padding:50px 120px 120px 32px;}
 .book{flex:1;min-width:0;font-size:16.5px;line-height:1.9;}
 @media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
 h1,h2,h3,h4,h5,h6{font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.4;margin:1.4em 0 .7em;}
@@ -1109,7 +1173,7 @@ hr{border:none;border-top:1px solid #ddd;margin:1.5em 0}
 #toTop.show{opacity:.85;pointer-events:auto}
 #toTop:hover{opacity:1}
 @media print{#toTop{display:none}}
-.toc{width:250px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #e5e2d8;border-radius:10px;padding:18px 20px}
+.toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #e5e2d8;border-radius:10px;padding:18px 20px}
 .toc-h{font-weight:700;font-size:15px;letter-spacing:4px;color:#667;margin-bottom:10px}
 .toc a{display:block;color:#26282b;text-decoration:none;padding:3px 0;font-size:14px}
 .toc a:hover{color:#3b7dd8}
@@ -1379,19 +1443,130 @@ async function copyDir(src, dst) {
     } else await copyDir(h, await dst.getDirectoryHandle(name, { create: true }));
   }
 }
+
+/* ================= 回收站（项目内 .trash） ================= */
+function ts() {
+  const d = new Date(), p = n => String(n).padStart(2, '0'), p3 = n => String(n).padStart(3, '0');
+  return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-'
+    + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '-' + p3(d.getMilliseconds());
+}
+function batchLabel(b) {
+  const m = b.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})/);
+  return m ? (m[1] + '-' + m[2] + '-' + m[3] + ' ' + m[4] + ':' + m[5] + ':' + m[6]) : b;
+}
+// 把项目内的文件/文件夹移入回收站；batch 可复用于同一次操作（如合并）
+async function trashMove(srcHandle, relPath, kind, batch) {
+  batch = batch || ts();
+  const trashRoot = await rootHandle.getDirectoryHandle('.trash', { create: true });
+  const bdir = await trashRoot.getDirectoryHandle(batch, { create: true });
+  const parts = relPath.split('/');
+  let d = bdir;
+  for (let i = 0; i < parts.length - 1; i++) d = await d.getDirectoryHandle(parts[i], { create: true });
+  const name = parts[parts.length - 1];
+  if (kind === 'dir') {
+    await copyDir(srcHandle, await d.getDirectoryHandle(name, { create: true }));
+  } else {
+    const fh = await d.getFileHandle(name, { create: true });
+    const w = await fh.createWritable(); await w.write(await srcHandle.getFile()); await w.close();
+  }
+  const srcDir = await getDirHandleByPath(parts.slice(0, -1).join('/'));
+  await srcDir.removeEntry(name, { recursive: true });
+  return batch;
+}
+// 列出回收站：按批次（删除时间）分组，每组只列被删节点的顶层项
+async function listTrash() {
+  let trashRoot;
+  try { trashRoot = await rootHandle.getDirectoryHandle('.trash'); } catch (e) { return []; }
+  const batches = [];
+  for await (const [bname, bh] of trashRoot.entries()) {
+    if (bh.kind !== 'directory') continue;
+    const items = [];
+    for await (const [name, ih] of bh.entries()) items.push({ relPath: name, kind: ih.kind });
+    items.sort((a, b) => a.relPath.localeCompare(b.relPath, 'zh'));
+    if (items.length) batches.push({ name: bname, items });
+  }
+  batches.sort((a, b) => b.name.localeCompare(a.name));
+  return batches;
+}
+async function trashRemoveItem(batchName, relPath) {
+  const bdir = await (await rootHandle.getDirectoryHandle('.trash')).getDirectoryHandle(batchName);
+  await bdir.removeEntry(relPath, { recursive: true });
+  let left = 0; for await (const _ of bdir.entries()) left++;
+  if (!left) await (await rootHandle.getDirectoryHandle('.trash')).removeEntry(batchName);
+}
+// 目标位置已存在同名时，自动加 (恢复n)
+async function uniqueRestoreName(dir, name, kind) {
+  const exists = async (nm) => {
+    try { if (kind === 'dir') await dir.getDirectoryHandle(nm); else await dir.getFileHandle(nm); return true; }
+    catch (e) { return false; }
+  };
+  if (!await exists(name)) return name;
+  let stem = name, suf = '';
+  if (kind === 'file') { const m = name.match(/^([\s\S]*)(\.[^.]+)$/); if (m) { stem = m[1]; suf = m[2]; } }
+  for (let i = 1; i < 1000; i++) { const cand = stem + ' (恢复' + i + ')' + suf; if (!await exists(cand)) return cand; }
+  return stem + ' (恢复)' + suf;
+}
+async function restoreTrashItem(batchName, relPath, kind) {
+  const bdir = await (await rootHandle.getDirectoryHandle('.trash')).getDirectoryHandle(batchName);
+  const srcH = kind === 'dir' ? await bdir.getDirectoryHandle(relPath) : await bdir.getFileHandle(relPath);
+  const parts = relPath.split('/');
+  const dstDir = await ensureDirByPath(parts.slice(0, -1).join('/'));
+  const finalName = await uniqueRestoreName(dstDir, parts[parts.length - 1], kind);
+  if (kind === 'dir') {
+    await copyDir(srcH, await dstDir.getDirectoryHandle(finalName, { create: true }));
+  } else {
+    const fh = await dstDir.getFileHandle(finalName, { create: true });
+    const w = await fh.createWritable(); await w.write(await srcH.getFile()); await w.close();
+  }
+  await trashRemoveItem(batchName, relPath);
+  return finalName;
+}
+
+/* ================= 历史版本（项目内 .history，每文件 20 版） ================= */
+const HIST_KEEP = 20;
+// 把一份旧内容存为历史版本（node.path 对应 .history 下同名目录，版本文件 = 时间戳+扩展名）
+async function backupHistory(node, oldText) {
+  try {
+    if (!/\.(md|markdown|txt|css)$/i.test(node.name)) return;
+    const histRoot = await rootHandle.getDirectoryHandle('.history', { create: true });
+    let d = histRoot;
+    for (const seg of node.path.split('/')) d = await d.getDirectoryHandle(seg, { create: true });
+    const ext = (node.name.match(/\.[^.]+$/) || ['.txt'])[0];
+    const vh = await d.getFileHandle(ts() + ext, { create: true });
+    const w = await vh.createWritable(); await w.write(oldText); await w.close();
+    const names = [];
+    for await (const [vn] of d.entries()) names.push(vn);
+    names.sort().reverse();   // 时间戳可字典序排序，最新在前
+    for (const old of names.slice(HIST_KEEP)) { try { await d.removeEntry(old); } catch (e) {} }
+  } catch (e) { /* 历史备份失败不影响正常保存 */ }
+}
+async function listHistory(node) {
+  let d;
+  try {
+    d = await rootHandle.getDirectoryHandle('.history');
+    for (const seg of node.path.split('/')) d = await d.getDirectoryHandle(seg);
+  } catch (e) { return []; }
+  const vers = [];
+  for await (const [vn, vh] of d.entries()) {
+    if (vh.kind !== 'file') continue;
+    const f = await vh.getFile();
+    vers.push({ name: vn, time: batchLabel(vn.replace(/\.[^.]+$/, '')), size: f.size, handle: vh });
+  }
+  vers.sort((a, b) => b.name.localeCompare(a.name));
+  return vers;
+}
 async function deleteNode() {
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
-  if (!confirm('确定删除「' + n.name + '」' + (n.type === 'dir' ? '及其全部内容' : '') + '？')) return;
+  if (!confirm('确定删除「' + n.name + '」' + (n.type === 'dir' ? '及其全部内容' : '') + '？\n（移入回收站，可在「回收站」中恢复）')) return;
   try {
-    const dir = await getDirHandleByPath(parentPath(n.path));
-    await dir.removeEntry(n.name, { recursive: true });
+    await trashMove(n.handle, n.path, n.type);
     if (current && (current.node === n || current.node.path.startsWith(n.path + '/'))) {
       current = null; $('editor').value = '';
     }
     selectedNode = null;
     await refreshTree(); renderTree(); updateToolbar(); updateStatus();
-    toast('已删除');
+    toast('已移入回收站');
   } catch (e) { toast('删除失败：' + e.message); }
 }
 function findNode(nodes, path) {
@@ -1407,27 +1582,29 @@ async function mergeSelected() {
   const files = multiSel.map(p => findNode(tree, p)).filter(Boolean);
   if (files.length < 2) { toast('所选文件已不存在，请重新选择（Esc 或「取消选择」清空）'); return; }
   const first = files[0];
+  if (!confirm('将把所选 ' + files.length + ' 个文件按目录顺序合并进「' + first.name + '」，其余文件移入回收站（可恢复）。确定继续？')) return;
   try {
     await flushSave();
-    // 合并内容写入第一个文件（沿用其文件名），其余文件删除
+    // 合并内容写入第一个文件（沿用其文件名）；第一个文件旧内容留历史版本，其余文件进回收站
     const parts = [];
+    let firstOld = '';
     for (const f of files) {
-      const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
-      parts.push(t);
+      const raw = await (await f.handle.getFile()).text();
+      if (f === first) firstOld = raw;
+      parts.push(raw.replace(/^\uFEFF/, '').trim());
     }
+    await backupHistory(first, firstOld.replace(/^\uFEFF/, ''));
     const dir0 = await getDirHandleByPath(parentPath(first.path));
     const fh = await dir0.getFileHandle(first.name, { create: true });
     const w = await fh.createWritable(); await w.write(parts.join('\n\n')); await w.close();
-    for (const f of files.slice(1)) {
-      const d = await getDirHandleByPath(parentPath(f.path));
-      await d.removeEntry(f.name);
-    }
+    const batch = ts();
+    for (const f of files.slice(1)) await trashMove(f.handle, f.path, 'file', batch);
     multiSel = []; selectedNode = null; current = null;
     await refreshTree();
     const node = findNode(tree, first.path);
     if (node) { selectedNode = node; await openFile(node); }
     renderTree(); updateToolbar();
-    toast('已合并 ' + files.length + ' 个文件 → ' + first.name + '，其余文件已删除');
+    toast('已合并 ' + files.length + ' 个文件 → ' + first.name + '，其余文件在回收站');
   } catch (e) { toast('合并失败：' + e.message); }
 }
 
@@ -1684,6 +1861,7 @@ function updateToolbar() {
   $('btnNewDir').disabled = !hasRoot;
   $('btnRename').disabled = !hasSel;
   $('btnDelete').disabled = !hasSel;
+  $('btnTrash').disabled = !hasRoot;
   $('btnInsertImg').disabled = !current;
   $('btnTable').disabled = !current;
   $('btnExport').disabled = !hasRoot;
@@ -1696,6 +1874,7 @@ function updateToolbar() {
   const hasFile = hasRoot && !!activeFile;
   $('btnAutoName').disabled = !hasFile || activeFile.name === 'style.css' || !/\.(md|markdown|txt)$/i.test(activeFile.name);
   $('btnRefresh').disabled = !hasRoot;
+  $('btnHistory').disabled = !hasFile;
   document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
 }
 $('btnOpen').onclick = pickFolder;
@@ -1768,6 +1947,119 @@ $('btnTheme').onclick = () => {
 };
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
+
+/* ---------- 回收站对话框 ---------- */
+async function renderTrash() {
+  const box = $('trashList');
+  let batches;
+  try { batches = await listTrash(); }
+  catch (e) { box.innerHTML = '<div class="trash-empty">读取失败：' + esc(e.message) + '</div>'; return; }
+  if (!batches.length) { box.innerHTML = '<div class="trash-empty">回收站为空</div>'; return; }
+  box.innerHTML = '';
+  for (const b of batches) {
+    const h = document.createElement('div');
+    h.className = 'trash-batch';
+    h.textContent = batchLabel(b.name) + '　（' + b.items.length + ' 项）';
+    box.appendChild(h);
+    for (const it of b.items) {
+      const row = document.createElement('div'); row.className = 'trash-item';
+      row.innerHTML = '<span>' + (it.kind === 'dir' ? '📁' : '📄') + '</span><span class="p" title="' + esc(it.relPath) + '">' + esc(it.relPath) + '</span>';
+      const b1 = document.createElement('button'); b1.textContent = '恢复';
+      b1.onclick = async () => {
+        try {
+          const fn = await restoreTrashItem(b.name, it.relPath, it.kind);
+          await refreshTree(); renderTree(); updateToolbar();
+          toast('已恢复：' + fn); await renderTrash();
+        } catch (e) { toast('恢复失败：' + e.message); }
+      };
+      const b2 = document.createElement('button'); b2.textContent = '彻底删除'; b2.className = 'danger';
+      b2.onclick = async () => {
+        if (!confirm('彻底删除「' + it.relPath + '」？此操作不可恢复')) return;
+        try { await trashRemoveItem(b.name, it.relPath); await renderTrash(); }
+        catch (e) { toast('删除失败：' + e.message); }
+      };
+      row.appendChild(b1); row.appendChild(b2);
+      box.appendChild(row);
+    }
+  }
+}
+$('btnTrash').onclick = async () => {
+  $('trashList').innerHTML = '<div class="trash-empty">读取中…</div>';
+  $('dlgTrash').showModal();
+  await renderTrash();
+};
+$('trashClose').onclick = () => $('dlgTrash').close();
+$('trashEmpty').onclick = async () => {
+  if (!confirm('清空回收站？其中所有文件/文件夹将彻底删除，不可恢复')) return;
+  try {
+    await rootHandle.removeEntry('.trash', { recursive: true });
+    toast('回收站已清空');
+  } catch (e) { /* 目录不存在即视为已空 */ }
+  await renderTrash();
+};
+
+/* ---------- 历史版本对话框 ---------- */
+let histVers = [], histSel = -1, histNode = null;
+async function refreshHistList(selectIdx) {
+  const box = $('histList');
+  histVers = await listHistory(histNode);
+  histSel = -1;
+  box.innerHTML = '';
+  if (!histVers.length) {
+    box.innerHTML = '<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>';
+    $('histView').textContent = ''; $('histMeta').textContent = '点击左侧版本查看内容';
+    $('histRestore').disabled = true;
+    return;
+  }
+  histVers.forEach((v, i) => {
+    const row = document.createElement('div'); row.className = 'hist-ver';
+    row.innerHTML = '版本 ' + (histVers.length - i) + '<div class="t">' + v.time + ' · ' + v.size + ' 字节</div>';
+    row.onclick = () => showHistVer(i, row);
+    box.appendChild(row);
+  });
+  const idx = Math.min(selectIdx || 0, histVers.length - 1);
+  showHistVer(idx, box.children[idx]);
+}
+async function showHistVer(i, rowEl) {
+  document.querySelectorAll('#histList .hist-ver').forEach(r => r.classList.remove('on'));
+  if (rowEl) rowEl.classList.add('on');
+  histSel = i;
+  const v = histVers[i];
+  $('histMeta').textContent = v.time + ' · ' + v.size + ' 字节';
+  try {
+    $('histView').textContent = await (await v.handle.getFile()).text();
+    $('histRestore').disabled = false;
+  } catch (e) { $('histView').textContent = '读取失败：' + e.message; $('histRestore').disabled = true; }
+}
+$('btnHistory').onclick = async () => {
+  histNode = current ? current.node : (selectedNode && selectedNode.type === 'file' ? selectedNode : null);
+  if (!histNode) { toast('请先打开一个文件'); return; }
+  $('histFile').textContent = histNode.path;
+  $('dlgHistory').showModal();
+  await refreshHistList(0);
+};
+$('histClose').onclick = () => $('dlgHistory').close();
+$('histRestore').onclick = async () => {
+  const v = histVers[histSel];
+  if (!v) return;
+  if (!confirm('恢复到 ' + v.time + ' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。')) return;
+  try {
+    const text = await (await v.handle.getFile()).text();
+    try {
+      const cur = await (await histNode.handle.getFile()).text();
+      if (cur !== text) await backupHistory(histNode, cur);
+    } catch (e) {}
+    const w = await histNode.handle.createWritable(); await w.write(text); await w.close();
+    if (current && current.node.path === histNode.path) {
+      current.content = text; current.dirty = false;
+      $('editor').value = text;
+      $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+      schedulePreview(); updateStatus();
+    }
+    toast('已恢复到 ' + v.time + ' 的版本');
+    await refreshHistList(histSel + 1);
+  } catch (e) { toast('恢复失败：' + e.message); }
+};
 if (localStorage.getItem('wt-theme') === 'dark') {
   document.documentElement.dataset.theme = 'dark';
   $('btnTheme').textContent = '☀️';
@@ -1941,8 +2233,9 @@ $('rpOk').onclick = async () => {
         if (n) { total += n; changed.push({ node: f, from: text }); }
       }
       if (!total) { toast('项目内没有找到「' + find + '」'); return; }
-      if (!confirm('项目内共 ' + changed.length + ' 个文件、' + total + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？此操作不可撤销。')) return;
+      if (!confirm('项目内共 ' + changed.length + ' 个文件、' + total + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）')) return;
       for (const c of changed) {
+        await backupHistory(c.node, c.from);
         const w = await c.node.handle.createWritable();
         await w.write(c.from.split(find).join(to)); await w.close();
       }
