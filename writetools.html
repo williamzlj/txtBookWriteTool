@@ -1240,9 +1240,8 @@ async function renderMerged() {
   body.appendChild(bt);
   let idx = 0;
   const tocItems = [];
-  // 统一的可编号条目列表：真实标题元素（type:'h'）或无标题文件的文件名兜底（type:'file'），
-  // 按文档顺序排列，编号时一起计数，避免文件名条目漏编号
-  const numItems = [];
+  // 目录完全由文件内真实标题（h1-h4）生成；无标题文件仅作为正文，不进目录、不参与编号
+  const headingEls = [];
   for (const f of files) {
     let text;
     try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
@@ -1253,43 +1252,29 @@ async function renderMerged() {
       body.appendChild(hr);
     }
     const sec = document.createElement('div'); sec.id = 'sec-' + idx;
-    sec.dataset.fname = f.name;   // 供导出 HTML 左侧目录为无标题文件兜底用
     if (bookCfg.chapterBreak) sec.classList.add('book-chapter');
     sec.innerHTML = mdToHtml(text);
     body.appendChild(sec);
-    // 目录：文件内有标题时，标题即章名；无标题时用清理后的文件名兜底（视为一级标题参与编号）
-    const fileHeadings = sec.querySelectorAll('h1,h2,h3,h4');
-    if (fileHeadings.length === 0) {
-      numItems.push({ type: 'file', text: cleanName(f.name), id: 'sec-' + idx, level: 1 });
-    } else {
-      for (const h of fileHeadings) {
-        h.id = 'h-' + idx + '-' + numItems.length;
-        numItems.push({ type: 'h', el: h });
-      }
+    for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
+      h.id = 'h-' + idx + '-' + headingEls.length;
+      headingEls.push(h);
     }
     await fixImages(sec, parentPath(f.path));
     idx++;
   }
-  // 标题自动编号（PDF 与 HTML 共用）：对统一列表计数，文件名兜底也参与编号
+  // 标题自动编号（PDF 与 HTML 共用）
   if (bookCfg.headingNumber) {
     const c = [0, 0, 0, 0, 0, 0];
-    for (const item of numItems) {
-      const lv = item.type === 'h' ? +item.el.tagName[1] - 1 : 0;
+    for (const h of headingEls) {
+      const lv = +h.tagName[1] - 1;
       c[lv]++;
       for (let i = lv + 1; i < 6; i++) c[i] = 0;
       for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
-      const num = c.slice(0, lv + 1).join('.');
-      if (item.type === 'h') item.el.textContent = num + '　' + item.el.textContent;
-      else item.numberedText = num + '　' + item.text;
+      h.textContent = c.slice(0, lv + 1).join('.') + '　' + h.textContent;
     }
   }
-  // 按顺序生成目录条目
-  for (const item of numItems) {
-    if (item.type === 'h') {
-      tocItems.push({ level: Math.min(+item.el.tagName[1], 4), text: item.el.textContent.trim() || '（无标题）', id: item.el.id });
-    } else {
-      tocItems.push({ level: 1, text: item.numberedText || item.text, id: item.id });
-    }
+  for (const h of headingEls) {
+    tocItems.push({ level: Math.min(+h.tagName[1], 4), text: h.textContent.trim() || '（无标题）', id: h.id });
   }
   // build toc
   for (const t of tocItems) {
@@ -1458,29 +1443,10 @@ async function exportMerged() {
       btEl.after(subEl);
     }
   }
-  // 标题编号已在 renderMerged 中完成（PDF/HTML 共用）；导出 HTML 左侧目录需重新构建，
-  // 并把无标题文件的文件名兜底也纳入（与成书目录编号保持一致）
+  // 导出 HTML 左侧目录：仅由真实标题生成，无标题文件不进目录（标题编号已在 renderMerged 中完成）
   const heads = [];
-  const c = [0, 0, 0, 0, 0, 0];
-  for (const sec of clone.querySelectorAll('[id^="sec-"]')) {
-    const hs = sec.querySelectorAll('h1,h2,h3,h4');
-    if (hs.length === 0) {
-      const lv = 0;
-      c[lv]++;
-      for (let i = lv + 1; i < 6; i++) c[i] = 0;
-      for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
-      const num = c.slice(0, lv + 1).join('.');
-      const txt = (bookCfg.headingNumber ? num + '　' : '') + cleanName(sec.dataset.fname || '');
-      heads.push({ level: 1, text: txt, id: sec.id });
-    } else {
-      for (const h of hs) {
-        if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
-        const lv = +h.tagName[1] - 1;
-        c[lv]++;
-        for (let i = lv + 1; i < 6; i++) c[i] = 0;
-        for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
-      }
-    }
+  for (const h of clone.querySelectorAll('h1,h2,h3,h4')) {
+    if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
   }
   const tocHtml = heads.length
     ? '<nav class="toc"><div class="toc-h">目 录</div>' +
