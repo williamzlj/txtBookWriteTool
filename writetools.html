@@ -1238,6 +1238,7 @@ async function renderMerged() {
   body.appendChild(bt);
   let idx = 0;
   const tocItems = [];
+  const fileEntries = [];   // 每个文件对应的目录条目（标题编号后填充文本）
   const headingEls = [];   // 收集所有标题，统一编号后再生成目录
   for (const f of files) {
     let text;
@@ -1252,11 +1253,18 @@ async function renderMerged() {
     if (bookCfg.chapterBreak) sec.classList.add('book-chapter');
     sec.innerHTML = mdToHtml(text);
     body.appendChild(sec);
-    // 目录：先显示文件名（清理编号前缀与扩展名），下面再显示该文件内的标题
-    tocItems.push({ level: 1, text: cleanName(f.name), id: 'sec-' + idx });
+    // 目录：文件内有标题时，标题即章名（不再单列文件名避免重复）；
+    // 文件内无标题时，才用清理后的文件名兜底
+    const fileHeadings = [];
     for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
       h.id = 'h-' + idx + '-' + headingEls.length;
       headingEls.push(h);
+      fileHeadings.push(h);
+    }
+    if (fileHeadings.length === 0) {
+      fileEntries.push([{ level: 1, text: cleanName(f.name), id: 'sec-' + idx, ref: null }]);
+    } else {
+      fileEntries.push(fileHeadings.map(h => ({ level: Math.min(+h.tagName[1], 4), text: '', id: h.id, ref: h })));
     }
     await fixImages(sec, parentPath(f.path));
     idx++;
@@ -1272,8 +1280,11 @@ async function renderMerged() {
       h.textContent = c.slice(0, lv + 1).join('.') + '　' + h.textContent;
     }
   }
-  for (const h of headingEls) {
-    tocItems.push({ level: Math.min(+h.tagName[1] + 1, 4), text: h.textContent.trim() || '（无标题）', id: h.id });
+  // 按文件顺序生成目录条目（编号后取标题文本）
+  for (const entries of fileEntries) {
+    for (const e of entries) {
+      tocItems.push({ level: e.level, text: e.ref ? (e.ref.textContent.trim() || '（无标题）') : e.text, id: e.id });
+    }
   }
   // build toc
   for (const t of tocItems) {
@@ -1422,15 +1433,15 @@ async function exportMerged() {
   // 导出为整体：去掉文件分隔线；左侧已有目录，删除正文内嵌目录
   clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
   clone.querySelector('.book-front')?.remove();
-  // 标题头：书名 + 作者/日期（放在标题下方）
+  // 标题头：书名 + 作者/日期（作者一行、日期一行，日期用宋体）
   const btEl = clone.querySelector('.book-title');
   if (btEl) {
-    const meta = [];
-    if (bookCfg.author.trim()) meta.push(esc(bookCfg.author.trim()) + ' 著');
-    meta.push(esc(bookDate()));
     const metaEl = document.createElement('div');
     metaEl.className = 'exp-meta';
-    metaEl.textContent = meta.join(' · ');
+    let metaHtml = '';
+    if (bookCfg.author.trim()) metaHtml += '<div class="exp-author">' + esc(bookCfg.author.trim()) + ' 著</div>';
+    metaHtml += '<div class="exp-date">' + esc(bookDate()) + '</div>';
+    metaEl.innerHTML = metaHtml;
     btEl.after(metaEl);
     if (bookCfg.subtitle.trim()) {
       const subEl = document.createElement('div');
@@ -1491,11 +1502,13 @@ pre{background:#f0efe9;padding:14px 18px;border-radius:8px;overflow:auto}
 hr{border:none;border-top:1px solid #ddd;margin:1.5em 0}
 .book-title{text-align:center;font-size:30px;font-weight:700;font-family:"Microsoft YaHei","PingFang SC",sans-serif;margin:0 0 14px;line-height:1.3}
 .exp-sub{text-align:center;font-size:15px;color:#667;letter-spacing:.1em;margin-bottom:10px}
-.exp-meta{text-align:center;font-size:14px;color:#556;margin-bottom:36px}
+.exp-meta{text-align:center;font-size:14px;color:#556;margin-bottom:36px;line-height:1.9}
+.exp-author{font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+.exp-date{font-family:SimSun,"Source Han Serif SC","Noto Serif SC",serif}
 #toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}
 #toTop:hover{opacity:1}
-@media print{#toTop{display:none}}
+@media print{#toTop{display:none}.toc{display:none!important}.book{max-width:100%}}
 .toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #e5e2d8;border-radius:10px;padding:18px 20px}
 .toc-h{font-weight:700;font-size:15px;letter-spacing:4px;color:#667;margin-bottom:10px}
 .toc a{display:block;color:#26282b;text-decoration:none;padding:3px 0;font-size:14px}
