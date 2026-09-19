@@ -230,16 +230,74 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .tnode.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--sel); }
 #projName.drop-target { color: var(--accent); }
 
+/* ---------- book publishing ---------- */
+#readMain { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+#bookBar {
+  display: flex; align-items: center; gap: 10px; padding: 6px 14px; flex: none;
+  border-bottom: 1px solid var(--border); background: var(--toolbar); font-size: 12.5px;
+}
+#bookBar .hint { color: var(--muted); font-size: 11.5px; }
+#bookBar select {
+  font: inherit; font-size: 12.5px; color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px;
+}
+.book-front { max-width: 780px; margin: 0 auto; padding: 0 36px; }
+.book-cover {
+  min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--border); margin-bottom: 34px;
+}
+.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; }
+.bc-sub { font-size: 15px; color: var(--muted); margin-top: 16px; letter-spacing: .12em; }
+.bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
+.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--border); margin-bottom: 34px; }
+.book-toc .toc-h { text-align: center; font-size: 19px; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
+.book-toc a { display: block; color: var(--text); text-decoration: none; font-size: 14px; line-height: 2.05; }
+.book-toc a.tl1 { font-weight: 700; margin-top: 7px; }
+.book-toc a.tl2 { padding-left: 1.6em; }
+.book-toc a.tl3 { padding-left: 3.2em; font-size: 13px; color: var(--muted); }
+.book-toc a.tl4 { padding-left: 4.8em; font-size: 12.5px; color: var(--muted); }
+body.book-has-cover #mergedBody > .book-title { display: none; }
+/* 三套成书主题（屏幕阅览同样生效） */
+body[data-book-theme="classic"] #mergedBody p { text-indent: 2em; }
+body[data-book-theme="classic"] #mergedBody h1 { text-align: center; margin-top: 2.4em; }
+body[data-book-theme="modern"] #mergedBody,
+body[data-book-theme="modern"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
+body[data-book-theme="modern"] #mergedBody { font-size: 16px; line-height: 1.85; }
+body[data-book-theme="modern"] #mergedBody h1 { font-size: 26px; border-left: 4px solid var(--text); padding-left: 12px; margin-top: 2em; }
+body[data-book-theme="modern"] #mergedBody p { margin: 1em 0; }
+body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 130px; }
+body[data-book-theme="modern"] .bc-title { font-size: 40px; }
+body[data-book-theme="modern"] .bc-meta { margin-top: 80px; }
+body[data-book-theme="academic"] #mergedBody,
+body[data-book-theme="academic"] .book-front { font-family: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif; }
+body[data-book-theme="academic"] #mergedBody { font-size: 15.5px; line-height: 1.75; }
+body[data-book-theme="academic"] #mergedBody h1 { text-align: center; font-size: 21px; margin-top: 2em; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
+body[data-book-theme="academic"] #mergedBody h2 { font-size: 17px; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
+body[data-book-theme="academic"] #mergedBody h3 { font-size: 15.5px; }
+body[data-book-theme="academic"] #mergedBody p { text-indent: 2em; }
+
 /* ---------- print ---------- */
 @media print {
-  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop { display: none !important; }
-  #main, #workarea, #readView, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; }
-  @page { margin: 20mm 16mm 18mm; }
-  body { overflow: visible; background: #fff; }
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #bookBar { display: none !important; }
+  #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; }
+  @page { margin: 24mm 22mm 22mm; }
+  body { margin: 0; overflow: visible; background: #fff; }
   #mergedBody { max-width: 100%; padding: 0; }
   #mergedBody hr.file-boundary { display: none; }
   #mergedBody hr { margin: 1.2em 0; }
-  .md-body { color: #000; background: #fff; }
+  .md-body { color: #000; background: #fff; padding: 0; }
+  .book-front { max-width: 100%; padding: 0; }
+  .book-cover {
+    min-height: 297mm; box-sizing: border-box; margin: 0; padding: 0 26mm;
+    border: none; page: cover; break-after: page;
+  }
+  body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; }
+  .book-toc { border: none; margin: 0; padding: 0; page: tocpage; break-after: page; }
+  #mergedBody .book-chapter { break-before: page; }
+  h1, h2, h3, h4 { break-after: avoid; break-inside: avoid; }
+  img, pre, blockquote, table, figure { break-inside: avoid; }
+  p, li { widows: 2; orphans: 2; }
+  body[data-book-theme="modern"] #mergedBody h1 { border-left: none; padding-left: 0; }
 }
 
 /* ---------- status bar ---------- */
@@ -350,7 +408,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
-  <button id="btnPrint" disabled title="合并全书后调出打印窗口，选“另存为 PDF”，并取消勾选“页眉和页脚”">打印/PDF</button>
+  <button id="btnPrint" disabled title="按成书模板排版（封面/目录/章首分页/页眉页码），在打印窗口选“另存为 PDF”，关闭浏览器自带页眉页脚">打印/PDF</button>
   <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
   <button id="btnExport" disabled>导出 HTML</button>
   <button id="btnAbout" title="软件使用说明">说明</button>
@@ -425,7 +483,19 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <div id="readView" class="hidden">
       <nav id="tocPanel"><div class="toc-title">目 录</div><div id="tocList"></div></nav>
       <div class="vdiv" id="divRead"></div>
-      <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
+      <div id="readMain">
+        <div id="bookBar">
+          <b>成书</b>
+          <select id="bookThemeSel" title="成书排版模板">
+            <option value="classic">经典书籍</option>
+            <option value="modern">现代简洁</option>
+            <option value="academic">学术</option>
+          </select>
+          <button id="btnBookCfg">封面与成书设置</button>
+          <span class="hint">封面 / 目录 / 章首分页按模板自动排版，打印即可另存 PDF；打印对话框请关闭浏览器自带“页眉和页脚”、边距选“默认”</span>
+        </div>
+        <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
+      </div>
     </div>
     <div id="outlineView" class="hidden">
       <div id="outlineBar">
@@ -534,7 +604,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <ul>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），双击即可在浏览器阅读。</li>
-      <li><b>打印/PDF</b>：在打印窗口选“另存为 PDF”；边距选“默认”，并取消勾选“页眉和页脚”。</li>
+      <li><b>打印/PDF（成书排版）</b>：阅览页顶部「成书」可切换<b>经典书籍 / 现代简洁 / 学术</b>三套模板，并在「封面与成书设置」里填写书名、副标题、作者、日期，开关封面页、目录页、每章另起一页。模板自动生成封面、无页码目录、章首分页、页眉书名与页脚页码、孤行寡行控制。打印窗口选“另存为 PDF”，边距选“默认”，<b>关闭</b>浏览器自带“页眉和页脚”（页码由模板提供，需 Chrome/Edge 131+）。</li>
     </ul>
     <h4>回收站与历史版本</h4>
     <ul>
@@ -577,6 +647,31 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="btns">
     <button id="histClose" class="primary">关闭</button>
+  </div>
+</dialog>
+<dialog id="dlgBook">
+  <h3>成书设置（打印 / 另存 PDF）</h3>
+  <div class="row"><label style="width:72px">模板</label>
+    <select id="bkTheme" style="flex:1">
+      <option value="classic">经典书籍（宋体正文、居中章节、首行缩进）</option>
+      <option value="modern">现代简洁（黑体、大留白、左对齐标题）</option>
+      <option value="academic">学术（宋体小字、紧凑排版、页眉带书名/副标题）</option>
+    </select>
+  </div>
+  <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" placeholder="留空则用项目文件夹名"></div>
+  <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" placeholder="如：卷一 / 修订版 v2（可空）"></div>
+  <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" placeholder="署名（可空）"></div>
+  <div class="row"><label style="width:72px">成书日期</label><input type="date" id="bkDate"></div>
+  <div class="row"><label style="width:72px">成书部分</label>
+    <label><input type="checkbox" id="bkCover"> 封面页</label>
+    <label><input type="checkbox" id="bkToc"> 目录页</label>
+    <label><input type="checkbox" id="bkBreak"> 每章另起一页</label>
+  </div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
+  <div class="btns">
+    <button id="bkCancel">取消</button>
+    <button id="bkSave">保存</button>
+    <button id="bkPrint" class="primary">保存并打印 / PDF</button>
   </div>
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
@@ -1124,6 +1219,7 @@ async function renderMerged() {
       body.appendChild(hr);
     }
     const sec = document.createElement('div'); sec.id = 'sec-' + idx;
+    if (bookCfg.chapterBreak) sec.classList.add('book-chapter');
     sec.innerHTML = mdToHtml(text);
     body.appendChild(sec);
     // 目录：先显示文件名，下面再显示该文件内的标题
@@ -1146,6 +1242,90 @@ async function renderMerged() {
     a.onclick = e => { e.preventDefault(); document.getElementById(t.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     toc.appendChild(a);
   }
+  renderBookFront(body, tocItems);
+  applyBookTheme();
+}
+
+/* ================= book publishing ================= */
+const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true };
+let bookCfg = BOOK_DEFAULT_CFG;
+try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
+function saveBookCfg() { localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg)); }
+function bookDate() {
+  const d = new Date();
+  const fmt = (y, m, day) => y + ' 年 ' + m + ' 月 ' + day + ' 日';
+  if (!bookCfg.date) return fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
+  const mt = bookCfg.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return mt ? fmt(+mt[1], +mt[2], +mt[3]) : bookCfg.date;
+}
+function bookTitle() { return (bookCfg.title || '').trim() || (rootHandle ? rootHandle.name : '未命名作品'); }
+function cssStr(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' '); }
+// 封面 + 目录（屏幕阅览与打印共用）
+function renderBookFront(body, tocItems) {
+  document.body.classList.toggle('book-has-cover', !!bookCfg.cover);
+  body.querySelector('.book-front')?.remove();
+  if (!bookCfg.cover && !bookCfg.toc) return;
+  const front = document.createElement('div');
+  front.className = 'book-front';
+  if (bookCfg.cover) {
+    const c = document.createElement('div');
+    c.className = 'book-cover';
+    let html = '<div class="bc-title">' + esc(bookTitle()) + '</div>';
+    if (bookCfg.subtitle.trim()) html += '<div class="bc-sub">' + esc(bookCfg.subtitle.trim()) + '</div>';
+    const metaParts = [];
+    if (bookCfg.author.trim()) metaParts.push(esc(bookCfg.author.trim()) + ' 著');
+    metaParts.push(esc(bookDate()));
+    html += '<div class="bc-meta">' + metaParts.join('<br>') + '</div>';
+    c.innerHTML = html;
+    front.appendChild(c);
+  }
+  if (bookCfg.toc && tocItems.length) {
+    const n = document.createElement('nav');
+    n.className = 'book-toc';
+    let html = '<div class="toc-h">目 录</div>';
+    for (const t of tocItems) {
+      const lv = Math.min(t.level, 4);
+      html += '<a class="tl' + lv + '" href="#' + t.id + '">' + esc(t.text) + '</a>';
+    }
+    n.innerHTML = html;
+    n.querySelectorAll('a').forEach((a, i) => {
+      const t = tocItems[i];
+      a.onclick = e => { e.preventDefault(); document.getElementById(t.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    });
+    front.appendChild(n);
+  }
+  body.insertBefore(front, body.firstChild);
+}
+// 动态 @page 规则：页眉书名/副标题与页脚页码随模板与设置变化（Chrome/Edge 131+）
+function pageCssFor(theme, title, sub) {
+  const t = cssStr(title), s = cssStr(sub);
+  if (theme === 'modern') {
+    return '@page { size: A4; margin: 20mm 18mm 18mm;'
+      + '@top-left { content: "' + t + '"; font: 8.5pt "Microsoft YaHei",sans-serif; color: #999; }'
+      + '@bottom-right { content: counter(page); font: 9pt "Microsoft YaHei",sans-serif; color: #666; } }'
+      + '@page cover { margin: 0; @top-left { content: none; } @bottom-right { content: none; } }'
+      + '@page tocpage { @top-left { content: none; } }';
+  }
+  if (theme === 'academic') {
+    return '@page { size: A4; margin: 25mm 24mm 23mm;'
+      + '@top-left { content: "' + t + '"; font: 8.5pt SimSun,serif; color: #666; }'
+      + (s ? '@top-right { content: "' + s + '"; font: 8.5pt SimSun,serif; color: #666; }' : '')
+      + '@bottom-center { content: "第 " counter(page) " 页"; font: 9pt SimSun,serif; color: #444; } }'
+      + '@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }'
+      + '@page tocpage { @top-left { content: none; } @top-right { content: none; } }';
+  }
+  return '@page { size: A4; margin: 24mm 22mm 22mm;'
+    + '@top-center { content: "' + t + '"; font: 9pt Georgia,"Noto Serif SC",SimSun,serif; color: #777; letter-spacing: .2em; }'
+    + '@bottom-center { content: counter(page); font: 10pt Georgia,serif; color: #444; } }'
+    + '@page cover { margin: 0; @top-center { content: none; } @bottom-center { content: none; } }'
+    + '@page tocpage { @top-center { content: none; } }';
+}
+function applyBookTheme() {
+  document.body.dataset.bookTheme = bookCfg.theme;
+  let st = document.getElementById('bookPageStyle');
+  if (!st) { st = document.createElement('style'); st.id = 'bookPageStyle'; document.head.appendChild(st); }
+  st.textContent = pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || '');
+  $('bookThemeSel').value = bookCfg.theme;
 }
 
 /* ================= export merged html ================= */
@@ -2186,12 +2366,59 @@ $('btnSide').onclick = () => {
   applySideHidden();
 };
 applySideHidden();
-// 打印 / 导出 PDF：用打印样式渲染合并全书
+// 打印 / 导出 PDF：用成书模板渲染合并全书
 $('btnPrint').onclick = async () => {
   if (!rootHandle) return;
-  toast('正在准备打印…请在打印对话框取消勾选“页眉和页脚”');
+  toast('正在准备打印…请在打印对话框关闭“页眉和页脚”，边距选“默认”，目标可改为“另存为 PDF”');
   if (mode !== 'read') setMode('read'); else await renderMerged();
   setTimeout(() => window.print(), 800);
+};
+
+/* ---------- 成书设置 ---------- */
+function todayInput() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function openBookDlg() {
+  $('bkTheme').value = bookCfg.theme;
+  $('bkTitle').value = bookCfg.title || (rootHandle ? rootHandle.name : '');
+  $('bkSub').value = bookCfg.subtitle;
+  $('bkAuthor').value = bookCfg.author;
+  $('bkDate').value = bookCfg.date || todayInput();
+  $('bkCover').checked = bookCfg.cover;
+  $('bkToc').checked = bookCfg.toc;
+  $('bkBreak').checked = bookCfg.chapterBreak;
+  $('dlgBook').showModal();
+}
+function readBookDlg() {
+  const def = rootHandle ? rootHandle.name : '';
+  bookCfg.theme = $('bkTheme').value;
+  bookCfg.title = $('bkTitle').value.trim() === def.trim() ? '' : $('bkTitle').value.trim();
+  bookCfg.subtitle = $('bkSub').value.trim();
+  bookCfg.author = $('bkAuthor').value.trim();
+  bookCfg.date = $('bkDate').value || '';
+  bookCfg.cover = $('bkCover').checked;
+  bookCfg.toc = $('bkToc').checked;
+  bookCfg.chapterBreak = $('bkBreak').checked;
+  saveBookCfg();
+}
+async function applyBookCfgAndRender() {
+  applyBookTheme();
+  if (mode === 'read') await renderMerged();
+}
+$('btnBookCfg').onclick = openBookDlg;
+$('bookThemeSel').onchange = async () => {
+  bookCfg.theme = $('bookThemeSel').value;
+  saveBookCfg();
+  await applyBookCfgAndRender();
+};
+$('bkCancel').onclick = () => $('dlgBook').close();
+$('bkSave').onclick = async () => { readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkPrint').onclick = async () => {
+  readBookDlg(); $('dlgBook').close();
+  await applyBookCfgAndRender();
+  toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
+  setTimeout(() => window.print(), 600);
 };
 $('btnExportMd').onclick = exportMd;
 $('btnTheme').onclick = () => {
