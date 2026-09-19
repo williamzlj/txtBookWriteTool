@@ -599,7 +599,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>调色盘</b>：选颜色确认后把色值插到光标处。</li>
       <li><b>◀ / ▶</b>：按目录顺序快速切换上一个 / 下一个文件（草稿除外），编辑、预览、阅览模式下都可用。</li>
       <li><b>全角空格</b>：在光标处插入一个中文全角空格（　），用于中文排版。</li>
-      <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认，项目替换会自动留档历史版本）。</li>
+      <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认）。<b>替换前的内容会自动存入「历史版本」，可随时恢复。</b></li>
       <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
       <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
       <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
@@ -910,6 +910,10 @@ async function scanDir(dirHandle, path) {
 function numOf(name) {
   const m = name.match(/^(\d+)(?=[.-]|$)/);
   return m ? parseInt(m[1], 10) : null;
+}
+// 清理文件名用于显示：去掉开头的数字编号（110-）和扩展名（.txt/.md），与大纲视图一致
+function cleanName(name) {
+  return name.replace(/^\d+-/, '').replace(/\.(md|markdown|txt)$/i, '');
 }
 // 同层节点排序：返回新数组
 function sortNodes(nodes) {
@@ -1234,8 +1238,8 @@ async function renderMerged() {
     if (bookCfg.chapterBreak) sec.classList.add('book-chapter');
     sec.innerHTML = mdToHtml(text);
     body.appendChild(sec);
-    // 目录：先显示文件名，下面再显示该文件内的标题
-    tocItems.push({ level: 1, text: f.name, id: 'sec-' + idx });
+    // 目录：先显示文件名（清理编号前缀与扩展名），下面再显示该文件内的标题
+    tocItems.push({ level: 1, text: cleanName(f.name), id: 'sec-' + idx });
     let hIdx = 0;
     for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
       const id = 'h-' + idx + '-' + (hIdx++);
@@ -2411,12 +2415,28 @@ $('btnSide').onclick = () => {
 };
 applySideHidden();
 // 打印 / 导出 PDF：用成书模板渲染合并全书
-$('btnPrint').onclick = async () => {
+$('btnPrint').onclick = () => {
   if (!rootHandle) return;
-  toast('正在准备打印…请在打印对话框关闭“页眉和页脚”，边距选“默认”，目标可改为“另存为 PDF”');
-  if (mode !== 'read') setMode('read'); else await renderMerged();
-  setTimeout(() => window.print(), 800);
+  // 先切到阅览模式渲染成书效果，隐藏左侧目录树，再弹出成书设置让用户预览确认
+  if (mode !== 'read') setMode('read'); else renderMerged();
+  const wasHidden = localStorage.getItem('wt-side-hidden') === '1';
+  if (!wasHidden) {
+    localStorage.setItem('wt-side-hidden', '1');
+    applySideHidden();
+    printRestoredSide = false;
+  } else {
+    printRestoredSide = true;
+  }
+  openBookDlg();
 };
+let printRestoredSide = true;
+$('dlgBook').addEventListener('close', () => {
+  if (!printRestoredSide) {
+    localStorage.removeItem('wt-side-hidden');
+    applySideHidden();
+    printRestoredSide = true;
+  }
+});
 
 /* ---------- 成书设置 ---------- */
 function todayInput() {
@@ -2458,14 +2478,22 @@ $('bookThemeSel').onchange = async () => {
   saveBookCfg();
   await applyBookCfgAndRender();
 };
-$('bkCancel').onclick = () => $('dlgBook').close();
-$('bkSave').onclick = async () => { readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkCancel').onclick = () => closeBookDlg();
+$('bkSave').onclick = async () => { readBookDlg(); closeBookDlg(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
 $('bkPrint').onclick = async () => {
-  readBookDlg(); $('dlgBook').close();
+  readBookDlg(); closeBookDlg();
   await applyBookCfgAndRender();
   toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
   setTimeout(() => window.print(), 600);
 };
+function closeBookDlg() {
+  if (!printRestoredSide) {
+    localStorage.removeItem('wt-side-hidden');
+    applySideHidden();
+    printRestoredSide = true;
+  }
+  $('dlgBook').close();
+}
 $('btnExportMd').onclick = exportMd;
 $('btnTheme').onclick = () => {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -2748,15 +2776,24 @@ $('rpOk').onclick = async () => {
       await flushSave();
       const n = countOcc(current.content, find);
       if (!n) { toast('当前文件没有找到「' + find + '」'); return; }
-      if (!confirm('当前文件中共 ' + n + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？')) return;
+      if (!confirm('当前文件中共 ' + n + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？\n（替换前内容会自动存入「历史」，可恢复）')) return;
+      await backupHistory(current.node, current.content);  // 替换前留存旧版本
       const ed = $('editor');
       const pos = ed.selectionStart;
-      ed.value = current.content.split(find).join(to);
-      markDirty();
+      const newText = current.content.split(find).join(to);
+      ed.value = newText;
+      current.content = newText;
+      // 立即写入磁盘，不依赖 900ms 延迟自动保存
+      try {
+        const w = await current.node.handle.createWritable();
+        await w.write(newText); await w.close();
+        current.dirty = false;
+        $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+      } catch (e) { markDirty(); }
       ed.setSelectionRange(Math.min(pos, ed.value.length), Math.min(pos, ed.value.length));
-      schedulePreview();
+      schedulePreview(); updateStatus();
       $('dlgReplace').close();
-      toast('已替换 ' + n + ' 处');
+      toast('已替换 ' + n + ' 处（已存入历史版本，可在「历史」中恢复）');
     } else {
       await flushSave();
       const changed = [];
