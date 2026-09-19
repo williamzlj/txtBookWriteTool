@@ -102,13 +102,13 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
   color: var(--muted); font-size: 13px; line-height: 1; cursor: pointer;
 }
 #sideCollapseBtn:hover { color: var(--accent); border-color: var(--accent); background: var(--hover); }
-/* 展开目录：侧栏折叠后贴 #main 左缘的竖页签 */
+/* 展开目录：侧栏折叠后贴 #main 左上角的小方块（与折叠按钮同位同尺寸） */
 #sideExpandBtn {
-  position: absolute; top: 50%; left: 0; transform: translateY(-50%);
-  width: 18px; height: 72px; z-index: 30; padding: 0; display: none;
+  position: absolute; top: 10px; left: 0;
+  width: 22px; height: 22px; z-index: 30; padding: 0; display: none;
   align-items: center; justify-content: center;
   background: var(--panel); border: 1px solid var(--border); border-left: none;
-  border-radius: 0 9px 9px 0; color: var(--muted); font-size: 15px; line-height: 1;
+  border-radius: 0 5px 5px 0; color: var(--muted); font-size: 13px; line-height: 1;
   cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,.18);
 }
 #sideExpandBtn:hover { color: var(--accent); border-color: var(--accent); }
@@ -227,14 +227,16 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
   /* 字体 */
   --md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
   --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;
-  /* 配色（经典黑默认） */
-  --md-body-color: #222222;
-  --md-muted-color: #8a8f98;
-  --md-accent: #3b7dd8;
-  --md-panel: #ffffff;
-  --md-code-bg: #f2f2ee;
-  --md-border: #e4e4e0;
-  --md-stripe: rgba(0,0,0,.035);
+  /* 配色（经典黑默认；内置配色会成套覆盖下列全部变量） */
+  --md-body-color: #222222;    /* 段落 / 正文 / 代码文字 */
+  --md-strong-color: #111111;  /* 着重强调 **bold** */
+  --md-muted-color: #8a8f98;   /* 次要文字：引用正文、副标题、缺失图片提示 */
+  --md-accent: #3b7dd8;        /* 主题色：链接、引用条、列表标记、modern 标题条 */
+  --md-panel: #ffffff;         /* 表面色：表头底、导出目录底 */
+  --md-quote-bg: #f7f8fa;      /* 引用块底色 */
+  --md-code-bg: #f2f2ee;       /* 行内代码 / 代码块底色 */
+  --md-border: #e4e4e0;        /* 分隔线、表格线、封面/目录分隔 */
+  --md-stripe: rgba(0,0,0,.035); /* 表格斑马纹 */
   /* 字号（成书主题会覆盖这组变量） */
   --md-fs: 16.5px; --md-lh: 1.9;
   --md-h1-fs: 27px; --md-h2-fs: 22px; --md-h3-fs: 19px;
@@ -247,9 +249,11 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 }
 [data-theme="dark"] {
   --md-body-color: #d8d9db;
+  --md-strong-color: #ececee;
   --md-muted-color: #9aa0a8;
   --md-accent: #6aa3e0;
   --md-panel: #2a2d31;
+  --md-quote-bg: rgba(255,255,255,.045);
   --md-code-bg: #2a2d31;
   --md-border: #3a3d42;
   --md-stripe: rgba(255,255,255,.05);
@@ -276,16 +280,22 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 .md-body h6 { font-size: calc(var(--md-h6-fs) * var(--md-zoom)); color: var(--md-h6-color); }
 .md-body h1:first-child, .md-body h2:first-child { margin-top: .2em; }
 .md-body p { margin: .8em 0; }
+/* 强调：粗体用深色强调色；斜体保持正文色；标题/链接内的粗体跟随父级颜色 */
+.md-body strong { color: var(--md-strong-color); font-weight: 700; }
+.md-body h1 strong, .md-body h2 strong, .md-body h3 strong, .md-body h4 strong,
+.md-body h5 strong, .md-body h6 strong, .md-body a strong { color: inherit; }
 .md-body a { color: var(--md-accent); }
+.md-body a:hover { opacity: .78; }
+.md-body ::selection { background: color-mix(in srgb, var(--md-accent) 22%, transparent); }
 .md-body img { max-width: 100%; border-radius: 4px; display: block; margin: 14px auto; }
 .md-body img.img-missing { display: inline-block; padding: 14px 18px; border: 1px dashed var(--md-muted-color);
   border-radius: 6px; color: var(--md-muted-color); font-size: 13px; font-family: var(--md-font-head); }
 .md-body blockquote {
-  border-left: 3px solid var(--md-accent); background: var(--md-panel);
+  border-left: 3px solid var(--md-accent); background: var(--md-quote-bg);
   margin: 1em 0; padding: .6em 1.1em; color: var(--md-muted-color); border-radius: 0 6px 6px 0;
 }
 .md-body code {
-  background: var(--md-code-bg); padding: .15em .4em; border-radius: 4px;
+  background: var(--md-code-bg); color: inherit; padding: .15em .4em; border-radius: 4px;
   font-family: Consolas, monospace; font-size: .88em;
 }
 .md-body pre { background: var(--md-code-bg); padding: 14px 18px; border-radius: 8px; overflow: auto; margin: 1em 0; }
@@ -293,6 +303,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 .md-body hr { border: none; border-top: 1px solid var(--md-border); margin: 2em 0; }
 .md-body ul, .md-body ol { padding-left: 1.8em; margin: .7em 0; }
 .md-body li { margin: .3em 0; }
+.md-body li::marker { color: var(--md-accent); }
 .md-body table { border-collapse: collapse; margin: 1.2em auto; max-width:100%; display:block; overflow-x:auto; }
 .md-body th, .md-body td { border: 1px solid var(--md-border); padding: 7px 14px; font-size: .92em; line-height: 1.6; }
 .md-body th { background: var(--md-panel); font-weight: 600; font-family: var(--md-font-head); }
@@ -302,7 +313,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 /* 阅览视图特有的作品标题与文件分隔线 */
 .md-body .book-title {
   text-align: center; font-size: 30px; font-weight: 700;
-  font-family: var(--md-font-head);
+  font-family: var(--md-font-head); color: var(--md-h1-color);
   line-height: 1.3; margin: 10px 0 40px;
 }
 .md-body hr.file-boundary {
@@ -328,7 +339,7 @@ body.book-indent .md-body p { text-indent: 2em; }
   min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px;
 }
-.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; }
+.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; color: var(--md-h1-color); }
 .bc-sub { font-size: 15px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
 .bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
 
@@ -484,7 +495,6 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
   <button id="btnFontReset" title="重置字号：编辑模式恢复编辑器默认字号（15px），预览/阅览恢复版式默认字号（缩放 100%）">↺</button>
-  <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
   <button id="btnAbout" title="软件使用说明">说明</button>
   <button id="btnTheme" title="切换明暗主题">🌙</button>
  </div>
@@ -497,17 +507,6 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button data-mode="outline" disabled>大纲</button>
    </div>
    <button id="btnRefresh" disabled>刷新</button>
-   <span class="sep"></span>
-   <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
-   <select id="presetSel" disabled title="选择内置配色：只替换 style.css 配色区（正文与标题颜色），点“样式”可微调任意内容">
-     <option value="">内置配色…</option>
-     <option value="classic">经典黑</option>
-     <option value="red">典雅红</option>
-     <option value="academic">学术蓝</option>
-     <option value="green">护眼绿</option>
-     <option value="warm">暖阳橙</option>
-     <option value="purple">典雅紫</option>
-   </select>
    <span class="sep"></span>
    <button id="btnPrev" disabled title="上一个文件">◀</button>
    <button id="btnNext" disabled title="下一个文件">▶</button>
@@ -524,15 +523,28 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    </div>
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
+      
+      <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
+      <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
+        <option value="">内置配色…</option>
+        <option value="classic">经典黑</option>
+        <option value="red">典雅红</option>
+        <option value="academic">学术蓝</option>
+        <option value="green">护眼绿</option>
+        <option value="warm">暖阳橙</option>
+        <option value="purple">典雅紫</option>
+      </select>
      <select id="bookThemeSel" title="成书版式：替换 style.css 成书版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
        <option value="classic">经典书籍</option>
        <option value="modern">现代简洁</option>
        <option value="academic">学术</option>
        <option value="phone">手机阅览</option>
      </select>
+     <span class="sep"></span>
      <button id="btnBookCfg" title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
      <button id="btnExportPdf" class="primary" disabled title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
      <button id="btnExportHtml" disabled title="导出为单文件 HTML（含左侧目录、自定义样式）">导出 HTML</button>
+     <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
    </div>
  </div>
 </header>
@@ -1271,7 +1283,7 @@ const BOOK_THEMES = {
   modern: {
     name: '现代',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
-    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-body-color); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="modern"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="modern"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
   },
   academic: {
     name: '学术',
@@ -1302,9 +1314,20 @@ function themeSectionCss(theme) {
     + vars + '\n}\n' + t.rules;
 }
 function colorSectionCss(p) {
-  let s = ':root:not([data-theme="dark"]) {\n  /* 配色：' + p.name + '（浅色背景专用；暗色主题回退系统配色） */\n  --md-body-color: ' + p.body + ';';
-  p.h.forEach((c, i) => { s += '\n  --md-h' + (i + 1) + '-color: ' + c + ';'; });
-  return s + '\n}';
+  // 每套预设必须成套输出：正文/强调/次要/主题色/表面/引用底/代码底/分隔线/斑马纹 + 六级标题，
+  // 确保链接、引用、列表、代码、分隔线、表格等元素与标题同一色系。
+  let s = ':root:not([data-theme="dark"]) {\n  /* 配色：' + p.name + '（浅色背景专用；暗色主题回退系统配色） */\n'
+    + '  --md-body-color: ' + p.body + ';\n'
+    + '  --md-strong-color: ' + p.strong + ';\n'
+    + '  --md-muted-color: ' + p.muted + ';\n'
+    + '  --md-accent: ' + p.accent + ';\n'
+    + '  --md-panel: ' + p.panel + ';\n'
+    + '  --md-quote-bg: ' + p.quote + ';\n'
+    + '  --md-code-bg: ' + p.code + ';\n'
+    + '  --md-border: ' + p.border + ';\n'
+    + '  --md-stripe: ' + p.stripe + ';\n';
+  p.h.forEach((c, i) => { s += '  --md-h' + (i + 1) + '-color: ' + c + ';\n'; });
+  return s + '}';
 }
 function styleTemplate(theme) {
   const t = BOOK_THEMES[theme] ? theme : 'classic';
@@ -1346,11 +1369,20 @@ async function loadUserCss() {
   try {
     const fh = await rootHandle.getFileHandle('style.css');
     let css = (await (await fh.getFile()).text()).replace(/^\uFEFF/, '');
+    let changed = false;
     // 带分区的文件若缺页眉页脚区（书名/日期可能已变）补齐一次；纯自定义文件不动
     if (css.indexOf(SEC_THEME + ' START') >= 0 && getSection(css, SEC_PAGE) === null) {
       css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || ''));
-      const w = await fh.createWritable(); await w.write(css); await w.close();
+      changed = true;
     }
+    // 旧版配色区只含正文+六级标题（引用条/链接等仍是蓝色默认）；按 h1 色匹配内置预设后补齐全套配色
+    const oldColor = getSection(css, SEC_COLOR);
+    if (oldColor !== null && oldColor.indexOf('--md-accent') < 0) {
+      const hm = /--md-h1-color:\s*(#[0-9a-fA-F]{3,6})/.exec(oldColor);
+      const preset = hm && PRESETS.find(x => x.h[0].toLowerCase() === hm[1].toLowerCase());
+      if (preset) { css = upsertSection(css, SEC_COLOR, colorSectionCss(preset)); changed = true; }
+    }
+    if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
     applyUserCss(css);
   } catch (e) {}
 }
@@ -1372,12 +1404,30 @@ async function openStyleCss() {
 
 /* ---------- built-in style presets ---------- */
 const PRESETS = [
-  { key: 'classic',  name: '经典黑', body: '#222222', h: ['#111111','#222222','#333333','#444444','#555555','#666666'] },
-  { key: 'academic', name: '学术蓝', body: '#26282b', h: ['#1a4f8b','#1f63a8','#2f74b5','#3b82c4','#4a90cf','#5d9dd8'] },
-  { key: 'green',    name: '护眼绿', body: '#3a4238', h: ['#2e6b3f','#357a49','#3f8a55','#4b9761','#5aa46e','#6fb17f'] },
-  { key: 'warm',     name: '暖阳橙', body: '#3d3226', h: ['#b8431c','#c95722','#d56a2a','#dd7c36','#e38e45','#e7a058'] },
-  { key: 'purple',   name: '典雅紫', body: '#2e2a35', h: ['#5b3a8c','#6c4aa0','#7d5bb0','#8d6dc0','#9d80cd','#ae93d8'] },
-  { key: 'red',      name: '典雅红', body: '#332827', h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
+  { key: 'classic', name: '经典黑',
+    body: '#222222', strong: '#111111', muted: '#8a8f98', accent: '#3b7dd8',
+    panel: '#ffffff', quote: '#f7f8fa', code: '#f2f2ee', border: '#e4e4e0', stripe: 'rgba(0,0,0,.035)',
+    h: ['#111111','#222222','#333333','#444444','#555555','#666666'] },
+  { key: 'academic', name: '学术蓝',
+    body: '#26282b', strong: '#16437a', muted: '#5f738c', accent: '#1a5fa8',
+    panel: '#ffffff', quote: '#f0f5fb', code: '#edf3f9', border: '#d8e3f0', stripe: 'rgba(26,79,139,.05)',
+    h: ['#1a4f8b','#1f63a8','#2f74b5','#3b82c4','#4a90cf','#5d9dd8'] },
+  { key: 'green', name: '护眼绿',
+    body: '#3a4238', strong: '#235734', muted: '#68755f', accent: '#25683a',
+    panel: '#ffffff', quote: '#f0f6ef', code: '#ecf4ea', border: '#d9e5d5', stripe: 'rgba(46,107,63,.05)',
+    h: ['#2e6b3f','#357a49','#3f8a55','#4b9761','#5aa46e','#6fb17f'] },
+  { key: 'warm', name: '暖阳橙',
+    body: '#3d3226', strong: '#9c3a17', muted: '#846e57', accent: '#bd531a',
+    panel: '#ffffff', quote: '#fdf3e9', code: '#faf0e3', border: '#f0dfc7', stripe: 'rgba(184,67,28,.05)',
+    h: ['#b8431c','#c95722','#d56a2a','#dd7c36','#e38e45','#e7a058'] },
+  { key: 'purple', name: '典雅紫',
+    body: '#2e2a35', strong: '#4c2f78', muted: '#726a83', accent: '#6a46a3',
+    panel: '#ffffff', quote: '#f5f1fb', code: '#f2edf8', border: '#e2daf0', stripe: 'rgba(91,58,140,.05)',
+    h: ['#5b3a8c','#6c4aa0','#7d5bb0','#8d6dc0','#9d80cd','#ae93d8'] },
+  { key: 'red', name: '典雅红',
+    body: '#332827', strong: '#7a1818', muted: '#8a716f', accent: '#b0322a',
+    panel: '#ffffff', quote: '#fcf0ef', code: '#f8edec', border: '#efd9d6', stripe: 'rgba(143,29,29,.05)',
+    h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
 ];
 $('presetSel').onchange = async () => {
   const key = $('presetSel').value;
@@ -1710,7 +1760,7 @@ body{margin:0;background:#fbfaf7;}
 .toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:calc(var(--md-fs)*.88);line-height:1.8}
 .toc a:hover{color:var(--md-accent)}
 .toc a.tl2{padding-left:18px}.toc a.tl3{padding-left:36px}.toc a.tl4{padding-left:54px}
-#toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
+#toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:var(--md-accent);color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}#toTop:hover{opacity:1}
 @media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
 @media print{#toTop{display:none}.toc{display:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}}
