@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WriteTools 写作工具</title>
+<style id="userCssStyle"></style>
+<style>
+:root {
+  --fs-body: 16.5px;
+  --bg: #f6f6f4; --panel: #ffffff; --text: #26282b; --muted: #8a8f98;
+  --border: #e4e4e0; --accent: #3b7dd8; --sel: #eaf2fd; --hover: #f0f2f5;
+  --code-bg: #f2f2ee; --toolbar: #fbfbfa;
+}
+[data-theme="dark"] {
+  --bg: #1b1d20; --panel: #24262a; --text: #d8d9db; --muted: #7d828a;
+  --border: #35373c; --accent: #5b9bd8; --sel: #2d3b4f; --hover: #2b2e33;
+  --code-bg: #1f2124; --toolbar: #202225;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+  background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+button {
+  font: inherit; color: var(--text); background: var(--panel);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; cursor: pointer; font-size: 13px; white-space: nowrap;
+}
+button:hover:not(:disabled) { background: var(--hover); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hidden { display: none !important; }
+.flex { flex: 1; }
+
+/* ---------- top bar ---------- */
+#topbar {
+  display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 7px 8px;
+  background: var(--toolbar); border-bottom: 1px solid var(--border);
+}
+#topbar button { padding: 4px 9px; }
+.tb-row { display: flex; align-items: center; gap: 5px; }
+.tb-row1 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+.tb-row1 > * { flex: none; }
+.tb-row1::-webkit-scrollbar, .tb-row2::-webkit-scrollbar { height: 6px; }
+.tb-row1::-webkit-scrollbar-thumb, .tb-row2::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.tb-row2 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); padding-top: 6px; }
+.tb-row2 > * { flex: none; }
+.tb-row2 #searchBar { padding: 0; width: 250px; max-width: 100%; flex: none; }
+.tb-row2 .tabs { margin-left: 10px; }
+.tb-row2 #searchBar input { font-size: 13px; padding: 5px 9px; }
+#presetSel { font-size: 12.5px; padding: 4px 4px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+#topbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.tabs { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.tabs button { border: none; border-radius: 0; background: transparent; padding: 4px 14px; }
+.tabs button.active { background: var(--accent); color: #fff; }
+
+/* ---------- layout ---------- */
+#main { flex: 1; display: flex; min-height: 0; }
+#sidebar {
+  width: 250px; min-width: 120px; flex: none; background: var(--panel);
+  display: flex; flex-direction: column; overflow: hidden; padding: 6px 4px;
+}
+#tree { flex: 1; min-height: 0; overflow: auto; }
+#searchBar { display: flex; gap: 4px; padding: 2px 2px 6px; }
+#searchBar input {
+  flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); padding: 4px 8px; font-size: 12px; outline: none;
+}
+#searchBar input:focus { border-color: var(--accent); }
+#searchBar button { flex: none; font-size: 12px; }
+#searchResults { flex: 1; min-height: 0; overflow: auto; }
+.s-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.s-item:hover { background: var(--hover); }
+.s-file { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.s-line { font-size: 12.5px; color: var(--text); word-break: break-all; }
+.s-line mark { background: #ffe58a; color: #000; border-radius: 2px; }
+.s-empty { color: var(--muted); font-size: 12px; padding: 10px 6px; }
+#projName {
+  padding: 8px 10px 7px; font-weight: 600; font-size: 13.5px;
+  border-bottom: 1px solid var(--border); margin: 0 0 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vdiv { flex: none; width: 5px; cursor: col-resize; position: relative; z-index: 5; }
+.vdiv::after { content: ''; position: absolute; left: 2px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.vdiv:hover::after { background: var(--accent); width: 2px; }
+.tnode.multisel { background: color-mix(in srgb, var(--sel) 70%, transparent); }
+.tnode.multisel .ico { color: #4a9a58; font-weight: 700; }
+#workarea { flex: 1; display: flex; min-width: 0; position: relative; }
+
+/* ---------- tree ---------- */
+.tnode {
+  display: flex; align-items: center; gap: 5px; padding: 4px 8px;
+  border-radius: 5px; cursor: pointer; font-size: 13.5px; user-select: none;
+  white-space: nowrap; overflow: hidden;
+}
+.tnode:hover { background: var(--hover); }
+.tnode.selected { background: var(--sel); }
+.tnode .ico { flex: none; font-size: 15px; width: 20px; text-align: center; color: var(--muted); line-height: 1; }
+.tnode.dir .ico { font-size: 16px; }
+.tnode.draft .nm { opacity: .55; font-style: italic; }
+.tnode .dtag { flex: none; margin-left: 6px; font-size: 10px; font-style: normal; color: #b0741a; background: #fdf0d5; border: 1px solid #eccf94; border-radius: 4px; padding: 0 4px; line-height: 16px; }
+.tnode .nm { overflow: hidden; text-overflow: ellipsis; }
+.tnode.dir .nm { font-weight: 600; }
+
+/* ---------- welcome ---------- */
+#welcome {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 18px; color: var(--muted);
+}
+#welcome h1 { font-size: 26px; color: var(--text); font-weight: 600; }
+#welcome .tip { max-width: 460px; line-height: 1.9; font-size: 13.5px; text-align: center; }
+
+/* ---------- editor ---------- */
+#editView { flex: 1; display: flex; min-width: 0; }
+#editor {
+  flex: 1; min-width: 0; border: none; outline: none; resize: none;
+  background: var(--panel); color: var(--text);
+  font-family: Consolas, "Microsoft YaHei", monospace;
+  font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 26px 30px; caret-color: var(--accent);
+}
+#livePreview {
+  width: 46%; min-width: 220px; flex: none; overflow: auto;
+  background: var(--bg);
+}
+#previewView { flex: 1; overflow: auto; background: var(--bg); }
+
+/* ---------- read (merged) view ---------- */
+#readView { flex: 1; display: flex; min-width: 0; }
+#tocPanel {
+  width: 250px; min-width: 120px; flex: none; overflow: auto;
+  background: var(--panel); padding: 12px 8px;
+  font-size: 13px;
+}
+#tocPanel .toc-title { color: var(--muted); font-size: 12px; padding: 0 6px 8px; letter-spacing: 1px; }
+#tocPanel a {
+  display: block; color: var(--text); text-decoration: none; padding: 3px 6px;
+  border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#tocPanel a:hover { background: var(--hover); color: var(--accent); }
+#tocPanel a.l1 { font-weight: 600; }
+#tocPanel a.l2 { padding-left: 20px; }
+#tocPanel a.l3 { padding-left: 34px; }
+#tocPanel a.l4 { padding-left: 48px; font-size: 12px; color: var(--muted); }
+#mergedWrap { flex: 1; overflow: auto; }
+#mergedBody { max-width: 780px; margin: 0 auto; padding: 40px 36px 120px; }
+#mergedBody .book-title {
+  text-align: center; font-size: 30px; font-weight: 700;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  line-height: 1.3; margin: 10px 0 40px;
+}
+#mergedBody .file-boundary {
+  border: none; border-top: 1px dashed var(--border); margin: 48px 0; position: relative;
+}
+#mergedBody .file-boundary span {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--bg); color: var(--muted); font-size: 11px; padding: 0 10px;
+  white-space: nowrap;
+}
+
+/* ---------- markdown body ---------- */
+.md-body {
+  font-family: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
+  font-size: var(--fs-body, 16.5px); line-height: 1.9; color: var(--text);
+  padding: 30px 38px;
+}
+.md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--text);
+  line-height: 1.4; margin: 1.4em 0 .7em; scroll-margin-top: 20px;
+}
+.md-body h1 { font-size: 27px; } .md-body h2 { font-size: 22px; }
+.md-body h3 { font-size: 19px; } .md-body h4 { font-size: 17px; }
+.md-body h1:first-child, .md-body h2:first-child { margin-top: .2em; }
+.md-body p { margin: .8em 0; }
+.md-body a { color: var(--accent); }
+.md-body img { max-width: 100%; border-radius: 4px; display: block; margin: 14px auto; }
+.md-body img.img-missing { display: inline-block; padding: 14px 18px; border: 1px dashed var(--muted);
+  border-radius: 6px; color: var(--muted); font-size: 13px; font-family: "Microsoft YaHei", sans-serif; }
+.md-body blockquote {
+  border-left: 3px solid var(--accent); background: var(--panel);
+  margin: 1em 0; padding: .6em 1.1em; color: var(--muted); border-radius: 0 6px 6px 0;
+}
+.md-body code {
+  background: var(--code-bg); padding: .15em .4em; border-radius: 4px;
+  font-family: Consolas, monospace; font-size: .88em;
+}
+.md-body pre { background: var(--code-bg); padding: 14px 18px; border-radius: 8px; overflow: auto; margin: 1em 0; }
+.md-body pre code { background: none; padding: 0; }
+.md-body hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.md-body ul, .md-body ol { padding-left: 1.8em; margin: .7em 0; }
+.md-body li { margin: .3em 0; }
+.md-body table { border-collapse: collapse; margin: 1.2em auto; max-width: 100%; display: block; overflow-x: auto; }
+.md-body th, .md-body td { border: 1px solid var(--border); padding: 7px 14px; font-size: 15px; line-height: 1.6; }
+.md-body th { background: var(--panel); font-weight: 600; font-family: "Microsoft YaHei", sans-serif; }
+.md-body tr:nth-child(even) td { background: color-mix(in srgb, var(--panel) 55%, transparent); }
+.md-body .plaintext { white-space: pre-wrap; font-family: Consolas, monospace; font-size: 14.5px; line-height: 1.8; }
+
+.tnode.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--sel); }
+#projName.drop-target { color: var(--accent); }
+
+/* ---------- print ---------- */
+@media print {
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #welcome, #toast, #tableBar, #toTop { display: none !important; }
+  #main, #workarea, #readView, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; }
+  @page { margin: 20mm 16mm 18mm; }
+  body { overflow: visible; background: #fff; }
+  #mergedBody { max-width: 100%; padding: 0; }
+  #mergedBody hr.file-boundary { display: none; }
+  #mergedBody hr { margin: 1.2em 0; }
+  .md-body { color: #000; background: #fff; }
+}
+
+/* ---------- status bar ---------- */
+#statusbar {
+  display: flex; align-items: center; gap: 14px; padding: 4px 12px;
+  border-top: 1px solid var(--border); background: var(--toolbar);
+  font-size: 12px; color: var(--muted); height: 26px;
+}
+#stSave.saved { color: #4a9a58; } #stSave.dirty { color: #c47f2e; }
+
+/* ---------- table helper bar ---------- */
+#tableBar {
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+  background: var(--panel); border-bottom: 1px solid var(--border); font-size: 13px;
+}
+#tableBar .lbl { color: var(--muted); margin-right: 2px; }
+#tableBar button { padding: 2px 9px; font-size: 12.5px; }
+
+/* ---------- dialog ---------- */
+dialog {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+  color: var(--text); padding: 22px 26px; min-width: 320px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+dialog::backdrop { background: rgba(0,0,0,.35); }
+dialog h3 { margin-bottom: 14px; font-size: 16px; }
+dialog .row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px; }
+dialog input, dialog select {
+  font: inherit; color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
+}
+dialog input[type="number"] { width: 64px; }
+dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#palGrid { display: grid; grid-template-columns: repeat(8, 28px); gap: 8px; margin: 4px 0 10px; }
+#palGrid .sw { width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+#palGrid .sw.on { border-color: var(--accent); transform: scale(1.12); }
+
+/* ---------- back to top ---------- */
+#toTop {
+  position: fixed; right: 26px; bottom: 34px; width: 40px; height: 40px;
+  border: none; border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 17px; line-height: 1; cursor: pointer; z-index: 50;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+#toTop.show { opacity: .9; pointer-events: auto; }
+#toTop:hover { opacity: 1; }
+
+/* ---------- toast & error ---------- */
+#toast {
+  position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%);
+  background: rgba(40,42,46,.92); color: #fff; padding: 8px 18px; border-radius: 8px;
+  font-size: 13px; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 99;
+}
+#errBanner {
+  position: fixed; bottom: 0; left: 0; right: 0; background: #b3392f; color: #fff;
+  padding: 8px 14px; font: 12px Consolas, monospace; z-index: 100; display: none;
+  max-height: 90px; overflow: auto;
+}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+ <div class="tb-row tb-row1">
+  <button id="btnOpen">打开文件夹</button>
+  <button id="btnReconnect" class="hidden">继续上次：<span id="lastName"></span></button>
+  <span class="sep"></span>
+  <button id="btnNewFile" class="primary" disabled>新建文件</button>
+  <button id="btnNewDir" disabled>新建文件夹</button>
+  <button id="btnRename" disabled>重命名</button>
+  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
+  <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
+  <button id="btnDelete" disabled>删除</button>
+  <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
+  <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
+  <span class="sep"></span>
+  <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
+  <button id="btnTable" disabled>插入表格</button>
+  <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
+  <button id="btnReplaceFile" disabled title="在当前文件中查找替换（替换前确认）">文档内替换</button>
+  <button id="btnReplaceProject" disabled title="在项目全部 md/txt 文件中查找替换（替换前确认，不可撤销）">项目内替换</button>
+ </div>
+ <div class="tb-row tb-row2">
+   <div id="searchBar"><input id="searchInput" placeholder="搜索文件内容…" title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" title="搜索">🔍</button><button id="btnClearSearch" title="清空搜索，恢复目录显示">✕</button></div>
+   <div class="tabs">
+     <button data-mode="edit" class="active" disabled>编辑</button>
+     <button data-mode="preview" disabled>预览</button>
+     <button data-mode="read" disabled>阅览</button>
+   </div>
+   <button id="btnSide" title="隐藏/显示左侧文件目录">隐藏目录</button>
+   <button id="btnRefresh" disabled>刷新</button>
+   <span class="sep"></span>
+   <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
+   <select id="presetSel" disabled title="选择内置样式：写入 style.css 并立即生效（可再点“样式”微调）">
+     <option value="">内置样式…</option>
+     <option value="classic">经典黑</option>
+     <option value="academic">学术蓝</option>
+     <option value="green">护眼绿</option>
+     <option value="warm">暖阳橙</option>
+     <option value="purple">典雅紫</option>
+    <option value="red">典雅红</option>
+   </select>
+   <span class="sep"></span>
+   <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
+   <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
+   <button id="btnPrint" disabled title="合并全书后调出打印窗口，选“另存为 PDF”，并取消勾选“页眉和页脚”">打印/PDF</button>
+   <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
+   <button id="btnExport" disabled>导出 HTML</button>
+   <button id="btnTheme" title="切换明暗主题">🌙</button>
+ </div>
+</header>
+
+<div id="main">
+  <aside id="sidebar">
+    <div id="projName" class="hidden"></div>
+    <div id="tree"></div>
+    <div id="searchResults" class="hidden"></div>
+  </aside>
+  <div class="vdiv" id="divSidebar"></div>
+  <section id="workarea">
+    <div id="welcome">
+      <h1>WriteTools 写作工具</h1>
+      <div class="tip">
+        选择一个本地文件夹作为书稿目录：文件夹可任意嵌套，.md / .txt 文件自动按目录树管理。<br>
+        「阅览」模式会把整个文件夹里的内容按顺序合并成一本书连续显示。<br>
+      文件名以 <b>_</b> 开头（如 _灵感.txt、_素材/）为草稿，不参与阅览和导出，但可正常编辑搜索。<br><br>
+        请使用 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开本页面。
+      </div>
+      <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">选择写作文件夹</button>
+    </div>
+    <div id="editView" class="hidden">
+      <div id="tableBar" class="hidden">
+        <span class="lbl">表格：</span>
+        <button data-top="rowAbove">↑插入行</button>
+        <button data-top="rowBelow">↓插入行</button>
+        <button data-top="rowDel">删除行</button>
+        <button data-top="colLeft">←插入列</button>
+        <button data-top="colRight">→插入列</button>
+        <button data-top="colDel">删除列</button>
+        <span class="flex"></span>
+        <span class="lbl" style="font-size:12px">光标放在表格任意单元格内即可编辑</span>
+      </div>
+      <textarea id="editor" spellcheck="false" placeholder=""></textarea>
+      <div class="vdiv" id="divEdit"></div>
+      <div id="livePreview" class="md-body"></div>
+    </div>
+    <div id="previewView" class="hidden"><div id="singlePreview" class="md-body"></div></div>
+    <div id="readView" class="hidden">
+      <nav id="tocPanel"><div class="toc-title">目 录</div><div id="tocList"></div></nav>
+      <div class="vdiv" id="divRead"></div>
+      <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
+    </div>
+  </section>
+</div>
+
+<footer id="statusbar">
+  <span id="stPath"></span>
+  <span class="flex"></span>
+  <span id="stCount"></span>
+  <span id="stSave"></span>
+</footer>
+
+<input type="file" id="imgInput" accept="image/*" multiple class="hidden">
+<dialog id="dlgTable">
+  <h3>插入表格</h3>
+  <div class="row"><label style="width:70px">行数</label><input type="number" id="tRows" value="3" min="1" max="99"></div>
+  <div class="row"><label style="width:70px">列数</label><input type="number" id="tCols" value="3" min="1" max="20"></div>
+  <div class="row"><label style="width:70px">对齐</label>
+    <select id="tAlign">
+      <option value="none">默认</option>
+      <option value="left">左对齐</option>
+      <option value="center">居中</option>
+      <option value="right">右对齐</option>
+    </select>
+  </div>
+  <div class="btns">
+    <button id="tCancel">取消</button>
+    <button id="tOk" class="primary">插入</button>
+  </div>
+</dialog>
+<dialog id="dlgPalette">
+  <h3>调色盘</h3>
+  <div id="palGrid"></div>
+  <div class="row">
+    <input type="color" id="palCustom" value="#3b7dd8" title="自定义颜色">
+    <span id="palHex" style="font-family:monospace">#3b7dd8</span>
+  </div>
+  <div class="btns">
+    <button id="palCancel">取消</button>
+    <button id="palOk" class="primary">确认插入</button>
+  </div>
+</dialog>
+<dialog id="dlgReplace">
+  <h3 id="rpTitle">替换</h3>
+  <div class="row"><label style="width:64px">查找：</label><input id="rpFind" style="flex:1" placeholder="要查找的文字"></div>
+  <div class="row"><label style="width:64px">替换为：</label><input id="rpTo" style="flex:1" placeholder="替换为（留空即删除）"></div>
+  <div id="rpInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0"></div>
+  <div class="btns">
+    <button id="rpCancel">取消</button>
+    <button id="rpOk" class="primary">替换</button>
+  </div>
+</dialog>
+<button id="toTop" title="返回顶部">↑</button>
+<div id="toast"></div>
+<div id="errBanner"></div>
+
+<script id="marked-lib">/**
+ * marked v15.0.12 - a markdown parser
+ * Copyright (c) 2011-2025, Christopher Jeffrey. (MIT Licensed)
+ * https://github.com/markedjs/marked
+ */
+
+/**
+ * DO NOT EDIT THIS FILE
+ * The code in this file is generated from files in ./src/
+ */
+(function(g,f){if(typeof exports=="object"&&typeof module<"u"){module.exports=f()}else if("function"==typeof define && define.amd){define("marked",f)}else {g["marked"]=f()}}(typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : this,function(){var exports={};var __exports=exports;var module={exports};
+"use strict";var H=Object.defineProperty;var be=Object.getOwnPropertyDescriptor;var Te=Object.getOwnPropertyNames;var we=Object.prototype.hasOwnProperty;var ye=(l,e)=>{for(var t in e)H(l,t,{get:e[t],enumerable:!0})},Re=(l,e,t,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of Te(e))!we.call(l,s)&&s!==t&&H(l,s,{get:()=>e[s],enumerable:!(n=be(e,s))||n.enumerable});return l};var Se=l=>Re(H({},"__esModule",{value:!0}),l);var kt={};ye(kt,{Hooks:()=>L,Lexer:()=>x,Marked:()=>E,Parser:()=>b,Renderer:()=>$,TextRenderer:()=>_,Tokenizer:()=>S,defaults:()=>w,getDefaults:()=>z,lexer:()=>ht,marked:()=>k,options:()=>it,parse:()=>pt,parseInline:()=>ct,parser:()=>ut,setOptions:()=>ot,use:()=>lt,walkTokens:()=>at});module.exports=Se(kt);function z(){return{async:!1,breaks:!1,extensions:null,gfm:!0,hooks:null,pedantic:!1,renderer:null,silent:!1,tokenizer:null,walkTokens:null}}var w=z();function N(l){w=l}var I={exec:()=>null};function h(l,e=""){let t=typeof l=="string"?l:l.source,n={replace:(s,i)=>{let r=typeof i=="string"?i:i.source;return r=r.replace(m.caret,"$1"),t=t.replace(s,r),n},getRegex:()=>new RegExp(t,e)};return n}var m={codeRemoveIndent:/^(?: {1,4}| {0,3}\t)/gm,outputLinkReplace:/\\([\[\]])/g,indentCodeCompensation:/^(\s+)(?:```)/,beginningSpace:/^\s+/,endingHash:/#$/,startingSpaceChar:/^ /,endingSpaceChar:/ $/,nonSpaceChar:/[^ ]/,newLineCharGlobal:/\n/g,tabCharGlobal:/\t/g,multipleSpaceGlobal:/\s+/g,blankLine:/^[ \t]*$/,doubleBlankLine:/\n[ \t]*\n[ \t]*$/,blockquoteStart:/^ {0,3}>/,blockquoteSetextReplace:/\n {0,3}((?:=+|-+) *)(?=\n|$)/g,blockquoteSetextReplace2:/^ {0,3}>[ \t]?/gm,listReplaceTabs:/^\t+/,listReplaceNesting:/^ {1,4}(?=( {4})*[^ ])/g,listIsTask:/^\[[ xX]\] /,listReplaceTask:/^\[[ xX]\] +/,anyLine:/\n.*\n/,hrefBrackets:/^<(.*)>$/,tableDelimiter:/[:|]/,tableAlignChars:/^\||\| *$/g,tableRowBlankLine:/\n[ \t]*$/,tableAlignRight:/^ *-+: *$/,tableAlignCenter:/^ *:-+: *$/,tableAlignLeft:/^ *:-+ *$/,startATag:/^<a /i,endATag:/^<\/a>/i,startPreScriptTag:/^<(pre|code|kbd|script)(\s|>)/i,endPreScriptTag:/^<\/(pre|code|kbd|script)(\s|>)/i,startAngleBracket:/^</,endAngleBracket:/>$/,pedanticHrefTitle:/^([^'"]*[^\s])\s+(['"])(.*)\2/,unicodeAlphaNumeric:/[\p{L}\p{N}]/u,escapeTest:/[&<>"']/,escapeReplace:/[&<>"']/g,escapeTestNoEncode:/[<>"']|&(?!(#\d{1,7}|#[Xx][a-fA-F0-9]{1,6}|\w+);)/,escapeReplaceNoEncode:/[<>"']|&(?!(#\d{1,7}|#[Xx][a-fA-F0-9]{1,6}|\w+);)/g,unescapeTest:/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig,caret:/(^|[^\[])\^/g,percentDecode:/%25/g,findPipe:/\|/g,splitPipe:/ \|/,slashPipe:/\\\|/g,carriageReturn:/\r\n|\r/g,spaceLine:/^ +$/gm,notSpaceStart:/^\S*/,endingNewline:/\n$/,listItemRegex:l=>new RegExp(`^( {0,3}${l})((?:[	 ][^\\n]*)?(?:\\n|$))`),nextBulletRegex:l=>new RegExp(`^ {0,${Math.min(3,l-1)}}(?:[*+-]|\\d{1,9}[.)])((?:[ 	][^\\n]*)?(?:\\n|$))`),hrRegex:l=>new RegExp(`^ {0,${Math.min(3,l-1)}}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)`),fencesBeginRegex:l=>new RegExp(`^ {0,${Math.min(3,l-1)}}(?:\`\`\`|~~~)`),headingBeginRegex:l=>new RegExp(`^ {0,${Math.min(3,l-1)}}#`),htmlBeginRegex:l=>new RegExp(`^ {0,${Math.min(3,l-1)}}<(?:[a-z].*>|!--)`,"i")},$e=/^(?:[ \t]*(?:\n|$))+/,_e=/^((?: {4}| {0,3}\t)[^\n]+(?:\n(?:[ \t]*(?:\n|$))*)?)+/,Le=/^ {0,3}(`{3,}(?=[^`\n]*(?:\n|$))|~{3,})([^\n]*)(?:\n|$)(?:|([\s\S]*?)(?:\n|$))(?: {0,3}\1[~`]* *(?=\n|$)|$)/,O=/^ {0,3}((?:-[\t ]*){3,}|(?:_[ \t]*){3,}|(?:\*[ \t]*){3,})(?:\n+|$)/,ze=/^ {0,3}(#{1,6})(?=\s|$)(.*)(?:\n+|$)/,F=/(?:[*+-]|\d{1,9}[.)])/,ie=/^(?!bull |blockCode|fences|blockquote|heading|html|table)((?:.|\n(?!\s*?\n|bull |blockCode|fences|blockquote|heading|html|table))+?)\n {0,3}(=+|-+) *(?:\n+|$)/,oe=h(ie).replace(/bull/g,F).replace(/blockCode/g,/(?: {4}| {0,3}\t)/).replace(/fences/g,/ {0,3}(?:`{3,}|~{3,})/).replace(/blockquote/g,/ {0,3}>/).replace(/heading/g,/ {0,3}#{1,6}/).replace(/html/g,/ {0,3}<[^\n>]+>\n/).replace(/\|table/g,"").getRegex(),Me=h(ie).replace(/bull/g,F).replace(/blockCode/g,/(?: {4}| {0,3}\t)/).replace(/fences/g,/ {0,3}(?:`{3,}|~{3,})/).replace(/blockquote/g,/ {0,3}>/).replace(/heading/g,/ {0,3}#{1,6}/).replace(/html/g,/ {0,3}<[^\n>]+>\n/).replace(/table/g,/ {0,3}\|?(?:[:\- ]*\|)+[\:\- ]*\n/).getRegex(),Q=/^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html|table| +\n)[^\n]+)*)/,Pe=/^[^\n]+/,U=/(?!\s*\])(?:\\.|[^\[\]\\])+/,Ae=h(/^ {0,3}\[(label)\]: *(?:\n[ \t]*)?([^<\s][^\s]*|<.*?>)(?:(?: +(?:\n[ \t]*)?| *\n[ \t]*)(title))? *(?:\n+|$)/).replace("label",U).replace("title",/(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/).getRegex(),Ee=h(/^( {0,3}bull)([ \t][^\n]+?)?(?:\n|$)/).replace(/bull/g,F).getRegex(),v="address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul",K=/<!--(?:-?>|[\s\S]*?(?:-->|$))/,Ce=h("^ {0,3}(?:<(script|pre|style|textarea)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)|comment[^\\n]*(\\n+|$)|<\\?[\\s\\S]*?(?:\\?>\\n*|$)|<![A-Z][\\s\\S]*?(?:>\\n*|$)|<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>\\n*|$)|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|<(?!script|pre|style|textarea)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|</(?!script|pre|style|textarea)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$))","i").replace("comment",K).replace("tag",v).replace("attribute",/ +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/).getRegex(),le=h(Q).replace("hr",O).replace("heading"," {0,3}#{1,6}(?:\\s|$)").replace("|lheading","").replace("|table","").replace("blockquote"," {0,3}>").replace("fences"," {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list"," {0,3}(?:[*+-]|1[.)]) ").replace("html","</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag",v).getRegex(),Ie=h(/^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/).replace("paragraph",le).getRegex(),X={blockquote:Ie,code:_e,def:Ae,fences:Le,heading:ze,hr:O,html:Ce,lheading:oe,list:Ee,newline:$e,paragraph:le,table:I,text:Pe},re=h("^ *([^\\n ].*)\\n {0,3}((?:\\| *)?:?-+:? *(?:\\| *:?-+:? *)*(?:\\| *)?)(?:\\n((?:(?! *\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)").replace("hr",O).replace("heading"," {0,3}#{1,6}(?:\\s|$)").replace("blockquote"," {0,3}>").replace("code","(?: {4}| {0,3}	)[^\\n]").replace("fences"," {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list"," {0,3}(?:[*+-]|1[.)]) ").replace("html","</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag",v).getRegex(),Oe={...X,lheading:Me,table:re,paragraph:h(Q).replace("hr",O).replace("heading"," {0,3}#{1,6}(?:\\s|$)").replace("|lheading","").replace("table",re).replace("blockquote"," {0,3}>").replace("fences"," {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list"," {0,3}(?:[*+-]|1[.)]) ").replace("html","</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag",v).getRegex()},Be={...X,html:h(`^ *(?:comment *(?:\\n|\\s*$)|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)|<tag(?:"[^"]*"|'[^']*'|\\s[^'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))`).replace("comment",K).replace(/tag/g,"(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\\b)\\w+(?!:|[^\\w\\s@]*@)\\b").getRegex(),def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,heading:/^(#{1,6})(.*)(?:\n+|$)/,fences:I,lheading:/^(.+?)\n {0,3}(=+|-+) *(?:\n+|$)/,paragraph:h(Q).replace("hr",O).replace("heading",` *#{1,6} *[^
+]`).replace("lheading",oe).replace("|table","").replace("blockquote"," {0,3}>").replace("|fences","").replace("|list","").replace("|html","").replace("|tag","").getRegex()},qe=/^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/,ve=/^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/,ae=/^( {2,}|\\)\n(?!\s*$)/,De=/^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/,D=/[\p{P}\p{S}]/u,W=/[\s\p{P}\p{S}]/u,ce=/[^\s\p{P}\p{S}]/u,Ze=h(/^((?![*_])punctSpace)/,"u").replace(/punctSpace/g,W).getRegex(),pe=/(?!~)[\p{P}\p{S}]/u,Ge=/(?!~)[\s\p{P}\p{S}]/u,He=/(?:[^\s\p{P}\p{S}]|~)/u,Ne=/\[[^[\]]*?\]\((?:\\.|[^\\\(\)]|\((?:\\.|[^\\\(\)])*\))*\)|`[^`]*?`|<[^<>]*?>/g,ue=/^(?:\*+(?:((?!\*)punct)|[^\s*]))|^_+(?:((?!_)punct)|([^\s_]))/,je=h(ue,"u").replace(/punct/g,D).getRegex(),Fe=h(ue,"u").replace(/punct/g,pe).getRegex(),he="^[^_*]*?__[^_*]*?\\*[^_*]*?(?=__)|[^*]+(?=[^*])|(?!\\*)punct(\\*+)(?=[\\s]|$)|notPunctSpace(\\*+)(?!\\*)(?=punctSpace|$)|(?!\\*)punctSpace(\\*+)(?=notPunctSpace)|[\\s](\\*+)(?!\\*)(?=punct)|(?!\\*)punct(\\*+)(?!\\*)(?=punct)|notPunctSpace(\\*+)(?=notPunctSpace)",Qe=h(he,"gu").replace(/notPunctSpace/g,ce).replace(/punctSpace/g,W).replace(/punct/g,D).getRegex(),Ue=h(he,"gu").replace(/notPunctSpace/g,He).replace(/punctSpace/g,Ge).replace(/punct/g,pe).getRegex(),Ke=h("^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)punctSpace(_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)","gu").replace(/notPunctSpace/g,ce).replace(/punctSpace/g,W).replace(/punct/g,D).getRegex(),Xe=h(/\\(punct)/,"gu").replace(/punct/g,D).getRegex(),We=h(/^<(scheme:[^\s\x00-\x1f<>]*|email)>/).replace("scheme",/[a-zA-Z][a-zA-Z0-9+.-]{1,31}/).replace("email",/[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/).getRegex(),Je=h(K).replace("(?:-->|$)","-->").getRegex(),Ve=h("^comment|^</[a-zA-Z][\\w:-]*\\s*>|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>|^<\\?[\\s\\S]*?\\?>|^<![a-zA-Z]+\\s[\\s\\S]*?>|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>").replace("comment",Je).replace("attribute",/\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/).getRegex(),q=/(?:\[(?:\\.|[^\[\]\\])*\]|\\.|`[^`]*`|[^\[\]\\`])*?/,Ye=h(/^!?\[(label)\]\(\s*(href)(?:(?:[ \t]*(?:\n[ \t]*)?)(title))?\s*\)/).replace("label",q).replace("href",/<(?:\\.|[^\n<>\\])+>|[^ \t\n\x00-\x1f]*/).replace("title",/"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/).getRegex(),ke=h(/^!?\[(label)\]\[(ref)\]/).replace("label",q).replace("ref",U).getRegex(),ge=h(/^!?\[(ref)\](?:\[\])?/).replace("ref",U).getRegex(),et=h("reflink|nolink(?!\\()","g").replace("reflink",ke).replace("nolink",ge).getRegex(),J={_backpedal:I,anyPunctuation:Xe,autolink:We,blockSkip:Ne,br:ae,code:ve,del:I,emStrongLDelim:je,emStrongRDelimAst:Qe,emStrongRDelimUnd:Ke,escape:qe,link:Ye,nolink:ge,punctuation:Ze,reflink:ke,reflinkSearch:et,tag:Ve,text:De,url:I},tt={...J,link:h(/^!?\[(label)\]\((.*?)\)/).replace("label",q).getRegex(),reflink:h(/^!?\[(label)\]\s*\[([^\]]*)\]/).replace("label",q).getRegex()},j={...J,emStrongRDelimAst:Ue,emStrongLDelim:Fe,url:h(/^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/,"i").replace("email",/[A-Za-z0-9._+-]+(@)[a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]*[a-zA-Z0-9])+(?![-_])/).getRegex(),_backpedal:/(?:[^?!.,:;*_'"~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_'"~)]+(?!$))+/,del:/^(~~?)(?=[^\s~])((?:\\.|[^\\])*?(?:\\.|[^\s~\\]))\1(?=[^~]|$)/,text:/^([`~]+|[^`~])(?:(?= {2,}\n)|(?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)|[\s\S]*?(?:(?=[\\<!\[`*~_]|\b_|https?:\/\/|ftp:\/\/|www\.|$)|[^ ](?= {2,}\n)|[^a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-](?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@)))/},nt={...j,br:h(ae).replace("{2,}","*").getRegex(),text:h(j.text).replace("\\b_","\\b_| {2,}\\n").replace(/\{2,\}/g,"*").getRegex()},B={normal:X,gfm:Oe,pedantic:Be},P={normal:J,gfm:j,breaks:nt,pedantic:tt};var st={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"},fe=l=>st[l];function R(l,e){if(e){if(m.escapeTest.test(l))return l.replace(m.escapeReplace,fe)}else if(m.escapeTestNoEncode.test(l))return l.replace(m.escapeReplaceNoEncode,fe);return l}function V(l){try{l=encodeURI(l).replace(m.percentDecode,"%")}catch{return null}return l}function Y(l,e){let t=l.replace(m.findPipe,(i,r,o)=>{let a=!1,c=r;for(;--c>=0&&o[c]==="\\";)a=!a;return a?"|":" |"}),n=t.split(m.splitPipe),s=0;if(n[0].trim()||n.shift(),n.length>0&&!n.at(-1)?.trim()&&n.pop(),e)if(n.length>e)n.splice(e);else for(;n.length<e;)n.push("");for(;s<n.length;s++)n[s]=n[s].trim().replace(m.slashPipe,"|");return n}function A(l,e,t){let n=l.length;if(n===0)return"";let s=0;for(;s<n;){let i=l.charAt(n-s-1);if(i===e&&!t)s++;else if(i!==e&&t)s++;else break}return l.slice(0,n-s)}function de(l,e){if(l.indexOf(e[1])===-1)return-1;let t=0;for(let n=0;n<l.length;n++)if(l[n]==="\\")n++;else if(l[n]===e[0])t++;else if(l[n]===e[1]&&(t--,t<0))return n;return t>0?-2:-1}function me(l,e,t,n,s){let i=e.href,r=e.title||null,o=l[1].replace(s.other.outputLinkReplace,"$1");n.state.inLink=!0;let a={type:l[0].charAt(0)==="!"?"image":"link",raw:t,href:i,title:r,text:o,tokens:n.inlineTokens(o)};return n.state.inLink=!1,a}function rt(l,e,t){let n=l.match(t.other.indentCodeCompensation);if(n===null)return e;let s=n[1];return e.split(`
+`).map(i=>{let r=i.match(t.other.beginningSpace);if(r===null)return i;let[o]=r;return o.length>=s.length?i.slice(s.length):i}).join(`
+`)}var S=class{options;rules;lexer;constructor(e){this.options=e||w}space(e){let t=this.rules.block.newline.exec(e);if(t&&t[0].length>0)return{type:"space",raw:t[0]}}code(e){let t=this.rules.block.code.exec(e);if(t){let n=t[0].replace(this.rules.other.codeRemoveIndent,"");return{type:"code",raw:t[0],codeBlockStyle:"indented",text:this.options.pedantic?n:A(n,`
+`)}}}fences(e){let t=this.rules.block.fences.exec(e);if(t){let n=t[0],s=rt(n,t[3]||"",this.rules);return{type:"code",raw:n,lang:t[2]?t[2].trim().replace(this.rules.inline.anyPunctuation,"$1"):t[2],text:s}}}heading(e){let t=this.rules.block.heading.exec(e);if(t){let n=t[2].trim();if(this.rules.other.endingHash.test(n)){let s=A(n,"#");(this.options.pedantic||!s||this.rules.other.endingSpaceChar.test(s))&&(n=s.trim())}return{type:"heading",raw:t[0],depth:t[1].length,text:n,tokens:this.lexer.inline(n)}}}hr(e){let t=this.rules.block.hr.exec(e);if(t)return{type:"hr",raw:A(t[0],`
+`)}}blockquote(e){let t=this.rules.block.blockquote.exec(e);if(t){let n=A(t[0],`
+`).split(`
+`),s="",i="",r=[];for(;n.length>0;){let o=!1,a=[],c;for(c=0;c<n.length;c++)if(this.rules.other.blockquoteStart.test(n[c]))a.push(n[c]),o=!0;else if(!o)a.push(n[c]);else break;n=n.slice(c);let p=a.join(`
+`),u=p.replace(this.rules.other.blockquoteSetextReplace,`
+    $1`).replace(this.rules.other.blockquoteSetextReplace2,"");s=s?`${s}
+${p}`:p,i=i?`${i}
+${u}`:u;let d=this.lexer.state.top;if(this.lexer.state.top=!0,this.lexer.blockTokens(u,r,!0),this.lexer.state.top=d,n.length===0)break;let g=r.at(-1);if(g?.type==="code")break;if(g?.type==="blockquote"){let T=g,f=T.raw+`
+`+n.join(`
+`),y=this.blockquote(f);r[r.length-1]=y,s=s.substring(0,s.length-T.raw.length)+y.raw,i=i.substring(0,i.length-T.text.length)+y.text;break}else if(g?.type==="list"){let T=g,f=T.raw+`
+`+n.join(`
+`),y=this.list(f);r[r.length-1]=y,s=s.substring(0,s.length-g.raw.length)+y.raw,i=i.substring(0,i.length-T.raw.length)+y.raw,n=f.substring(r.at(-1).raw.length).split(`
+`);continue}}return{type:"blockquote",raw:s,tokens:r,text:i}}}list(e){let t=this.rules.block.list.exec(e);if(t){let n=t[1].trim(),s=n.length>1,i={type:"list",raw:"",ordered:s,start:s?+n.slice(0,-1):"",loose:!1,items:[]};n=s?`\\d{1,9}\\${n.slice(-1)}`:`\\${n}`,this.options.pedantic&&(n=s?n:"[*+-]");let r=this.rules.other.listItemRegex(n),o=!1;for(;e;){let c=!1,p="",u="";if(!(t=r.exec(e))||this.rules.block.hr.test(e))break;p=t[0],e=e.substring(p.length);let d=t[2].split(`
+`,1)[0].replace(this.rules.other.listReplaceTabs,Z=>" ".repeat(3*Z.length)),g=e.split(`
+`,1)[0],T=!d.trim(),f=0;if(this.options.pedantic?(f=2,u=d.trimStart()):T?f=t[1].length+1:(f=t[2].search(this.rules.other.nonSpaceChar),f=f>4?1:f,u=d.slice(f),f+=t[1].length),T&&this.rules.other.blankLine.test(g)&&(p+=g+`
+`,e=e.substring(g.length+1),c=!0),!c){let Z=this.rules.other.nextBulletRegex(f),te=this.rules.other.hrRegex(f),ne=this.rules.other.fencesBeginRegex(f),se=this.rules.other.headingBeginRegex(f),xe=this.rules.other.htmlBeginRegex(f);for(;e;){let G=e.split(`
+`,1)[0],C;if(g=G,this.options.pedantic?(g=g.replace(this.rules.other.listReplaceNesting,"  "),C=g):C=g.replace(this.rules.other.tabCharGlobal,"    "),ne.test(g)||se.test(g)||xe.test(g)||Z.test(g)||te.test(g))break;if(C.search(this.rules.other.nonSpaceChar)>=f||!g.trim())u+=`
+`+C.slice(f);else{if(T||d.replace(this.rules.other.tabCharGlobal,"    ").search(this.rules.other.nonSpaceChar)>=4||ne.test(d)||se.test(d)||te.test(d))break;u+=`
+`+g}!T&&!g.trim()&&(T=!0),p+=G+`
+`,e=e.substring(G.length+1),d=C.slice(f)}}i.loose||(o?i.loose=!0:this.rules.other.doubleBlankLine.test(p)&&(o=!0));let y=null,ee;this.options.gfm&&(y=this.rules.other.listIsTask.exec(u),y&&(ee=y[0]!=="[ ] ",u=u.replace(this.rules.other.listReplaceTask,""))),i.items.push({type:"list_item",raw:p,task:!!y,checked:ee,loose:!1,text:u,tokens:[]}),i.raw+=p}let a=i.items.at(-1);if(a)a.raw=a.raw.trimEnd(),a.text=a.text.trimEnd();else return;i.raw=i.raw.trimEnd();for(let c=0;c<i.items.length;c++)if(this.lexer.state.top=!1,i.items[c].tokens=this.lexer.blockTokens(i.items[c].text,[]),!i.loose){let p=i.items[c].tokens.filter(d=>d.type==="space"),u=p.length>0&&p.some(d=>this.rules.other.anyLine.test(d.raw));i.loose=u}if(i.loose)for(let c=0;c<i.items.length;c++)i.items[c].loose=!0;return i}}html(e){let t=this.rules.block.html.exec(e);if(t)return{type:"html",block:!0,raw:t[0],pre:t[1]==="pre"||t[1]==="script"||t[1]==="style",text:t[0]}}def(e){let t=this.rules.block.def.exec(e);if(t){let n=t[1].toLowerCase().replace(this.rules.other.multipleSpaceGlobal," "),s=t[2]?t[2].replace(this.rules.other.hrefBrackets,"$1").replace(this.rules.inline.anyPunctuation,"$1"):"",i=t[3]?t[3].substring(1,t[3].length-1).replace(this.rules.inline.anyPunctuation,"$1"):t[3];return{type:"def",tag:n,raw:t[0],href:s,title:i}}}table(e){let t=this.rules.block.table.exec(e);if(!t||!this.rules.other.tableDelimiter.test(t[2]))return;let n=Y(t[1]),s=t[2].replace(this.rules.other.tableAlignChars,"").split("|"),i=t[3]?.trim()?t[3].replace(this.rules.other.tableRowBlankLine,"").split(`
+`):[],r={type:"table",raw:t[0],header:[],align:[],rows:[]};if(n.length===s.length){for(let o of s)this.rules.other.tableAlignRight.test(o)?r.align.push("right"):this.rules.other.tableAlignCenter.test(o)?r.align.push("center"):this.rules.other.tableAlignLeft.test(o)?r.align.push("left"):r.align.push(null);for(let o=0;o<n.length;o++)r.header.push({text:n[o],tokens:this.lexer.inline(n[o]),header:!0,align:r.align[o]});for(let o of i)r.rows.push(Y(o,r.header.length).map((a,c)=>({text:a,tokens:this.lexer.inline(a),header:!1,align:r.align[c]})));return r}}lheading(e){let t=this.rules.block.lheading.exec(e);if(t)return{type:"heading",raw:t[0],depth:t[2].charAt(0)==="="?1:2,text:t[1],tokens:this.lexer.inline(t[1])}}paragraph(e){let t=this.rules.block.paragraph.exec(e);if(t){let n=t[1].charAt(t[1].length-1)===`
+`?t[1].slice(0,-1):t[1];return{type:"paragraph",raw:t[0],text:n,tokens:this.lexer.inline(n)}}}text(e){let t=this.rules.block.text.exec(e);if(t)return{type:"text",raw:t[0],text:t[0],tokens:this.lexer.inline(t[0])}}escape(e){let t=this.rules.inline.escape.exec(e);if(t)return{type:"escape",raw:t[0],text:t[1]}}tag(e){let t=this.rules.inline.tag.exec(e);if(t)return!this.lexer.state.inLink&&this.rules.other.startATag.test(t[0])?this.lexer.state.inLink=!0:this.lexer.state.inLink&&this.rules.other.endATag.test(t[0])&&(this.lexer.state.inLink=!1),!this.lexer.state.inRawBlock&&this.rules.other.startPreScriptTag.test(t[0])?this.lexer.state.inRawBlock=!0:this.lexer.state.inRawBlock&&this.rules.other.endPreScriptTag.test(t[0])&&(this.lexer.state.inRawBlock=!1),{type:"html",raw:t[0],inLink:this.lexer.state.inLink,inRawBlock:this.lexer.state.inRawBlock,block:!1,text:t[0]}}link(e){let t=this.rules.inline.link.exec(e);if(t){let n=t[2].trim();if(!this.options.pedantic&&this.rules.other.startAngleBracket.test(n)){if(!this.rules.other.endAngleBracket.test(n))return;let r=A(n.slice(0,-1),"\\");if((n.length-r.length)%2===0)return}else{let r=de(t[2],"()");if(r===-2)return;if(r>-1){let a=(t[0].indexOf("!")===0?5:4)+t[1].length+r;t[2]=t[2].substring(0,r),t[0]=t[0].substring(0,a).trim(),t[3]=""}}let s=t[2],i="";if(this.options.pedantic){let r=this.rules.other.pedanticHrefTitle.exec(s);r&&(s=r[1],i=r[3])}else i=t[3]?t[3].slice(1,-1):"";return s=s.trim(),this.rules.other.startAngleBracket.test(s)&&(this.options.pedantic&&!this.rules.other.endAngleBracket.test(n)?s=s.slice(1):s=s.slice(1,-1)),me(t,{href:s&&s.replace(this.rules.inline.anyPunctuation,"$1"),title:i&&i.replace(this.rules.inline.anyPunctuation,"$1")},t[0],this.lexer,this.rules)}}reflink(e,t){let n;if((n=this.rules.inline.reflink.exec(e))||(n=this.rules.inline.nolink.exec(e))){let s=(n[2]||n[1]).replace(this.rules.other.multipleSpaceGlobal," "),i=t[s.toLowerCase()];if(!i){let r=n[0].charAt(0);return{type:"text",raw:r,text:r}}return me(n,i,n[0],this.lexer,this.rules)}}emStrong(e,t,n=""){let s=this.rules.inline.emStrongLDelim.exec(e);if(!s||s[3]&&n.match(this.rules.other.unicodeAlphaNumeric))return;if(!(s[1]||s[2]||"")||!n||this.rules.inline.punctuation.exec(n)){let r=[...s[0]].length-1,o,a,c=r,p=0,u=s[0][0]==="*"?this.rules.inline.emStrongRDelimAst:this.rules.inline.emStrongRDelimUnd;for(u.lastIndex=0,t=t.slice(-1*e.length+r);(s=u.exec(t))!=null;){if(o=s[1]||s[2]||s[3]||s[4]||s[5]||s[6],!o)continue;if(a=[...o].length,s[3]||s[4]){c+=a;continue}else if((s[5]||s[6])&&r%3&&!((r+a)%3)){p+=a;continue}if(c-=a,c>0)continue;a=Math.min(a,a+c+p);let d=[...s[0]][0].length,g=e.slice(0,r+s.index+d+a);if(Math.min(r,a)%2){let f=g.slice(1,-1);return{type:"em",raw:g,text:f,tokens:this.lexer.inlineTokens(f)}}let T=g.slice(2,-2);return{type:"strong",raw:g,text:T,tokens:this.lexer.inlineTokens(T)}}}}codespan(e){let t=this.rules.inline.code.exec(e);if(t){let n=t[2].replace(this.rules.other.newLineCharGlobal," "),s=this.rules.other.nonSpaceChar.test(n),i=this.rules.other.startingSpaceChar.test(n)&&this.rules.other.endingSpaceChar.test(n);return s&&i&&(n=n.substring(1,n.length-1)),{type:"codespan",raw:t[0],text:n}}}br(e){let t=this.rules.inline.br.exec(e);if(t)return{type:"br",raw:t[0]}}del(e){let t=this.rules.inline.del.exec(e);if(t)return{type:"del",raw:t[0],text:t[2],tokens:this.lexer.inlineTokens(t[2])}}autolink(e){let t=this.rules.inline.autolink.exec(e);if(t){let n,s;return t[2]==="@"?(n=t[1],s="mailto:"+n):(n=t[1],s=n),{type:"link",raw:t[0],text:n,href:s,tokens:[{type:"text",raw:n,text:n}]}}}url(e){let t;if(t=this.rules.inline.url.exec(e)){let n,s;if(t[2]==="@")n=t[0],s="mailto:"+n;else{let i;do i=t[0],t[0]=this.rules.inline._backpedal.exec(t[0])?.[0]??"";while(i!==t[0]);n=t[0],t[1]==="www."?s="http://"+t[0]:s=t[0]}return{type:"link",raw:t[0],text:n,href:s,tokens:[{type:"text",raw:n,text:n}]}}}inlineText(e){let t=this.rules.inline.text.exec(e);if(t){let n=this.lexer.state.inRawBlock;return{type:"text",raw:t[0],text:t[0],escaped:n}}}};var x=class l{tokens;options;state;tokenizer;inlineQueue;constructor(e){this.tokens=[],this.tokens.links=Object.create(null),this.options=e||w,this.options.tokenizer=this.options.tokenizer||new S,this.tokenizer=this.options.tokenizer,this.tokenizer.options=this.options,this.tokenizer.lexer=this,this.inlineQueue=[],this.state={inLink:!1,inRawBlock:!1,top:!0};let t={other:m,block:B.normal,inline:P.normal};this.options.pedantic?(t.block=B.pedantic,t.inline=P.pedantic):this.options.gfm&&(t.block=B.gfm,this.options.breaks?t.inline=P.breaks:t.inline=P.gfm),this.tokenizer.rules=t}static get rules(){return{block:B,inline:P}}static lex(e,t){return new l(t).lex(e)}static lexInline(e,t){return new l(t).inlineTokens(e)}lex(e){e=e.replace(m.carriageReturn,`
+`),this.blockTokens(e,this.tokens);for(let t=0;t<this.inlineQueue.length;t++){let n=this.inlineQueue[t];this.inlineTokens(n.src,n.tokens)}return this.inlineQueue=[],this.tokens}blockTokens(e,t=[],n=!1){for(this.options.pedantic&&(e=e.replace(m.tabCharGlobal,"    ").replace(m.spaceLine,""));e;){let s;if(this.options.extensions?.block?.some(r=>(s=r.call({lexer:this},e,t))?(e=e.substring(s.raw.length),t.push(s),!0):!1))continue;if(s=this.tokenizer.space(e)){e=e.substring(s.raw.length);let r=t.at(-1);s.raw.length===1&&r!==void 0?r.raw+=`
+`:t.push(s);continue}if(s=this.tokenizer.code(e)){e=e.substring(s.raw.length);let r=t.at(-1);r?.type==="paragraph"||r?.type==="text"?(r.raw+=`
+`+s.raw,r.text+=`
+`+s.text,this.inlineQueue.at(-1).src=r.text):t.push(s);continue}if(s=this.tokenizer.fences(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.heading(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.hr(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.blockquote(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.list(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.html(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.def(e)){e=e.substring(s.raw.length);let r=t.at(-1);r?.type==="paragraph"||r?.type==="text"?(r.raw+=`
+`+s.raw,r.text+=`
+`+s.raw,this.inlineQueue.at(-1).src=r.text):this.tokens.links[s.tag]||(this.tokens.links[s.tag]={href:s.href,title:s.title});continue}if(s=this.tokenizer.table(e)){e=e.substring(s.raw.length),t.push(s);continue}if(s=this.tokenizer.lheading(e)){e=e.substring(s.raw.length),t.push(s);continue}let i=e;if(this.options.extensions?.startBlock){let r=1/0,o=e.slice(1),a;this.options.extensions.startBlock.forEach(c=>{a=c.call({lexer:this},o),typeof a=="number"&&a>=0&&(r=Math.min(r,a))}),r<1/0&&r>=0&&(i=e.substring(0,r+1))}if(this.state.top&&(s=this.tokenizer.paragraph(i))){let r=t.at(-1);n&&r?.type==="paragraph"?(r.raw+=`
+`+s.raw,r.text+=`
+`+s.text,this.inlineQueue.pop(),this.inlineQueue.at(-1).src=r.text):t.push(s),n=i.length!==e.length,e=e.substring(s.raw.length);continue}if(s=this.tokenizer.text(e)){e=e.substring(s.raw.length);let r=t.at(-1);r?.type==="text"?(r.raw+=`
+`+s.raw,r.text+=`
+`+s.text,this.inlineQueue.pop(),this.inlineQueue.at(-1).src=r.text):t.push(s);continue}if(e){let r="Infinite loop on byte: "+e.charCodeAt(0);if(this.options.silent){console.error(r);break}else throw new Error(r)}}return this.state.top=!0,t}inline(e,t=[]){return this.inlineQueue.push({src:e,tokens:t}),t}inlineTokens(e,t=[]){let n=e,s=null;if(this.tokens.links){let o=Object.keys(this.tokens.links);if(o.length>0)for(;(s=this.tokenizer.rules.inline.reflinkSearch.exec(n))!=null;)o.includes(s[0].slice(s[0].lastIndexOf("[")+1,-1))&&(n=n.slice(0,s.index)+"["+"a".repeat(s[0].length-2)+"]"+n.slice(this.tokenizer.rules.inline.reflinkSearch.lastIndex))}for(;(s=this.tokenizer.rules.inline.anyPunctuation.exec(n))!=null;)n=n.slice(0,s.index)+"++"+n.slice(this.tokenizer.rules.inline.anyPunctuation.lastIndex);for(;(s=this.tokenizer.rules.inline.blockSkip.exec(n))!=null;)n=n.slice(0,s.index)+"["+"a".repeat(s[0].length-2)+"]"+n.slice(this.tokenizer.rules.inline.blockSkip.lastIndex);let i=!1,r="";for(;e;){i||(r=""),i=!1;let o;if(this.options.extensions?.inline?.some(c=>(o=c.call({lexer:this},e,t))?(e=e.substring(o.raw.length),t.push(o),!0):!1))continue;if(o=this.tokenizer.escape(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.tag(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.link(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.reflink(e,this.tokens.links)){e=e.substring(o.raw.length);let c=t.at(-1);o.type==="text"&&c?.type==="text"?(c.raw+=o.raw,c.text+=o.text):t.push(o);continue}if(o=this.tokenizer.emStrong(e,n,r)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.codespan(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.br(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.del(e)){e=e.substring(o.raw.length),t.push(o);continue}if(o=this.tokenizer.autolink(e)){e=e.substring(o.raw.length),t.push(o);continue}if(!this.state.inLink&&(o=this.tokenizer.url(e))){e=e.substring(o.raw.length),t.push(o);continue}let a=e;if(this.options.extensions?.startInline){let c=1/0,p=e.slice(1),u;this.options.extensions.startInline.forEach(d=>{u=d.call({lexer:this},p),typeof u=="number"&&u>=0&&(c=Math.min(c,u))}),c<1/0&&c>=0&&(a=e.substring(0,c+1))}if(o=this.tokenizer.inlineText(a)){e=e.substring(o.raw.length),o.raw.slice(-1)!=="_"&&(r=o.raw.slice(-1)),i=!0;let c=t.at(-1);c?.type==="text"?(c.raw+=o.raw,c.text+=o.text):t.push(o);continue}if(e){let c="Infinite loop on byte: "+e.charCodeAt(0);if(this.options.silent){console.error(c);break}else throw new Error(c)}}return t}};var $=class{options;parser;constructor(e){this.options=e||w}space(e){return""}code({text:e,lang:t,escaped:n}){let s=(t||"").match(m.notSpaceStart)?.[0],i=e.replace(m.endingNewline,"")+`
+`;return s?'<pre><code class="language-'+R(s)+'">'+(n?i:R(i,!0))+`</code></pre>
+`:"<pre><code>"+(n?i:R(i,!0))+`</code></pre>
+`}blockquote({tokens:e}){return`<blockquote>
+${this.parser.parse(e)}</blockquote>
+`}html({text:e}){return e}heading({tokens:e,depth:t}){return`<h${t}>${this.parser.parseInline(e)}</h${t}>
+`}hr(e){return`<hr>
+`}list(e){let t=e.ordered,n=e.start,s="";for(let o=0;o<e.items.length;o++){let a=e.items[o];s+=this.listitem(a)}let i=t?"ol":"ul",r=t&&n!==1?' start="'+n+'"':"";return"<"+i+r+`>
+`+s+"</"+i+`>
+`}listitem(e){let t="";if(e.task){let n=this.checkbox({checked:!!e.checked});e.loose?e.tokens[0]?.type==="paragraph"?(e.tokens[0].text=n+" "+e.tokens[0].text,e.tokens[0].tokens&&e.tokens[0].tokens.length>0&&e.tokens[0].tokens[0].type==="text"&&(e.tokens[0].tokens[0].text=n+" "+R(e.tokens[0].tokens[0].text),e.tokens[0].tokens[0].escaped=!0)):e.tokens.unshift({type:"text",raw:n+" ",text:n+" ",escaped:!0}):t+=n+" "}return t+=this.parser.parse(e.tokens,!!e.loose),`<li>${t}</li>
+`}checkbox({checked:e}){return"<input "+(e?'checked="" ':"")+'disabled="" type="checkbox">'}paragraph({tokens:e}){return`<p>${this.parser.parseInline(e)}</p>
+`}table(e){let t="",n="";for(let i=0;i<e.header.length;i++)n+=this.tablecell(e.header[i]);t+=this.tablerow({text:n});let s="";for(let i=0;i<e.rows.length;i++){let r=e.rows[i];n="";for(let o=0;o<r.length;o++)n+=this.tablecell(r[o]);s+=this.tablerow({text:n})}return s&&(s=`<tbody>${s}</tbody>`),`<table>
+<thead>
+`+t+`</thead>
+`+s+`</table>
+`}tablerow({text:e}){return`<tr>
+${e}</tr>
+`}tablecell(e){let t=this.parser.parseInline(e.tokens),n=e.header?"th":"td";return(e.align?`<${n} align="${e.align}">`:`<${n}>`)+t+`</${n}>
+`}strong({tokens:e}){return`<strong>${this.parser.parseInline(e)}</strong>`}em({tokens:e}){return`<em>${this.parser.parseInline(e)}</em>`}codespan({text:e}){return`<code>${R(e,!0)}</code>`}br(e){return"<br>"}del({tokens:e}){return`<del>${this.parser.parseInline(e)}</del>`}link({href:e,title:t,tokens:n}){let s=this.parser.parseInline(n),i=V(e);if(i===null)return s;e=i;let r='<a href="'+e+'"';return t&&(r+=' title="'+R(t)+'"'),r+=">"+s+"</a>",r}image({href:e,title:t,text:n,tokens:s}){s&&(n=this.parser.parseInline(s,this.parser.textRenderer));let i=V(e);if(i===null)return R(n);e=i;let r=`<img src="${e}" alt="${n}"`;return t&&(r+=` title="${R(t)}"`),r+=">",r}text(e){return"tokens"in e&&e.tokens?this.parser.parseInline(e.tokens):"escaped"in e&&e.escaped?e.text:R(e.text)}};var _=class{strong({text:e}){return e}em({text:e}){return e}codespan({text:e}){return e}del({text:e}){return e}html({text:e}){return e}text({text:e}){return e}link({text:e}){return""+e}image({text:e}){return""+e}br(){return""}};var b=class l{options;renderer;textRenderer;constructor(e){this.options=e||w,this.options.renderer=this.options.renderer||new $,this.renderer=this.options.renderer,this.renderer.options=this.options,this.renderer.parser=this,this.textRenderer=new _}static parse(e,t){return new l(t).parse(e)}static parseInline(e,t){return new l(t).parseInline(e)}parse(e,t=!0){let n="";for(let s=0;s<e.length;s++){let i=e[s];if(this.options.extensions?.renderers?.[i.type]){let o=i,a=this.options.extensions.renderers[o.type].call({parser:this},o);if(a!==!1||!["space","hr","heading","code","table","blockquote","list","html","paragraph","text"].includes(o.type)){n+=a||"";continue}}let r=i;switch(r.type){case"space":{n+=this.renderer.space(r);continue}case"hr":{n+=this.renderer.hr(r);continue}case"heading":{n+=this.renderer.heading(r);continue}case"code":{n+=this.renderer.code(r);continue}case"table":{n+=this.renderer.table(r);continue}case"blockquote":{n+=this.renderer.blockquote(r);continue}case"list":{n+=this.renderer.list(r);continue}case"html":{n+=this.renderer.html(r);continue}case"paragraph":{n+=this.renderer.paragraph(r);continue}case"text":{let o=r,a=this.renderer.text(o);for(;s+1<e.length&&e[s+1].type==="text";)o=e[++s],a+=`
+`+this.renderer.text(o);t?n+=this.renderer.paragraph({type:"paragraph",raw:a,text:a,tokens:[{type:"text",raw:a,text:a,escaped:!0}]}):n+=a;continue}default:{let o='Token with "'+r.type+'" type was not found.';if(this.options.silent)return console.error(o),"";throw new Error(o)}}}return n}parseInline(e,t=this.renderer){let n="";for(let s=0;s<e.length;s++){let i=e[s];if(this.options.extensions?.renderers?.[i.type]){let o=this.options.extensions.renderers[i.type].call({parser:this},i);if(o!==!1||!["escape","html","link","image","strong","em","codespan","br","del","text"].includes(i.type)){n+=o||"";continue}}let r=i;switch(r.type){case"escape":{n+=t.text(r);break}case"html":{n+=t.html(r);break}case"link":{n+=t.link(r);break}case"image":{n+=t.image(r);break}case"strong":{n+=t.strong(r);break}case"em":{n+=t.em(r);break}case"codespan":{n+=t.codespan(r);break}case"br":{n+=t.br(r);break}case"del":{n+=t.del(r);break}case"text":{n+=t.text(r);break}default:{let o='Token with "'+r.type+'" type was not found.';if(this.options.silent)return console.error(o),"";throw new Error(o)}}}return n}};var L=class{options;block;constructor(e){this.options=e||w}static passThroughHooks=new Set(["preprocess","postprocess","processAllTokens"]);preprocess(e){return e}postprocess(e){return e}processAllTokens(e){return e}provideLexer(){return this.block?x.lex:x.lexInline}provideParser(){return this.block?b.parse:b.parseInline}};var E=class{defaults=z();options=this.setOptions;parse=this.parseMarkdown(!0);parseInline=this.parseMarkdown(!1);Parser=b;Renderer=$;TextRenderer=_;Lexer=x;Tokenizer=S;Hooks=L;constructor(...e){this.use(...e)}walkTokens(e,t){let n=[];for(let s of e)switch(n=n.concat(t.call(this,s)),s.type){case"table":{let i=s;for(let r of i.header)n=n.concat(this.walkTokens(r.tokens,t));for(let r of i.rows)for(let o of r)n=n.concat(this.walkTokens(o.tokens,t));break}case"list":{let i=s;n=n.concat(this.walkTokens(i.items,t));break}default:{let i=s;this.defaults.extensions?.childTokens?.[i.type]?this.defaults.extensions.childTokens[i.type].forEach(r=>{let o=i[r].flat(1/0);n=n.concat(this.walkTokens(o,t))}):i.tokens&&(n=n.concat(this.walkTokens(i.tokens,t)))}}return n}use(...e){let t=this.defaults.extensions||{renderers:{},childTokens:{}};return e.forEach(n=>{let s={...n};if(s.async=this.defaults.async||s.async||!1,n.extensions&&(n.extensions.forEach(i=>{if(!i.name)throw new Error("extension name required");if("renderer"in i){let r=t.renderers[i.name];r?t.renderers[i.name]=function(...o){let a=i.renderer.apply(this,o);return a===!1&&(a=r.apply(this,o)),a}:t.renderers[i.name]=i.renderer}if("tokenizer"in i){if(!i.level||i.level!=="block"&&i.level!=="inline")throw new Error("extension level must be 'block' or 'inline'");let r=t[i.level];r?r.unshift(i.tokenizer):t[i.level]=[i.tokenizer],i.start&&(i.level==="block"?t.startBlock?t.startBlock.push(i.start):t.startBlock=[i.start]:i.level==="inline"&&(t.startInline?t.startInline.push(i.start):t.startInline=[i.start]))}"childTokens"in i&&i.childTokens&&(t.childTokens[i.name]=i.childTokens)}),s.extensions=t),n.renderer){let i=this.defaults.renderer||new $(this.defaults);for(let r in n.renderer){if(!(r in i))throw new Error(`renderer '${r}' does not exist`);if(["options","parser"].includes(r))continue;let o=r,a=n.renderer[o],c=i[o];i[o]=(...p)=>{let u=a.apply(i,p);return u===!1&&(u=c.apply(i,p)),u||""}}s.renderer=i}if(n.tokenizer){let i=this.defaults.tokenizer||new S(this.defaults);for(let r in n.tokenizer){if(!(r in i))throw new Error(`tokenizer '${r}' does not exist`);if(["options","rules","lexer"].includes(r))continue;let o=r,a=n.tokenizer[o],c=i[o];i[o]=(...p)=>{let u=a.apply(i,p);return u===!1&&(u=c.apply(i,p)),u}}s.tokenizer=i}if(n.hooks){let i=this.defaults.hooks||new L;for(let r in n.hooks){if(!(r in i))throw new Error(`hook '${r}' does not exist`);if(["options","block"].includes(r))continue;let o=r,a=n.hooks[o],c=i[o];L.passThroughHooks.has(r)?i[o]=p=>{if(this.defaults.async)return Promise.resolve(a.call(i,p)).then(d=>c.call(i,d));let u=a.call(i,p);return c.call(i,u)}:i[o]=(...p)=>{let u=a.apply(i,p);return u===!1&&(u=c.apply(i,p)),u}}s.hooks=i}if(n.walkTokens){let i=this.defaults.walkTokens,r=n.walkTokens;s.walkTokens=function(o){let a=[];return a.push(r.call(this,o)),i&&(a=a.concat(i.call(this,o))),a}}this.defaults={...this.defaults,...s}}),this}setOptions(e){return this.defaults={...this.defaults,...e},this}lexer(e,t){return x.lex(e,t??this.defaults)}parser(e,t){return b.parse(e,t??this.defaults)}parseMarkdown(e){return(n,s)=>{let i={...s},r={...this.defaults,...i},o=this.onError(!!r.silent,!!r.async);if(this.defaults.async===!0&&i.async===!1)return o(new Error("marked(): The async option was set to true by an extension. Remove async: false from the parse options object to return a Promise."));if(typeof n>"u"||n===null)return o(new Error("marked(): input parameter is undefined or null"));if(typeof n!="string")return o(new Error("marked(): input parameter is of type "+Object.prototype.toString.call(n)+", string expected"));r.hooks&&(r.hooks.options=r,r.hooks.block=e);let a=r.hooks?r.hooks.provideLexer():e?x.lex:x.lexInline,c=r.hooks?r.hooks.provideParser():e?b.parse:b.parseInline;if(r.async)return Promise.resolve(r.hooks?r.hooks.preprocess(n):n).then(p=>a(p,r)).then(p=>r.hooks?r.hooks.processAllTokens(p):p).then(p=>r.walkTokens?Promise.all(this.walkTokens(p,r.walkTokens)).then(()=>p):p).then(p=>c(p,r)).then(p=>r.hooks?r.hooks.postprocess(p):p).catch(o);try{r.hooks&&(n=r.hooks.preprocess(n));let p=a(n,r);r.hooks&&(p=r.hooks.processAllTokens(p)),r.walkTokens&&this.walkTokens(p,r.walkTokens);let u=c(p,r);return r.hooks&&(u=r.hooks.postprocess(u)),u}catch(p){return o(p)}}}onError(e,t){return n=>{if(n.message+=`
+Please report this to https://github.com/markedjs/marked.`,e){let s="<p>An error occurred:</p><pre>"+R(n.message+"",!0)+"</pre>";return t?Promise.resolve(s):s}if(t)return Promise.reject(n);throw n}}};var M=new E;function k(l,e){return M.parse(l,e)}k.options=k.setOptions=function(l){return M.setOptions(l),k.defaults=M.defaults,N(k.defaults),k};k.getDefaults=z;k.defaults=w;k.use=function(...l){return M.use(...l),k.defaults=M.defaults,N(k.defaults),k};k.walkTokens=function(l,e){return M.walkTokens(l,e)};k.parseInline=M.parseInline;k.Parser=b;k.parser=b.parse;k.Renderer=$;k.TextRenderer=_;k.Lexer=x;k.lexer=x.lex;k.Tokenizer=S;k.Hooks=L;k.parse=k;var it=k.options,ot=k.setOptions,lt=k.use,at=k.walkTokens,ct=k.parseInline,pt=k,ut=b.parse,ht=x.lex;
+
+if(__exports != exports)module.exports = exports;return module.exports}));
+</script>
+<script>
+'use strict';
+window.onerror = function(msg, src, line) {
+  const el = document.getElementById('errBanner');
+  el.style.display = 'block';
+  el.textContent = '脚本错误: ' + msg + ' @' + (line || '?');
+};
+
+/* ================= state ================= */
+const $ = id => document.getElementById(id);
+let rootHandle = null;          // 根目录句柄
+let tree = [];                  // 目录树节点
+let selectedNode = null;        // 树中选中的节点（文件或文件夹）
+let multiSel = [];              // 多选文件路径（用于合并），按点击顺序
+let current = null;             // { node, content, dirty }
+let mode = 'edit';              // edit | preview | read
+let expanded = new Set();       // 已展开的文件夹 path
+let imgCache = new Map();       // baseDirPath::src -> blobUrl
+let saveTimer = null, previewTimer = null;
+let livePreviewOn = true;
+
+/* ================= idb (记住上次文件夹) ================= */
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('writetools', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbSet(k, v) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const t = db.transaction('kv', 'readwrite');
+    t.objectStore('kv').put(v, k);
+    t.oncomplete = res; t.onerror = () => rej(t.error);
+  });
+}
+function idbGet(k) {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('writetools', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => {
+      const t = r.result.transaction('kv', 'readonly');
+      const q = t.objectStore('kv').get(k);
+      q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
+    };
+    r.onerror = () => rej(r.error);
+  });
+}
+
+/* ================= utils ================= */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function toast(msg, ms = 1600) {
+  const t = $('toast'); t.textContent = msg; t.style.opacity = 1;
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.style.opacity = 0, ms);
+}
+const parentPath = p => { const i = p.lastIndexOf('/'); return i < 0 ? '' : p.slice(0, i); };
+async function getDirHandleByPath(rel) {
+  if (!rel) return rootHandle;
+  let dir = rootHandle;
+  for (const seg of rel.split('/')) dir = await dir.getDirectoryHandle(seg);
+  return dir;
+}
+function countChars(text) {
+  const plain = text.replace(/```[\s\S]*?```/g, '').replace(/[#>*`\-\|!\[\]()]/g, '');
+  const cjk = (plain.match(/[\u4e00-\u9fff\u3040-\u30ff]/g) || []).length;
+  const en = (plain.match(/[a-zA-Z]+/g) || []).length;
+  return cjk + en;
+}
+function mdToHtml(text) {
+  try { return marked.parse(expandImgParams(text), { gfm: true, breaks: true }); }
+  catch (e) { return '<pre>' + esc(text) + '</pre>'; }
+}
+// 图片扩展语法: ![alt](路径 =600x400 center)  宽高可只写一边 =600x / =x300，对齐 center/left/right
+function expandImgParams(md) {
+  return md.replace(/!\[([^\]]*)\]\(\s*([^)\s]+)((?:\s+[^\s()]+)+?)\s*\)/g, (m0, alt, src, params) => {
+    let w = '', h = '', align = '';
+    for (const tk of params.trim().split(/\s+/)) {
+      const sm = tk.match(/^=(\d*)x(\d*)$/i);
+      if (sm) { w = sm[1]; h = sm[2]; continue; }
+      if (/^(center|left|right)$/i.test(tk)) align = tk.toLowerCase();
+    }
+    if (!w && !h && !align) return m0;
+    let style = '';
+    if (w) style += 'width:' + w + 'px;';
+    if (h) style += 'height:' + h + 'px;';
+    if (align === 'center') style += 'display:block;margin-left:auto;margin-right:auto;';
+    else if (align === 'left') style += 'float:left;margin:6px 20px 6px 0;';
+    else if (align === 'right') style += 'float:right;margin:6px 0 6px 20px;';
+    return '<img src="' + esc(src) + '" alt="' + esc(alt) + '" style="' + style + '">';
+  });
+}
+
+/* ================= folder open ================= */
+async function useRoot(handle) {
+  let perm = 'prompt';
+  try { perm = await handle.queryPermission({ mode: 'readwrite' }); } catch (e) {}
+  if (perm !== 'granted') {
+    perm = await handle.requestPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') { toast('未获得读写权限'); return; }
+  }
+  rootHandle = handle;
+  await idbSet('root', handle);
+  imgCache.forEach(u => URL.revokeObjectURL(u)); imgCache.clear();
+  selectedNode = null; current = null; multiSel = [];
+  expanded = new Set();
+  $('projName').textContent = '📖 ' + handle.name;
+  $('projName').classList.remove('hidden');
+  await refreshTree();
+  await loadUserCss();
+  $('welcome').classList.add('hidden');
+  setMode('edit');
+  toast('已打开：' + handle.name);
+  updateToolbar();
+}
+async function refreshTree() {
+  tree = await scanDir(rootHandle, '');
+  renderTree();
+}
+// 草稿/素材：名称以 _ 开头（推荐，如 _灵感.txt、_素材/），也兼容 [草稿]、draft- 前缀
+// 草稿仍在目录树中显示、可编辑、可搜索，但不参与阅览合并和导出；草稿文件夹的整个子树都不输出
+function isDraftName(name) { return /^(_|\[草稿\]|draft-)/i.test(name); }
+async function scanDir(dirHandle, path) {
+  const dirs = [], files = [];
+  for await (const [name, h] of dirHandle.entries()) {
+    if (name.startsWith('.')) continue;
+    if (h.kind === 'directory') {
+      dirs.push({ type: 'dir', name, handle: h, path: path ? path + '/' + name : name, children: [], draft: isDraftName(name) });
+    } else if (/\.(md|markdown|txt|css)$/i.test(name)) {
+      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name) });
+    }
+  }
+  for (const d of dirs) d.children = await scanDir(d.handle, d.path);
+  // 排序规则（同层三组）：
+  // 1) 无编号文件夹（最前，按名称）——保持旧项目“文件夹在前”的习惯
+  // 2) 带编号的文件/文件夹（按编号统一混排，同号文件夹优先，再按名称）
+  // 3) 无编号文件（最后，按名称）
+  return sortNodes([...dirs, ...files]);
+}
+// 提取名称前导编号：110.txt / 110-abc.txt / 120-正文 → 数字；“正文”“123abc” → null
+function numOf(name) {
+  const m = name.match(/^(\d+)(?=[.-]|$)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+// 同层节点排序：返回新数组
+function sortNodes(nodes) {
+  const nat = (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { numeric: true });
+  const dirs = nodes.filter(n => n.type === 'dir');
+  const files = nodes.filter(n => n.type === 'file');
+  const unnumDirs = dirs.filter(d => numOf(d.name) === null).sort(nat);
+  const numNodes = [...dirs.filter(d => numOf(d.name) !== null), ...files.filter(f => numOf(f.name) !== null)]
+    .sort((a, b) => (numOf(a.name) - numOf(b.name)) || (a.type === b.type ? nat(a, b) : (a.type === 'dir' ? -1 : 1)));
+  const unnumFiles = files.filter(f => numOf(f.name) === null).sort(nat);
+  return [...unnumDirs, ...numNodes, ...unnumFiles];
+}
+
+/* ================= tree render ================= */
+let dragPath = null;   // 正在拖动的节点路径
+function renderTree() {
+  const el = $('tree'); el.innerHTML = '';
+  const mk = (node, depth) => {
+    const row = document.createElement('div');
+    row.className = 'tnode ' + node.type
+      + (selectedNode === node ? ' selected' : '')
+      + (multiSel.includes(node.path) ? ' multisel' : '')
+      + (node.draft ? ' draft' : '');
+    row.style.paddingLeft = (8 + depth * 16) + 'px';
+    let ico;
+    if (node.type === 'dir') ico = expanded.has(node.path) ? '📂' : '📁';
+    else if (multiSel.includes(node.path)) ico = '✓';
+    else ico = '📄';
+    row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (node.draft ? '<span class="dtag">不输出</span>' : '');
+    row.title = (node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
+      + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并用，Esc 或「取消选择」清空）；拖动可移动' : '拖动文件/文件夹到这里可移动');
+    row.draggable = true;
+    row.ondragstart = e => { dragPath = node.path; e.dataTransfer.setData('text/plain', node.path); e.dataTransfer.effectAllowed = 'move'; };
+    row.ondragend = () => { dragPath = null; row.classList.remove('drop-target'); };
+    row.ondragover = e => {
+      if (node.type !== 'dir' || !dragPath) return;
+      if (dragPath === node.path || dragPath.startsWith(node.path + '/')) return;
+      e.preventDefault();
+      row.classList.add('drop-target');
+    };
+    row.ondragleave = () => row.classList.remove('drop-target');
+    row.ondrop = async e => {
+      e.preventDefault(); e.stopPropagation();
+      row.classList.remove('drop-target');
+      const p = e.dataTransfer.getData('text/plain') || dragPath;
+      const src = p && findNode(tree, p);
+      dragPath = null;
+      if (src && src !== node) await moveNode(src, node);
+    };
+    row.onclick = async (ev) => {
+      if ((ev.ctrlKey || ev.metaKey) && node.type === 'file') {
+        const i = multiSel.indexOf(node.path);
+        if (i >= 0) multiSel.splice(i, 1); else multiSel.push(node.path);
+        selectedNode = node;
+        renderTree(); updateToolbar();
+        return;
+      }
+      selectedNode = node;
+      if (node.type === 'dir') {
+        if (expanded.has(node.path)) expanded.delete(node.path);
+        else expanded.add(node.path);
+        renderTree();
+        updateToolbar();   // 文件夹选中后重命名/删除等按钮应可用
+      } else await openFile(node);
+    };
+    el.appendChild(row);
+    if (node.type === 'dir' && expanded.has(node.path)) node.children.forEach(c => mk(c, depth + 1));
+  };
+  tree.forEach(n => mk(n, 0));
+}
+
+async function moveNode(src, destDirNode) {
+  const destPath = destDirNode ? destDirNode.path : '';
+  if (src.type === 'dir' && (destPath === src.path || destPath.startsWith(src.path + '/'))) {
+    toast('不能移动到自身内部'); return;
+  }
+  if (destPath === parentPath(src.path)) { toast('已在目标位置'); return; }
+  try {
+    await flushSave();
+    const destDir = destDirNode ? destDirNode.handle : rootHandle;
+    try { await destDir.getFileHandle(src.name); toast('目标已存在同名文件：' + src.name); return; } catch (e) {}
+    const oldCur = current ? current.node.path : null;
+    if (src.type === 'file') {
+      let moved = false;
+      try { if (src.handle.move) { await src.handle.move(destDir, src.name); moved = true; } } catch (e) {}
+      if (!moved) {
+        const f = await src.handle.getFile();
+        const nh = await destDir.getFileHandle(src.name, { create: true });
+        const w = await nh.createWritable(); await w.write(f); await w.close();
+        const sp = await getDirHandleByPath(parentPath(src.path));
+        await sp.removeEntry(src.name);
+      }
+    } else {
+      await copyDir(src.handle, await destDir.getDirectoryHandle(src.name, { create: true }));
+      const sp = await getDirHandleByPath(parentPath(src.path));
+      await sp.removeEntry(src.name, { recursive: true });
+    }
+    multiSel = []; selectedNode = null; current = null;
+    expanded.add(destPath);
+    await refreshTree();
+    let newPath = null;
+    if (oldCur) {
+      const newSrcPath = destPath ? destPath + '/' + src.name : src.name;
+      if (oldCur === src.path) newPath = newSrcPath;
+      else if (oldCur.startsWith(src.path + '/')) newPath = newSrcPath + oldCur.slice(src.path.length);
+    }
+    if (newPath) { const node = findNode(tree, newPath); if (node) { selectedNode = node; await openFile(node); } }
+    renderTree(); updateToolbar();
+    toast('已移动到：' + (destPath || '根目录'));
+  } catch (e) { toast('移动失败：' + e.message); }
+}
+
+/* ================= file open / save ================= */
+async function openFile(node) {
+  await flushSave();
+  try {
+    const f = await node.handle.getFile();
+    const text = (await f.text()).replace(/^\uFEFF/, '');
+    current = { node, content: text, dirty: false };
+    expandedAddTo(node.path);
+    $('editor').value = text;
+    setMode(mode);            // refresh view content
+    updateStatus(); updateToolbar();
+    schedulePreview();
+  } catch (e) { toast('读取失败：' + e.message); }
+}
+function expandedAddTo(path) {
+  const parts = path.split('/'); parts.pop();
+  let acc = '';
+  for (const p of parts) { acc = acc ? acc + '/' + p : p; expanded.add(acc); }
+}
+async function flushSave() {
+  if (current && current.dirty) await saveCurrent();
+}
+async function saveCurrent() {
+  if (!current) return;
+  try {
+    const w = await current.node.handle.createWritable();
+    await w.write(current.content); await w.close();
+    current.dirty = false;
+    $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+    if (current.node.name === 'style.css' && !parentPath(current.node.path)) applyUserCss(current.content);
+  } catch (e) {
+    $('stSave').textContent = '保存失败'; $('stSave').className = 'dirty';
+    toast('保存失败：' + e.message);
+  }
+}
+function markDirty() {
+  if (!current) return;
+  current.content = $('editor').value; current.dirty = true;
+  $('stSave').textContent = '未保存…'; $('stSave').className = 'dirty';
+  updateStatus();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveCurrent, 900);
+}
+function updateStatus() {
+  $('stPath').textContent = current ? current.node.path : (rootHandle ? rootHandle.name : '');
+  $('stCount').textContent = current ? countChars(current.content) + ' 字' : '';
+}
+
+/* ================= preview & images ================= */
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(renderLivePreview, 250);
+}
+function renderLivePreview() {
+  if (!current) return;
+  const c = $('livePreview');
+  c.innerHTML = mdToHtml(current.content);
+  fixImages(c, parentPath(current.node.path));
+}
+async function fixImages(container, baseDirPath) {
+  for (const img of container.querySelectorAll('img')) {
+    const src = img.getAttribute('src') || '';
+    if (/^(https?:|data:|blob:)/i.test(src)) continue;
+    const key = baseDirPath + '::' + src;
+    if (imgCache.has(key)) { img.src = imgCache.get(key); continue; }
+    try {
+      const url = await resolveImg(src, baseDirPath);
+      if (url) { imgCache.set(key, url); img.src = url; }
+      else { img.className = 'img-missing'; img.alt = '图片不存在: ' + src; img.removeAttribute('src'); }
+    } catch (e) { img.className = 'img-missing'; img.alt = '图片加载失败: ' + src; img.removeAttribute('src'); }
+  }
+}
+async function resolveImg(src, baseDirPath) {
+  let clean = decodeURIComponent(src.split('#')[0].split('?')[0]).replace(/\\/g, '/');
+  clean = clean.replace(/^\.\//, '').replace(/^\/+/, '');
+  if (!clean) return null;
+  let dir = await getDirHandleByPath(baseDirPath);
+  const parts = clean.split('/'); const fname = parts.pop();
+  if (!fname) return null;
+  for (const p of parts) { if (p === '..') return null; dir = await dir.getDirectoryHandle(p); }
+  const fh = await dir.getFileHandle(fname);
+  const file = await fh.getFile();
+  return URL.createObjectURL(file);
+}
+
+/* ================= 自定义CSS ================= */
+const CSS_TEMPLATE = `/* ===== WriteTools 自定义样式 =====
+   本文件(style.css)保存在项目根目录，保存后立即生效，导出 HTML 也会带上。
+   选择器以 .md-body 开头只影响内容区（预览/阅览），不影响工具界面。示例： */
+.md-body { font-size: 17px; line-height: 2; }
+.md-body h1 { font-size: 30px; color: #b3392f; }
+.md-body h2 { font-size: 24px; color: #1a5276; }
+.md-body h3 { font-size: 20px; color: #1e8449; }
+`;
+function applyUserCss(cssText) {
+  // style.css 里的颜色为浅色背景设计：应用内只在亮色主题生效，暗色主题回退到系统配色（导出 HTML 始终用原色）
+  $('userCssStyle').textContent = cssText ? ':root:not([data-theme="dark"]){\n' + cssText + '\n}' : '';
+}
+async function loadUserCss() {
+  applyUserCss('');
+  if (!rootHandle) return;
+  try {
+    const fh = await rootHandle.getFileHandle('style.css');
+    applyUserCss((await (await fh.getFile()).text()).replace(/^\uFEFF/, ''));
+  } catch (e) {}
+}
+async function openStyleCss() {
+  if (!rootHandle) return;
+  let fh;
+  try { fh = await rootHandle.getFileHandle('style.css'); }
+  catch (e) {
+    try {
+      fh = await rootHandle.getFileHandle('style.css', { create: true });
+      const w = await fh.createWritable(); await w.write(CSS_TEMPLATE); await w.close();
+      await refreshTree();
+      toast('已在项目根目录创建 style.css');
+    } catch (e2) { toast('创建失败：' + e2.message); return; }
+  }
+  const node = findNode(tree, 'style.css');
+  if (node) { selectedNode = node; await openFile(node); renderTree(); updateToolbar(); }
+}
+
+/* ---------- built-in style presets ---------- */
+const PRESETS = [
+  { key: 'classic',  name: '经典黑', body: '#222222', h: ['#111111','#222222','#333333','#444444','#555555','#666666'] },
+  { key: 'academic', name: '学术蓝', body: '#26282b', h: ['#1a4f8b','#1f63a8','#2f74b5','#3b82c4','#4a90cf','#5d9dd8'] },
+  { key: 'green',    name: '护眼绿', body: '#3a4238', h: ['#2e6b3f','#357a49','#3f8a55','#4b9761','#5aa46e','#6fb17f'] },
+  { key: 'warm',     name: '暖阳橙', body: '#3d3226', h: ['#b8431c','#c95722','#d56a2a','#dd7c36','#e38e45','#e7a058'] },
+  { key: 'purple',   name: '典雅紫', body: '#2e2a35', h: ['#5b3a8c','#6c4aa0','#7d5bb0','#8d6dc0','#9d80cd','#ae93d8'] },
+  { key: 'red',      name: '典雅红', body: '#332827', h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
+];
+function buildPresetCss(p) {
+  const sizes = ['1.9em','1.6em','1.38em','1.2em','1.08em','1em'];
+  let s = '/* 内置样式：' + p.name + '（由 WriteTools 生成，可自行修改） */\n';
+  s += '.md-body { color: ' + p.body + '; font-size: 16.5px; }\n';
+  p.h.forEach((c, i) => { s += '.md-body h' + (i + 1) + ' { color: ' + c + '; font-size: ' + sizes[i] + '; }\n'; });
+  return s;
+}
+$('presetSel').onchange = async () => {
+  const key = $('presetSel').value;
+  $('presetSel').value = '';
+  if (!key || !rootHandle) return;
+  const p = PRESETS.find(x => x.key === key);
+  if (!p) return;
+  let exists = false;
+  try { await rootHandle.getFileHandle('style.css'); exists = true; } catch (e) {}
+  if (exists && !confirm('将用内置样式「' + p.name + '」覆盖项目根目录的 style.css，原有自定义内容会被替换。确定继续吗？')) return;
+  try {
+    const css = buildPresetCss(p);
+    const fh = await rootHandle.getFileHandle('style.css', { create: true });
+    const w = await fh.createWritable(); await w.write(css); await w.close();
+    applyUserCss(css);
+    // 若 style.css 正打开着，同步编辑器内容，避免旧内容回存覆盖
+    if (current && current.node.name === 'style.css') {
+      current.content = css; current.dirty = false;
+      $('editor').value = css; updateStatus();
+    }
+    await refreshTree();
+    if (mode === 'read') await renderMerged();
+    else if (mode === 'preview') renderSinglePreview();
+    else renderLivePreview();
+    toast('已应用内置样式：' + p.name + '（可点“样式”继续微调）');
+  } catch (e) { toast('应用样式失败：' + e.message); }
+};
+
+/* ================= merged (read) view ================= */
+// includeDraft=false（默认）：跳过草稿文件、不进入草稿文件夹——用于阅览/导出
+// includeDraft=true：搜索、项目替换等编辑操作仍可触及草稿（style.css 始终排除）
+function collectFiles(nodes, out = [], includeDraft = false) {
+  for (const n of nodes) {
+    if (n.type === 'dir') {
+      if (!includeDraft && n.draft) continue;
+      collectFiles(n.children, out, includeDraft);
+    }
+    else if (!/\.css$/i.test(n.name) && (includeDraft || !n.draft)) out.push(n);
+  }
+  return out;
+}
+async function renderMerged() {
+  await flushSave();
+  const body = $('mergedBody'); const toc = $('tocList');
+  body.innerHTML = '<div style="color:var(--muted)">正在合并…</div>'; toc.innerHTML = '';
+  const files = collectFiles(tree);
+  if (!files.length) { body.innerHTML = '<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>'; return; }
+  body.innerHTML = '';
+  // 项目文件夹名作为作品标题，居中显示
+  const bt = document.createElement('div');
+  bt.className = 'book-title';
+  bt.textContent = rootHandle ? rootHandle.name : '';
+  body.appendChild(bt);
+  let idx = 0;
+  const tocItems = [];
+  for (const f of files) {
+    let text;
+    try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
+    catch (e) { text = '> 读取失败: ' + e.message; }
+    if (idx > 0) {
+      const hr = document.createElement('hr'); hr.className = 'file-boundary';
+      hr.innerHTML = '<span>' + esc(f.path) + '</span>';
+      body.appendChild(hr);
+    }
+    const sec = document.createElement('div'); sec.id = 'sec-' + idx;
+    sec.innerHTML = mdToHtml(text);
+    body.appendChild(sec);
+    // 目录：先显示文件名，下面再显示该文件内的标题
+    tocItems.push({ level: 1, text: f.name, id: 'sec-' + idx });
+    let hIdx = 0;
+    for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
+      const id = 'h-' + idx + '-' + (hIdx++);
+      h.id = id;
+      tocItems.push({ level: Math.min(+h.tagName[1] + 1, 4), text: h.textContent.trim() || '（无标题）', id });
+    }
+    await fixImages(sec, parentPath(f.path));
+    idx++;
+  }
+  // build toc
+  for (const t of tocItems) {
+    const a = document.createElement('a');
+    a.className = 'l' + Math.min(t.level, 4);
+    a.textContent = t.text;
+    a.href = '#' + t.id;
+    a.onclick = e => { e.preventDefault(); document.getElementById(t.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    toc.appendChild(a);
+  }
+}
+
+/* ================= export merged html ================= */
+async function exportMerged() {
+  await flushSave();
+  if (!tree.length) { toast('没有内容'); return; }
+  await renderMerged();  // 确保 toc/图片已加载
+  const clone = $('mergedBody').cloneNode(true);
+  // 导出为整体：去掉文件分隔线；生成仅含标题（不含文件名）的目录
+  clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
+  const heads = [];
+  for (const h of clone.querySelectorAll('h1,h2,h3,h4')) {
+    if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
+  }
+  const tocHtml = heads.length
+    ? '<nav class="toc"><div class="toc-h">目 录</div>' +
+      heads.map(t => '<a class="tl' + t.level + '" href="#' + t.id + '">' + esc(t.text) + '</a>').join('') +
+      '</nav>'
+    : '';
+  // 内嵌图片为 base64
+  for (const img of clone.querySelectorAll('img[src^="blob:"]')) {
+    try {
+      const blob = await (await fetch(img.src)).blob();
+      img.src = await new Promise((res, rej) => {
+        const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej;
+        r.readAsDataURL(blob);
+      });
+    } catch (e) { img.removeAttribute('src'); }
+  }
+  let userCss = '';
+  try { userCss = await (await (await rootHandle.getFileHandle('style.css')).getFile()).text(); } catch (e) {}
+  const doc = '<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="UTF-8"><title>' +
+    esc(rootHandle.name) + '</title><style>' + EXPORT_CSS + '</style>' +
+    (userCss ? '<style>' + userCss + '</style>' : '') +
+      '</head><body><div class="wrap">' + tocHtml + '<main class="book md-body">' + clone.innerHTML + '</main></div>' +
+      '<button id="toTop" title="返回顶部">↑</button>' +
+      '<script>var t=document.getElementById("toTop");window.addEventListener("scroll",function(){t.classList.toggle("show",(window.scrollY||document.documentElement.scrollTop)>300)},{passive:true});t.onclick=function(){window.scrollTo({top:0,behavior:"smooth"})};<\/script></body></html>';
+  const blob = new Blob([doc], { type: 'text/html' });
+  const d = new Date();
+  const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = rootHandle.name + '-' + date + '.html';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast('已导出 ' + a.download);
+}
+const EXPORT_CSS = `
+body{margin:0;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
+.wrap{display:flex;align-items:flex-start;gap:36px;max-width:1160px;margin:0 auto;padding:50px 72px 120px 32px;}
+.book{flex:1;min-width:0;font-size:16.5px;line-height:1.9;}
+@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
+h1,h2,h3,h4,h5,h6{font-family:"Microsoft YaHei","PingFang SC",sans-serif;line-height:1.4;margin:1.4em 0 .7em;}
+h1{font-size:27px}h2{font-size:22px}h3{font-size:19px}
+p{margin:.8em 0}a{color:#3b7dd8}img{max-width:100%;border-radius:4px;display:block;margin:14px auto}
+blockquote{border-left:3px solid #3b7dd8;background:#fff;margin:1em 0;padding:.6em 1.1em;color:#667;border-radius:0 6px 6px 0}
+code{background:#f0efe9;padding:.15em .4em;border-radius:4px;font-family:Consolas,monospace;font-size:.88em}
+pre{background:#f0efe9;padding:14px 18px;border-radius:8px;overflow:auto}
+hr{border:none;border-top:1px solid #ddd;margin:1.5em 0}
+.book-title{text-align:center;font-size:30px;font-weight:700;font-family:"Microsoft YaHei","PingFang SC",sans-serif;margin:0 0 36px;line-height:1.3}
+#toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
+#toTop.show{opacity:.85;pointer-events:auto}
+#toTop:hover{opacity:1}
+@media print{#toTop{display:none}}
+.toc{width:250px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #e5e2d8;border-radius:10px;padding:18px 20px}
+.toc-h{font-weight:700;font-size:15px;letter-spacing:4px;color:#667;margin-bottom:10px}
+.toc a{display:block;color:#26282b;text-decoration:none;padding:3px 0;font-size:14px}
+.toc a:hover{color:#3b7dd8}
+.toc a.tl2{padding-left:18px}
+.toc a.tl3{padding-left:36px}
+.toc a.tl4{padding-left:54px;color:#667;font-size:13px}
+table{border-collapse:collapse;margin:1.2em auto}
+th,td{border:1px solid #ccc;padding:7px 14px}
+.plaintext{white-space:pre-wrap;font-family:Consolas,monospace}
+`;
+
+async function exportMd() {
+  if (!rootHandle) return;
+  await flushSave();
+  const files = collectFiles(tree);
+  if (!files.length) { toast('没有可导出的内容'); return; }
+  const parts = [];
+  for (const f of files) {
+    const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
+    parts.push(t);
+  }
+  const d = new Date();
+  const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const blob = new Blob([parts.join('\n\n')], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = rootHandle.name + '-' + date + '.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast('已导出 ' + a.download);
+}
+
+/* ================= new / rename / delete ================= */
+async function targetDir() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!n) return { handle: rootHandle, path: '' };
+  if (n.type === 'dir') return { handle: n.handle, path: n.path };
+  return { handle: await getDirHandleByPath(parentPath(n.path)), path: parentPath(n.path) };
+}
+// 同层最大编号（文件和带编号文件夹一起算，文件夹占号）
+async function maxNumInDir(dir) {
+  let max = 0;
+  for await (const [name, h] of dir.entries()) {
+    if (h.kind === 'file' && !/\.(md|markdown|txt)$/i.test(name)) continue;
+    if (isDraftName(name)) continue;   // 草稿不参与编号建议
+    const n = numOf(name);
+    if (n !== null && n > max) max = n;
+  }
+  return max;
+}
+async function nextFileName(dir) {
+  const max = await maxNumInDir(dir);
+  return (max ? max + 10 : 110) + '.txt';
+}
+async function newFile() {
+  if (!rootHandle) return;
+  const { handle: dir, path } = await targetDir();
+  const full = await nextFileName(dir);
+  try {
+    const fh = await dir.getFileHandle(full, { create: true });
+    const w = await fh.createWritable(); await w.write(''); await w.close();
+    await refreshTree();
+    const p = path ? path + '/' + full : full;
+    const node = findNode(tree, p);
+    if (node) { selectedNode = node; await openFile(node); }
+    setMode('edit'); $('editor').focus();
+    renderTree(); updateToolbar();
+    toast('已创建 ' + full);
+  } catch (e) { toast('创建失败：' + e.message); }
+}
+async function newDir() {
+  if (!rootHandle) return;
+  const { handle: dir } = await targetDir();
+  const suggest = await maxNumInDir(dir);
+  const def = (suggest ? suggest + 10 : 110) + '-新文件夹';
+  const name = prompt('文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：', def);
+  if (!name) return;
+  try {
+    await dir.getDirectoryHandle(name, { create: true });
+    await refreshTree();
+    toast('已创建 ' + name);
+  } catch (e) { toast('创建失败：' + e.message); }
+}
+async function renameNode() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!n) return;
+  let newName = prompt('新名称（文件无后缀自动补 .txt）：', n.name);
+  if (!newName || newName === n.name) return;
+  if (n.type === 'file' && !/\.\w+$/.test(newName)) newName += '.txt';
+  try {
+    const dir = await getDirHandleByPath(parentPath(n.path));
+    if (n.type === 'file') {
+      const f = await n.handle.getFile();
+      const nh = await dir.getFileHandle(newName, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+      await dir.removeEntry(n.name);
+      if (current && current.node === n) current = null;
+    } else {
+      await copyDir(n.handle, await dir.getDirectoryHandle(newName, { create: true }));
+      await dir.removeEntry(n.name, { recursive: true });
+    }
+    selectedNode = null; current = null;
+    $('editor').value = '';
+    await refreshTree(); renderTree(); updateToolbar(); updateStatus();
+    toast('已重命名');
+  } catch (e) { toast('重命名失败：' + e.message); }
+}
+async function autoRename() {
+  const n = (selectedNode && selectedNode.type === 'file') ? selectedNode : (current ? current.node : null);
+  if (!n) { toast('请先选择文件'); return; }
+  await flushSave();
+  let text;
+  try { text = (await (await n.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
+  catch (e) { toast('读取失败'); return; }
+  const first = (text.split('\n').find(l => l.trim()) || '').trim();
+  if (!first) { toast('文件内容为空'); return; }
+  let title = first.replace(/^#+\s*/, '').replace(/[*_`~[\]()#>!]/g, '').trim().slice(0, 16);
+  title = title.replace(/[\\/:*?"<>|.]/g, '').trim();
+  if (!title) { toast('第一行没有可用文字'); return; }
+  const ext = (n.name.match(/\.\w+$/) || ['.txt'])[0];
+  const pm = n.name.match(/^(\d+)(?:-[^.]*)?/);
+  const newName = (pm ? pm[1] + '-' + title : title) + ext;
+  if (newName === n.name) { toast('名称已符合格式'); return; }
+  const dirPath = parentPath(n.path);
+  try {
+    const dir = await getDirHandleByPath(dirPath);
+    try { await dir.getFileHandle(newName); toast('已存在同名文件：' + newName); return; } catch (e) {}
+    const f = await n.handle.getFile();
+    const nh = await dir.getFileHandle(newName, { create: true });
+    const w = await nh.createWritable(); await w.write(f); await w.close();
+    const wasCurrent = current && current.node === n;
+    await dir.removeEntry(n.name);
+    selectedNode = null; if (wasCurrent) current = null;
+    await refreshTree();
+    const node = findNode(tree, dirPath ? dirPath + '/' + newName : newName);
+    if (node) { selectedNode = node; await openFile(node); }
+    renderTree(); updateToolbar();
+    toast('已重命名：' + newName);
+  } catch (e) { toast('重命名失败：' + e.message); }
+}
+async function renumberAll() {
+  if (!rootHandle) return;
+  // 目标文件夹：选中的文件夹本身；选中/打开的文件则取其所在文件夹
+  const sel = selectedNode || (current ? current.node : null);
+  if (!sel) { toast('请先在目录中选择一个文件或文件夹'); return; }
+  await flushSave();
+  let dirHandle, dirPath, dirLabel;
+  if (sel.type === 'dir') { dirHandle = sel.handle; dirPath = sel.path; dirLabel = sel.name; }
+  else {
+    dirPath = parentPath(sel.path);
+    dirHandle = await getDirHandleByPath(dirPath);
+    dirLabel = dirPath || rootHandle.name;
+  }
+  // 收集该文件夹直接包含的 md/txt 文件和子文件夹（不递归、不含草稿）
+  const fileEntries = [], dirEntries = [];
+  for await (const [name, h] of dirHandle.entries()) {
+    if (name.startsWith('.') || isDraftName(name)) continue;
+    if (h.kind === 'file' && /\.(md|markdown|txt)$/i.test(name)) fileEntries.push({ name, handle: h });
+    else if (h.kind === 'directory') dirEntries.push({ name, handle: h });
+  }
+  // 按全局排序规则排列：无编号文件夹在最前（保持不动、不占槽），
+  // 其余文件和带编号文件夹统一按 110、120、130…重新编号（文件夹也改名）
+  const ordered = sortNodes([
+    ...dirEntries.map(d => ({ type: 'dir', name: d.name, handle: d.handle })),
+    ...fileEntries.map(f => ({ type: 'file', name: f.name, handle: f.handle }))
+  ]);
+  const tasks = [];
+  let slot = 0;
+  for (const nd of ordered) {
+    if (nd.type === 'dir' && numOf(nd.name) === null) continue;  // 无编号文件夹：保持在最前，不动
+    const base = String(110 + slot * 10).padStart(3, '0');
+    slot++;
+    if (nd.type === 'file') {
+      const m = nd.name.match(/^(\d+)(?:-(.*))?(\.[^.]+)$/);
+      let ext, stem;
+      if (m) { ext = m[3]; stem = m[2] || ''; }
+      else {
+        const em = nd.name.match(/(\.[^.]+)$/);
+        ext = em ? em[1] : '.txt';
+        stem = nd.name.replace(/\.[^.]+$/, '');
+      }
+      tasks.push({
+        kind: 'file', handle: nd.handle, oldName: nd.name, dirPath,
+        tmp: '.wttmp' + String(tasks.length + 1).padStart(4, '0') + ext,
+        newName: stem ? base + '-' + stem + ext : base + ext
+      });
+    } else {
+      // 带编号文件夹：替换编号、保留文字（文件夹无扩展名）
+      const m = nd.name.match(/^(\d+)(?:-(.*))?$/);
+      const stem = m && m[2] ? m[2] : '';
+      tasks.push({
+        kind: 'dir', handle: nd.handle, oldName: nd.name, dirPath,
+        tmp: '.wttmpd' + String(tasks.length + 1).padStart(4, '0'),
+        newName: stem ? base + '-' + stem : base
+      });
+    }
+  }
+  if (!tasks.length) { toast('文件夹「' + dirLabel + '」内没有可编号的文件或带编号文件夹'); return; }
+  const examples = tasks.slice(0, 4).map(t => '  ' + t.oldName + '  →  ' + t.newName).join('\n');
+  if (!confirm('将对文件夹「' + dirLabel + '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ' + tasks.length + ' 项（文件 ' + tasks.filter(t => t.kind === 'file').length + ' 个、文件夹 ' + tasks.filter(t => t.kind === 'dir').length + ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n' + examples + '\n\n此操作直接修改文件/文件夹名，不可撤销，确定继续？')) return;
+  const curPath = current ? current.node.path : null;
+  const moveToTemp = async (t) => {
+    if (t.kind === 'file') {
+      const f = await t.handle.getFile();
+      const nh = await dirHandle.getFileHandle(t.tmp, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+      await dirHandle.removeEntry(t.oldName);
+    } else {
+      await copyDir(t.handle, await dirHandle.getDirectoryHandle(t.tmp, { create: true }));
+      await dirHandle.removeEntry(t.oldName, { recursive: true });
+    }
+  };
+  const moveToTarget = async (t, destName) => {
+    if (t.kind === 'file') {
+      const f = await (await dirHandle.getFileHandle(t.tmp)).getFile();
+      const nh = await dirHandle.getFileHandle(destName, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+      await dirHandle.removeEntry(t.tmp);
+    } else {
+      await copyDir(await dirHandle.getDirectoryHandle(t.tmp), await dirHandle.getDirectoryHandle(destName, { create: true }));
+      await dirHandle.removeEntry(t.tmp, { recursive: true });
+    }
+  };
+  try {
+    // 阶段1：全部先改为临时名，避免新旧编号互相冲突
+    for (const t of tasks) await moveToTemp(t);
+    // 阶段2：临时名改为目标名；若目标名被未参与项（如图片、无编号文件夹）占用则跳过并回滚
+    const failed = [];
+    for (const t of tasks) {
+      let clash = false;
+      try {
+        if (t.kind === 'file') await dirHandle.getFileHandle(t.newName);
+        else await dirHandle.getDirectoryHandle(t.newName);
+        clash = true;
+      } catch (e) {}
+      if (clash) { failed.push(t); continue; }
+      await moveToTarget(t, t.newName);
+    }
+    for (const t of failed) await moveToTarget(t, t.oldName);
+    multiSel = []; selectedNode = null; current = null;
+    $('editor').value = '';
+    await refreshTree();
+    if (curPath) {
+      const old = tasks.find(t => t.kind === 'file' && (t.dirPath ? t.dirPath + '/' + t.oldName : t.oldName) === curPath);
+      if (old && !failed.includes(old)) {
+        const np = old.dirPath ? old.dirPath + '/' + old.newName : old.newName;
+        const node = findNode(tree, np);
+        if (node) { selectedNode = node; await openFile(node); }
+      }
+    }
+    renderTree(); updateToolbar();
+    toast(failed.length ? '已重新编号，' + failed.length + ' 项因重名跳过（保留原名）' : '文件夹「' + dirLabel + '」已重新编号 ' + tasks.length + ' 项');
+  } catch (e) {
+    toast('重新编号中断：' + e.message + '（临时名以 .wttmp 开头，可手动改回）');
+    await refreshTree(); renderTree(); updateToolbar();
+  }
+}
+async function copyDir(src, dst) {
+  for await (const [name, h] of src.entries()) {
+    if (h.kind === 'file') {
+      const fh = await dst.getFileHandle(name, { create: true });
+      const w = await fh.createWritable(); await w.write(await h.getFile()); await w.close();
+    } else await copyDir(h, await dst.getDirectoryHandle(name, { create: true }));
+  }
+}
+async function deleteNode() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!n) return;
+  if (!confirm('确定删除「' + n.name + '」' + (n.type === 'dir' ? '及其全部内容' : '') + '？')) return;
+  try {
+    const dir = await getDirHandleByPath(parentPath(n.path));
+    await dir.removeEntry(n.name, { recursive: true });
+    if (current && (current.node === n || current.node.path.startsWith(n.path + '/'))) {
+      current = null; $('editor').value = '';
+    }
+    selectedNode = null;
+    await refreshTree(); renderTree(); updateToolbar(); updateStatus();
+    toast('已删除');
+  } catch (e) { toast('删除失败：' + e.message); }
+}
+function findNode(nodes, path) {
+  for (const n of nodes) {
+    if (n.path === path) return n;
+    if (n.type === 'dir') { const r = findNode(n.children, path); if (r) return r; }
+  }
+  return null;
+}
+async function mergeSelected() {
+  if (multiSel.length < 2) { toast('请先 Ctrl+点击 选择至少两个文件'); return; }
+  // multiSel 存路径：刷新后仍有效；已删除/移动的文件自动剔除
+  const files = multiSel.map(p => findNode(tree, p)).filter(Boolean);
+  if (files.length < 2) { toast('所选文件已不存在，请重新选择（Esc 或「取消选择」清空）'); return; }
+  const first = files[0];
+  try {
+    await flushSave();
+    // 合并内容写入第一个文件（沿用其文件名），其余文件删除
+    const parts = [];
+    for (const f of files) {
+      const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
+      parts.push(t);
+    }
+    const dir0 = await getDirHandleByPath(parentPath(first.path));
+    const fh = await dir0.getFileHandle(first.name, { create: true });
+    const w = await fh.createWritable(); await w.write(parts.join('\n\n')); await w.close();
+    for (const f of files.slice(1)) {
+      const d = await getDirHandleByPath(parentPath(f.path));
+      await d.removeEntry(f.name);
+    }
+    multiSel = []; selectedNode = null; current = null;
+    await refreshTree();
+    const node = findNode(tree, first.path);
+    if (node) { selectedNode = node; await openFile(node); }
+    renderTree(); updateToolbar();
+    toast('已合并 ' + files.length + ' 个文件 → ' + first.name + '，其余文件已删除');
+  } catch (e) { toast('合并失败：' + e.message); }
+}
+
+/* ================= images: paste / drop / pick ================= */
+const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp' };
+async function saveAsset(blob, name) {
+  if (!current) { toast('请先打开一个文件'); return null; }
+  const dir = await getDirHandleByPath(parentPath(current.node.path));
+  const assets = await dir.getDirectoryHandle('assets', { create: true });
+  const fh = await assets.getFileHandle(name, { create: true });
+  const w = await fh.createWritable(); await w.write(blob); await w.close();
+  refreshTree();
+  return 'assets/' + name;
+}
+async function insertImages(files) {
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) continue;
+    const ext = extMap[f.type] || 'png';
+    const name = 'img-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14) + '-' + Math.random().toString(36).slice(2, 6) + '.' + ext;
+    const rel = await saveAsset(f, name);
+    if (rel) insertAtCursor('![image](' + rel + ')\n');
+  }
+}
+function insertAtCursor(text) {
+  const ed = $('editor');
+  ed.focus();
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, text); } catch (e) {}
+  if (!ok) {
+    const s = ed.selectionStart;
+    ed.setRangeText(text, s, ed.selectionEnd, 'end');
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+$('editor').addEventListener('paste', async e => {
+  const items = [...(e.clipboardData?.items || [])];
+  const imgs = items.filter(i => i.type.startsWith('image/'));
+  if (!imgs.length) return;
+  e.preventDefault();
+  const files = imgs.map(i => i.getAsFile()).filter(Boolean);
+  await insertImages(files);
+});
+$('workarea').addEventListener('dragover', e => { e.preventDefault(); });
+$('workarea').addEventListener('drop', async e => {
+  e.preventDefault();
+  const files = [...(e.dataTransfer?.files || [])];
+  if (files.length) await insertImages(files);
+});
+$('btnInsertImg').onclick = () => $('imgInput').click();
+$('imgInput').onchange = async e => {
+  await insertImages([...e.target.files]);
+  e.target.value = '';
+};
+
+/* ================= table: insert & edit ================= */
+function genTable(rows, cols, align) {
+  const sepMap = { left: ':---', center: ':---:', right: '---:', none: '---' };
+  const blank = () => '|' + Array(cols).fill(' ').join('|') + '|';
+  const lines = [blank(), '|' + Array(cols).fill(sepMap[align]).join('|') + '|'];
+  for (let r = 1; r < rows; r++) lines.push(blank());
+  return '\n' + lines.join('\n') + '\n';
+}
+$('btnTable').onclick = () => {
+  if (!current) return;
+  $('dlgTable').showModal();
+};
+$('tCancel').onclick = () => $('dlgTable').close();
+$('tOk').onclick = () => {
+  const rows = Math.max(1, +$('tRows').value || 3);
+  const cols = Math.max(1, +$('tCols').value || 3);
+  insertAtCursor(genTable(rows, cols, $('tAlign').value));
+  $('dlgTable').close();
+};
+
+function splitRow(line) {
+  let s = line.trim();
+  if (s.startsWith('|')) s = s.slice(1);
+  if (s.endsWith('|') && !s.endsWith('\\|')) s = s.slice(0, -1);
+  const cells = []; let cur = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === '\\' && s[i + 1] === '|') { cur += '\\|'; i++; }
+    else if (ch === '|') { cells.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+function caretLineInfo() {
+  const ed = $('editor');
+  const val = ed.value, pos = ed.selectionStart;
+  const lines = val.split('\n');
+  const li = val.slice(0, pos).split('\n').length - 1;
+  return { ed, val, pos, lines, li };
+}
+function getTableBlock() {
+  const { lines, li } = caretLineInfo();
+  if (!lines[li] || !lines[li].includes('|')) return null;
+  const isT = s => s.includes('|');
+  let a = li, b = li;
+  while (a > 0 && isT(lines[a - 1])) a--;
+  while (b < lines.length - 1 && isT(lines[b + 1])) b++;
+  if (b - a < 1) return null;
+  return { lines, a, b, li };
+}
+function caretColInRow(line, posInLine) {
+  let pipes = 0;
+  for (let i = 0; i < posInLine && i < line.length; i++) {
+    if (line[i] === '\\' && line[i + 1] === '|') { i++; continue; }
+    if (line[i] === '|') pipes++;
+  }
+  const col = line.trim().startsWith('|') ? pipes - 1 : pipes;
+  return Math.max(0, col);
+}
+function replaceBlock(a, b, newLines) {
+  const { ed, val, lines } = caretLineInfo();
+  const start = lines.slice(0, a).join('\n').length + (a > 0 ? 1 : 0);
+  const end = start + lines.slice(a, b + 1).join('\n').length;
+  ed.focus();
+  ed.setSelectionRange(start, end);
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, newLines.join('\n')); } catch (e) {}
+  if (!ok) {
+    ed.setRangeText(newLines.join('\n'), start, end, 'end');
+    markDirty();
+  }
+}
+function tableOp(op) {
+  const blk = getTableBlock();
+  if (!blk) { toast('光标需放在表格内'); return; }
+  const { lines, a, b, li, ed } = blk;
+  const blkLines = lines.slice(a, b + 1);
+  const sepIdx = blkLines.findIndex((l, i) => i > 0 && /^\s*\|?[\s:|-]+\|?\s*$/.test(l) && l.includes('-'));
+  const colCount = Math.max(...blkLines.map(l => splitRow(l).length));
+  const posInLine = ed.selectionStart - (lines.slice(0, li).join('\n').length + (li > 0 ? 1 : 0));
+  const col = caretColInRow(lines[li], posInLine);
+  let out = null;
+
+  const mkEmptyRow = tpl => {
+    const cells = splitRow(tpl).map(() => ' ');
+    const lead = tpl.trim().startsWith('|') ? '|' : '';
+    const trail = tpl.trim().endsWith('|') ? '|' : '';
+    return lead + ' ' + cells.join(' | ') + ' ' + trail;
+  };
+
+  if (op === 'rowAbove' || op === 'rowBelow') {
+    const tpl = (sepIdx >= 0 ? blkLines[Math.max(1, sepIdx - 1)] : blkLines[blkLines.length - 1]) || blkLines[0];
+    const row = mkEmptyRow(tpl);
+    let at = op === 'rowAbove' ? li - a : li - a + 1;
+    if (sepIdx >= 0) { if (op === 'rowAbove' && at <= sepIdx) at = sepIdx; if (op === 'rowBelow' && at <= sepIdx) at = sepIdx + 1; }
+    out = [...blkLines.slice(0, at), row, ...blkLines.slice(at)];
+  } else if (op === 'rowDel') {
+    if (b - a < 1 || (sepIdx >= 0 && blkLines.length <= 2)) { toast('至少保留表头与分隔行'); return; }
+    out = blkLines.filter((_, i) => i !== li - a);
+  } else if (op === 'colLeft' || op === 'colRight') {
+    const at = op === 'colLeft' ? col : col + 1;
+    out = blkLines.map((l, i) => {
+      const cells = splitRow(l);
+      const fill = (i === sepIdx || (sepIdx < 0 && i === 1)) ? (cells[Math.min(col, cells.length - 1)] || '---') : ' ';
+      cells.splice(Math.min(at, cells.length), 0, fill);
+      const lead = l.trim().startsWith('|') ? '|' : '';
+      const trail = l.trim().endsWith('|') ? '|' : '';
+      return lead + ' ' + cells.join(' | ') + ' ' + trail;
+    });
+  } else if (op === 'colDel') {
+    if (colCount <= 1) { toast('至少保留一列'); return; }
+    out = blkLines.map(l => {
+      const cells = splitRow(l);
+      cells.splice(Math.min(col, cells.length - 1), 1);
+      const lead = l.trim().startsWith('|') ? '|' : '';
+      const trail = l.trim().endsWith('|') ? '|' : '';
+      return lead + ' ' + cells.join(' | ') + ' ' + trail;
+    });
+  }
+  if (out) replaceBlock(a, b, out);
+}
+document.querySelectorAll('#tableBar button').forEach(b => b.onclick = () => tableOp(b.dataset.top));
+$('editor').addEventListener('keyup', updateTableBar);
+$('editor').addEventListener('click', updateTableBar);
+$('editor').addEventListener('input', updateTableBar);
+function updateTableBar() {
+  const inTable = current && !!getTableBlock();
+  $('tableBar').classList.toggle('hidden', !inTable);
+}
+
+/* ================= editor keys ================= */
+$('editor').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); if (current) { clearTimeout(saveTimer); saveCurrent(); } return; }
+  if (e.key === 'Tab') { e.preventDefault(); insertAtCursor('  '); return; }
+  if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) { listContinue(e); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapSel('**'); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapSel('*'); return; }
+});
+function wrapSel(txt) {
+  const ed = $('editor'); ed.focus();
+  const sel = ed.value.slice(ed.selectionStart, ed.selectionEnd);
+  try { document.execCommand('insertText', false, txt + sel + txt); } catch (e) {}
+}
+function listContinue(e) {
+  const { ed, val, pos } = caretLineInfo();
+  const ls = val.lastIndexOf('\n', pos - 1) + 1;
+  const line = val.slice(ls, pos);
+  const m = line.match(/^(\s*)(> ?|[-*+] \[[ x]\] |[-*+] |(\d+)([.)]) )/);
+  if (!m) return;
+  const rest = line.slice(m[0].length);
+  e.preventDefault();
+  if (!rest.trim()) { // 空列表项 -> 退出列表
+    ed.setSelectionRange(ls, pos);
+    try { document.execCommand('insertText', false, ''); } catch (err) {}
+    return;
+  }
+  let marker = m[2];
+  if (m[3]) marker = (parseInt(m[3]) + 1) + m[4] + ' ';
+  if (/^[-*+] \[[ x]\] $/.test(marker)) marker = marker[0] + ' [ ] ';
+  try { document.execCommand('insertText', false, '\n' + m[1] + marker); } catch (err) {}
+}
+
+/* ================= modes ================= */
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  $('editView').classList.toggle('hidden', m !== 'edit');
+  $('previewView').classList.toggle('hidden', m !== 'preview');
+  $('readView').classList.toggle('hidden', m !== 'read');
+  if (m === 'edit') {
+    // 编辑时一律展开左侧目录，方便操作文件
+    localStorage.removeItem('wt-side-hidden');
+    applySideHidden();
+    renderLivePreview(); updateTableBar();
+  }
+  if (m === 'preview') renderSinglePreview();
+  if (m === 'read') renderMerged();
+  updateToTopVis();
+}
+function renderSinglePreview() {
+  if (!current) { $('singlePreview').innerHTML = '<div style="color:var(--muted)">未选择文件</div>'; return; }
+  $('singlePreview').innerHTML = mdToHtml(current.content);
+  fixImages($('singlePreview'), parentPath(current.node.path));
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* ================= toolbar / theme / misc ================= */
+function updateToolbar() {
+  const hasRoot = !!rootHandle;
+  const hasSel = hasRoot && (selectedNode || current);
+  $('btnMerge').disabled = !(hasRoot && multiSel.length >= 2);
+  $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
+  $('btnUnsel').classList.toggle('hidden', !multiSel.length);
+  $('btnPalette').disabled = !current;
+  $('btnReplaceFile').disabled = !current;
+  $('btnReplaceProject').disabled = !hasRoot;
+  $('btnNewFile').disabled = !hasRoot;
+  $('btnNewDir').disabled = !hasRoot;
+  $('btnRename').disabled = !hasSel;
+  $('btnDelete').disabled = !hasSel;
+  $('btnInsertImg').disabled = !current;
+  $('btnTable').disabled = !current;
+  $('btnExport').disabled = !hasRoot;
+  $('btnExportMd').disabled = !hasRoot;
+  $('btnPrint').disabled = !hasRoot;
+  $('btnCss').disabled = !hasRoot;
+  $('presetSel').disabled = !hasRoot;
+  $('btnRenumber').disabled = !(hasRoot && (selectedNode || current));
+  const hasFile = hasRoot && ((selectedNode && selectedNode.type === 'file') || current);
+  $('btnAutoName').disabled = !hasFile;
+  $('btnRefresh').disabled = !hasRoot;
+  document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
+}
+$('btnOpen').onclick = pickFolder;
+$('btnOpen2').onclick = pickFolder;
+async function pickFolder() {
+  try {
+    const h = await showDirectoryPicker({ mode: 'readwrite' });
+    await useRoot(h);
+  } catch (e) { if (e.name !== 'AbortError') toast('打开失败：' + e.message); }
+}
+$('btnReconnect').onclick = async () => {
+  try { const h = await idbGet('root'); if (h) await useRoot(h); }
+  catch (e) { toast('重连失败，请重新选择文件夹'); }
+};
+$('btnNewFile').onclick = newFile;
+$('btnNewDir').onclick = newDir;
+$('btnRename').onclick = renameNode;
+$('btnDelete').onclick = deleteNode;
+$('btnMerge').onclick = mergeSelected;
+$('btnUnsel').onclick = () => { multiSel = []; renderTree(); updateToolbar(); };
+$('btnAutoName').onclick = autoRename;
+$('btnRenumber').onclick = renumberAll;
+$('btnCss').onclick = openStyleCss;
+$('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') renderMerged(); toast('已刷新'); };
+$('btnExport').onclick = exportMerged;
+// 字号调节：编辑模式调编辑器字号，预览/阅览调内容字号
+let fsBody = parseFloat(localStorage.getItem('wt-fs')) || 16.5;
+let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
+function applyFs() {
+  document.documentElement.style.setProperty('--fs-body', fsBody + 'px');
+  document.documentElement.style.setProperty('--fs-editor', fsEditor + 'px');
+  localStorage.setItem('wt-fs', String(fsBody));
+  localStorage.setItem('wt-efs', String(fsEditor));
+}
+applyFs();
+$('btnFontUp').onclick = () => {
+  if (mode === 'edit') fsEditor = Math.min(28, fsEditor + 1); else fsBody = Math.min(26, fsBody + 1);
+  applyFs();
+};
+$('btnFontDown').onclick = () => {
+  if (mode === 'edit') fsEditor = Math.max(12, fsEditor - 1); else fsBody = Math.max(13, fsBody - 1);
+  applyFs();
+};
+// 隐藏/显示左侧文件目录
+function applySideHidden() {
+  const hid = localStorage.getItem('wt-side-hidden') === '1';
+  $('sidebar').classList.toggle('hidden', hid);
+  $('divSidebar').classList.toggle('hidden', hid);
+  $('btnSide').textContent = hid ? '展开目录' : '隐藏目录';
+}
+$('btnSide').onclick = () => {
+  localStorage.setItem('wt-side-hidden', localStorage.getItem('wt-side-hidden') === '1' ? '0' : '1');
+  applySideHidden();
+};
+applySideHidden();
+// 打印 / 导出 PDF：用打印样式渲染合并全书
+$('btnPrint').onclick = async () => {
+  if (!rootHandle) return;
+  toast('正在准备打印…请在打印对话框取消勾选“页眉和页脚”');
+  if (mode !== 'read') setMode('read'); else await renderMerged();
+  setTimeout(() => window.print(), 800);
+};
+$('btnExportMd').onclick = exportMd;
+$('btnTheme').onclick = () => {
+  const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = cur;
+  $('btnTheme').textContent = cur === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('wt-theme', cur);
+};
+if (localStorage.getItem('wt-theme') === 'dark') {
+  document.documentElement.dataset.theme = 'dark';
+  $('btnTheme').textContent = '☀️';
+}
+// 编辑器双向绑定
+$('editor').addEventListener('input', () => { markDirty(); schedulePreview(); updateTableBar(); });
+window.addEventListener('beforeunload', e => {
+  if (current && current.dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ================= 可拖动分隔条 ================= */
+function makeDivider(div, leftEl, opt) {
+  const saved = localStorage.getItem(opt.store);
+  if (saved) leftEl.style.width = saved + 'px';
+  if (opt.onWidth) opt.onWidth(leftEl.getBoundingClientRect().width);
+  div.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const w0 = leftEl.getBoundingClientRect().width, x0 = e.clientX;
+    const mv = ev => {
+      let w = w0 + (opt.invert ? -1 : 1) * (ev.clientX - x0);
+      w = Math.max(opt.min, Math.min(opt.max, w));
+      leftEl.style.width = w + 'px';
+      if (opt.onWidth) opt.onWidth(w);
+    };
+    const up = () => {
+      localStorage.setItem(opt.store, Math.round(leftEl.getBoundingClientRect().width));
+      document.removeEventListener('mousemove', mv);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
+  });
+}
+makeDivider($('divSidebar'), $('sidebar'), { min: 120, max: 640, store: 'wt-w-sidebar' });
+makeDivider($('divEdit'), $('livePreview'), { min: 220, max: 1600, store: 'wt-w-preview', invert: true });
+makeDivider($('divRead'), $('tocPanel'), { min: 120, max: 640, store: 'wt-w-toc' });
+// 拖到项目名上 = 移到根目录
+$('projName').ondragover = e => { if (dragPath && parentPath(dragPath)) { e.preventDefault(); $('projName').classList.add('drop-target'); } };
+$('projName').ondragleave = () => $('projName').classList.remove('drop-target');
+$('projName').ondrop = async e => {
+  e.preventDefault(); $('projName').classList.remove('drop-target');
+  const p = e.dataTransfer.getData('text/plain') || dragPath;
+  const src = p && findNode(tree, p);
+  dragPath = null;
+  if (src && parentPath(src.path)) await moveNode(src, null);
+};
+/* ================= search ================= */
+const escapeReg = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+async function doSearch() {
+  if (!rootHandle) return;
+  const q = $('searchInput').value.trim();
+  if (!q) { clearSearch(); return; }
+  if (localStorage.getItem('wt-side-hidden') === '1') { localStorage.removeItem('wt-side-hidden'); applySideHidden(); }
+  await flushSave();
+  const ql = q.toLowerCase();
+  const results = [];
+  for (const f of collectFiles(tree, [], true)) {
+    let text;
+    try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
+    catch (e) { continue; }
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].toLowerCase().includes(ql)) {
+        results.push({ node: f, line: i + 1, text: lines[i].trim().slice(0, 120) });
+        if (results.length >= 200) break;
+      }
+    }
+    if (results.length >= 200) break;
+  }
+  const box = $('searchResults');
+  const re = new RegExp(escapeReg(q), 'gi');
+  box.innerHTML = results.length
+    ? results.map(r =>
+        '<div class="s-item"><div class="s-file">' + (r.node.draft ? '<span style="color:#b0741a">[草稿] </span>' : '') + esc(r.node.name) + ' · 第 ' + r.line + ' 行</div>' +
+        '<div class="s-line">' + esc(r.text).replace(re, m => '<mark>' + m + '</mark>') + '</div></div>').join('')
+    : '<div class="s-empty">没有找到包含「' + esc(q) + '」的内容</div>';
+  box.classList.remove('hidden');
+  $('tree').classList.add('hidden');
+  box.querySelectorAll('.s-item').forEach((el, i) => { el.onclick = () => gotoSearchResult(results[i]); });
+  if (!results.length) toast('没有找到「' + q + '」');
+}
+function clearSearch() {
+  $('searchInput').value = '';
+  $('searchResults').classList.add('hidden');
+  $('searchResults').innerHTML = '';
+  $('tree').classList.remove('hidden');
+}
+async function gotoSearchResult(r) {
+  selectedNode = r.node;
+  setMode('edit');
+  await openFile(r.node);
+  const ed = $('editor');
+  const lines = ed.value.split('\n');
+  let pos = 0;
+  for (let i = 0; i < r.line - 1 && i < lines.length; i++) pos += lines[i].length + 1;
+  ed.focus();
+  ed.setSelectionRange(pos, pos + (lines[r.line - 1] || '').length);
+  const lh = parseFloat(getComputedStyle(ed).lineHeight) || 26;
+  ed.scrollTop = Math.max(0, (r.line - 6) * lh);
+}
+$('btnSearch').onclick = doSearch;
+$('btnClearSearch').onclick = clearSearch;
+$('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+  if (e.key === 'Escape') clearSearch();
+});
+
+/* ================= palette & replace ================= */
+const PALETTE = ['#000000','#7f8c8d','#bdc3c7','#ecf0f1','#ffffff','#c0392b','#e74c3c','#e91e63',
+'#8e44ad','#9b59b6','#2980b9','#3498db','#16a085','#1abc9c','#27ae60','#2ecc71',
+'#d35400','#e67e22','#f39c12','#f1c40f','#2c3e50','#34495e','#5d6d7e','#95a5a6'];
+let palSel = '#3b7dd8';
+function renderPalette() {
+  $('palGrid').innerHTML = PALETTE.map(c =>
+    '<div class="sw' + (c.toLowerCase() === palSel.toLowerCase() ? ' on' : '') + '" style="background:' + c + '" data-c="' + c + '"></div>').join('');
+  $('palHex').textContent = palSel;
+  $('palCustom').value = /^#[0-9a-f]{6}$/i.test(palSel) ? palSel : '#3b7dd8';
+  $('palGrid').querySelectorAll('.sw').forEach(el => {
+    el.onclick = () => { palSel = el.dataset.c; renderPalette(); };
+  });
+}
+$('btnPalette').onclick = () => { if (!current) { toast('请先打开文件'); return; } renderPalette(); $('dlgPalette').showModal(); };
+$('palCancel').onclick = () => $('dlgPalette').close();
+$('palCustom').oninput = e => { palSel = e.target.value; renderPalette(); };
+$('palOk').onclick = () => { $('dlgPalette').close(); insertAtCursor(palSel); toast('已插入 ' + palSel); };
+
+let rpMode = 'file';
+function countOcc(hay, needle) {
+  if (!needle) return 0;
+  let n = 0, i = 0;
+  while ((i = hay.indexOf(needle, i)) >= 0) { n++; i += needle.length; }
+  return n;
+}
+function openReplace(m) {
+  if (m === 'file' && !current) { toast('请先打开文件'); return; }
+  if (m === 'project' && !rootHandle) return;
+  rpMode = m;
+  $('rpTitle').textContent = m === 'file' ? '替换（当前文件：' + current.node.name + '）' : '替换（整个项目）';
+  $('rpInfo').textContent = m === 'file' ? '' : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片）';
+  $('dlgReplace').showModal();
+}
+$('btnReplaceFile').onclick = () => openReplace('file');
+$('btnReplaceProject').onclick = () => openReplace('project');
+$('rpCancel').onclick = () => $('dlgReplace').close();
+$('rpOk').onclick = async () => {
+  const find = $('rpFind').value;
+  if (!find) { toast('请输入查找内容'); return; }
+  const to = $('rpTo').value;
+  try {
+    if (rpMode === 'file') {
+      await flushSave();
+      const n = countOcc(current.content, find);
+      if (!n) { toast('当前文件没有找到「' + find + '」'); return; }
+      if (!confirm('当前文件中共 ' + n + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？')) return;
+      const ed = $('editor');
+      const pos = ed.selectionStart;
+      ed.value = current.content.split(find).join(to);
+      markDirty();
+      ed.setSelectionRange(Math.min(pos, ed.value.length), Math.min(pos, ed.value.length));
+      schedulePreview();
+      $('dlgReplace').close();
+      toast('已替换 ' + n + ' 处');
+    } else {
+      await flushSave();
+      const changed = [];
+      let total = 0;
+      for (const f of collectFiles(tree, [], true)) {
+        let text;
+        try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); } catch (e) { continue; }
+        const n = countOcc(text, find);
+        if (n) { total += n; changed.push({ node: f, from: text }); }
+      }
+      if (!total) { toast('项目内没有找到「' + find + '」'); return; }
+      if (!confirm('项目内共 ' + changed.length + ' 个文件、' + total + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？此操作不可撤销。')) return;
+      for (const c of changed) {
+        const w = await c.node.handle.createWritable();
+        await w.write(c.from.split(find).join(to)); await w.close();
+      }
+      // 若当前打开的文件被改动，同步编辑器
+      const hit = current && changed.find(c => c.node.path === current.node.path);
+      if (hit) {
+        current.content = hit.from.split(find).join(to);
+        current.dirty = false;
+        $('editor').value = current.content;
+        schedulePreview(); updateStatus();
+        $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+      }
+      $('dlgReplace').close();
+      toast('已在 ' + changed.length + ' 个文件中替换 ' + total + ' 处');
+    }
+  } catch (e) { toast('替换失败：' + e.message); }
+};
+/* ================= back to top ================= */
+let topTarget = null;
+function updateToTopVis() {
+  const cands = mode === 'read' ? [$('mergedWrap')] : mode === 'preview' ? [$('singlePreview')] : [$('editor'), $('livePreview')];
+  topTarget = cands.find(el => el && el.scrollTop > 300) || null;
+  $('toTop').classList.toggle('show', !!topTarget);
+}
+['mergedWrap', 'editor', 'livePreview', 'singlePreview'].forEach(id => {
+  $(id).addEventListener('scroll', () => {
+    if ($(id).scrollTop > 300) { topTarget = $(id); $('toTop').classList.add('show'); }
+    else if (topTarget === $(id)) { topTarget = null; $('toTop').classList.remove('show'); }
+  }, { passive: true });
+});
+$('toTop').onclick = () => {
+  const el = topTarget || (mode === 'read' ? $('mergedWrap') : $('editor'));
+  el.scrollTo({ top: 0, behavior: 'smooth' });
+};
+// Esc 清空多选
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && multiSel.length) { multiSel = []; renderTree(); updateToolbar(); }
+});
+
+/* ================= init ================= */
+(async function init() {
+  if (!window.showDirectoryPicker) {
+    $('welcome').querySelector('.tip').innerHTML =
+      '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 writetools.html）。';
+    return;
+  }
+  try {
+    const saved = await idbGet('root');
+    if (saved && saved.name) {
+      $('lastName').textContent = saved.name;
+      $('btnReconnect').classList.remove('hidden');
+      // 新版浏览器（Chrome/Edge 122+）持久授权：静默自动恢复，无需点击
+      const perm = await saved.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') { await useRoot(saved); return; }
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
