@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WriteTools 写作工具</title>
-<style id="userCssStyle"></style>
-<style>
+<style id="chromeCss">
 :root {
-  --fs-body: 16.5px;
+  --fs-editor: 15px;
   --bg: #f6f6f4; --panel: #ffffff; --text: #26282b; --muted: #8a8f98;
   --border: #e4e4e0; --accent: #3b7dd8; --sel: #eaf2fd; --hover: #f0f2f5;
   --code-bg: #f2f2ee; --toolbar: #fbfbfa;
@@ -176,61 +175,11 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 #tocPanel a.l4 { padding-left: 48px; font-size: 12px; color: var(--muted); }
 #mergedWrap { flex: 1; overflow: auto; }
 #mergedBody { max-width: 780px; margin: 0 auto; padding: 40px 36px 120px; }
-#mergedBody .book-title {
-  text-align: center; font-size: 30px; font-weight: 700;
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-  line-height: 1.3; margin: 10px 0 40px;
-}
-#mergedBody .file-boundary {
-  border: none; border-top: 1px dashed var(--border); margin: 48px 0; position: relative;
-}
-#mergedBody .file-boundary span {
-  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-  background: var(--bg); color: var(--muted); font-size: 11px; padding: 0 10px;
-  white-space: nowrap;
-}
-
-/* ---------- markdown body ---------- */
-.md-body {
-  font-family: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
-  font-size: var(--fs-body, 16.5px); line-height: 1.9; color: var(--text);
-  padding: 30px 38px;
-}
-.md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 {
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--text);
-  line-height: 1.4; margin: 1.4em 0 .7em; scroll-margin-top: 20px;
-}
-.md-body h1 { font-size: 27px; } .md-body h2 { font-size: 22px; }
-.md-body h3 { font-size: 19px; } .md-body h4 { font-size: 17px; }
-.md-body h1:first-child, .md-body h2:first-child { margin-top: .2em; }
-.md-body p { margin: .8em 0; }
-.md-body a { color: var(--accent); }
-.md-body img { max-width: 100%; border-radius: 4px; display: block; margin: 14px auto; }
-.md-body img.img-missing { display: inline-block; padding: 14px 18px; border: 1px dashed var(--muted);
-  border-radius: 6px; color: var(--muted); font-size: 13px; font-family: "Microsoft YaHei", sans-serif; }
-.md-body blockquote {
-  border-left: 3px solid var(--accent); background: var(--panel);
-  margin: 1em 0; padding: .6em 1.1em; color: var(--muted); border-radius: 0 6px 6px 0;
-}
-.md-body code {
-  background: var(--code-bg); padding: .15em .4em; border-radius: 4px;
-  font-family: Consolas, monospace; font-size: .88em;
-}
-.md-body pre { background: var(--code-bg); padding: 14px 18px; border-radius: 8px; overflow: auto; margin: 1em 0; }
-.md-body pre code { background: none; padding: 0; }
-.md-body hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
-.md-body ul, .md-body ol { padding-left: 1.8em; margin: .7em 0; }
-.md-body li { margin: .3em 0; }
-.md-body table { border-collapse: collapse; margin: 1.2em auto; max-width: 100%; display: block; overflow-x: auto; }
-.md-body th, .md-body td { border: 1px solid var(--border); padding: 7px 14px; font-size: 15px; line-height: 1.6; }
-.md-body th { background: var(--panel); font-weight: 600; font-family: "Microsoft YaHei", sans-serif; }
-.md-body tr:nth-child(even) td { background: color-mix(in srgb, var(--panel) 55%, transparent); }
-.md-body .plaintext { white-space: pre-wrap; font-family: Consolas, monospace; font-size: 14.5px; line-height: 1.8; }
 
 .tnode.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--sel); }
 #projName.drop-target { color: var(--accent); }
 
-/* ---------- book publishing ---------- */
+/* ---------- book publishing (chrome only) ---------- */
 #readMain { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 #bookBar {
   display: flex; align-items: center; gap: 10px; padding: 6px 14px; flex: none;
@@ -241,74 +190,188 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
   font: inherit; font-size: 12.5px; color: var(--text); background: var(--bg);
   border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px;
 }
-.book-front { max-width: 780px; margin: 0 auto; padding: 0 36px; }
-.book-cover {
-  min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--border); margin-bottom: 34px;
-}
-.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; }
-.bc-sub { font-size: 15px; color: var(--muted); margin-top: 16px; letter-spacing: .12em; }
-.bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
-.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--border); margin-bottom: 34px; }
-.book-toc .toc-h { text-align: center; font-size: 19px; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
-.book-toc a { display: block; color: var(--text); text-decoration: none; font-size: 14px; line-height: 2.05; }
-.book-toc a.tl1 { font-weight: 700; margin-top: 7px; }
-.book-toc a.tl2 { padding-left: 1.6em; }
-.book-toc a.tl3 { padding-left: 3.2em; font-size: 13px; color: var(--muted); }
-.book-toc a.tl4 { padding-left: 4.8em; font-size: 12.5px; color: var(--muted); }
-body.book-has-cover #mergedBody > .book-title { display: none; }
-/* 四套成书主题（屏幕阅览同样生效） */
-/* 首行缩进：成书阅览 + 编辑模式右侧实时预览均生效 */
-body.book-indent #mergedBody p,
-body.book-indent #livePreview p { text-indent: 2em; }
-body[data-book-theme="classic"] #mergedBody h1 { text-align: center; margin-top: 2.4em; }
-body[data-book-theme="modern"] #mergedBody,
-body[data-book-theme="modern"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
-body[data-book-theme="modern"] #mergedBody { font-size: 16px; line-height: 1.85; }
-body[data-book-theme="modern"] #mergedBody h1 { font-size: 26px; border-left: 4px solid var(--text); padding-left: 12px; margin-top: 2em; }
-body[data-book-theme="modern"] #mergedBody p { margin: 1em 0; }
-body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 130px; }
-body[data-book-theme="modern"] .bc-title { font-size: 40px; }
-body[data-book-theme="modern"] .bc-meta { margin-top: 80px; }
-body[data-book-theme="academic"] #mergedBody,
-body[data-book-theme="academic"] .book-front { font-family: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif; }
-body[data-book-theme="academic"] #mergedBody { font-size: 15.5px; line-height: 1.75; }
-body[data-book-theme="academic"] #mergedBody h1 { text-align: center; font-size: 21px; margin-top: 2em; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
-body[data-book-theme="academic"] #mergedBody h2 { font-size: 17px; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
-body[data-book-theme="academic"] #mergedBody h3 { font-size: 15.5px; }
-/* 手机阅览：黑体、大字号、宽行距，适合窄屏手机浏览器 */
-body[data-book-theme="phone"] #mergedBody,
-body[data-book-theme="phone"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
-body[data-book-theme="phone"] #mergedBody { font-size: 20px; line-height: 1.95; }
-body[data-book-theme="phone"] #mergedBody h1 { text-align: center; font-size: 27px; margin-top: 2em; }
-body[data-book-theme="phone"] #mergedBody h2 { font-size: 24px; }
-body[data-book-theme="phone"] #mergedBody h3 { font-size: 22px; }
-/* 手机阅览：封面（书名/副标题/作者/日期）同步放大 */
-body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 70px 20px 60px; }
-body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
-body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
-body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
-/* 手机阅览：目录（扉页内）同步放大，各级别条目都覆盖 */
-body[data-book-theme="phone"] .book-toc .toc-h { font-size: 23px; }
-body[data-book-theme="phone"] .book-toc a,
-body[data-book-theme="phone"] .book-toc a.tl1,
-body[data-book-theme="phone"] .book-toc a.tl2,
-body[data-book-theme="phone"] .book-toc a.tl3,
-body[data-book-theme="phone"] .book-toc a.tl4 { font-size: 19px; line-height: 1.95; color: var(--text); }
 
-/* ---------- print ---------- */
+/* ---------- print (chrome: hide UI + baseline page) ---------- */
 @media print {
   * { box-sizing: border-box; }
   #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #bookBar { display: none !important; }
   #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; width: 100%; }
   @page { size: A4; margin: 24mm 20mm 22mm; }
   body { margin: 0; overflow: visible; background: #fff; }
-  #mergedBody { width: 100%; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-  #mergedBody .book-title { text-align: center !important; font-size: 28px; margin: 0 0 30px !important; }
-  #mergedBody hr.file-boundary { display: none; }
-  #mergedBody hr { margin: 1.2em 0; }
+}
+</style>
+
+<!-- ================= 内容样式（单一来源） =================
+     编辑实时预览、单文件预览、成书阅览共用本表；
+     导出 HTML 时直接序列化本表，不再维护第二套。 -->
+<style id="contentCss">
+:root {
+  /* 字体 */
+  --md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
+  --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;
+  /* 配色（经典黑默认） */
+  --md-body-color: #222222;
+  --md-muted-color: #8a8f98;
+  --md-accent: #3b7dd8;
+  --md-panel: #ffffff;
+  --md-code-bg: #f2f2ee;
+  --md-border: #e4e4e0;
+  --md-stripe: rgba(0,0,0,.035);
+  /* 字号（成书主题会覆盖这组变量） */
+  --md-fs: 16.5px; --md-lh: 1.9;
+  --md-h1-fs: 27px; --md-h2-fs: 22px; --md-h3-fs: 19px;
+  --md-h4-fs: 17px; --md-h5-fs: 15px; --md-h6-fs: 14px;
+  /* 标题配色（经典黑默认） */
+  --md-h1-color: #111111; --md-h2-color: #222222; --md-h3-color: #333333;
+  --md-h4-color: #444444; --md-h5-color: #555555; --md-h6-color: #666666;
+  /* A+/A- 缩放倍率（默认 1） */
+  --md-zoom: 1;
+}
+[data-theme="dark"] {
+  --md-body-color: #d8d9db;
+  --md-muted-color: #9aa0a8;
+  --md-accent: #6aa3e0;
+  --md-panel: #2a2d31;
+  --md-code-bg: #2a2d31;
+  --md-border: #3a3d42;
+  --md-stripe: rgba(255,255,255,.05);
+  --md-h1-color: #eeeeee; --md-h2-color: #e4e5e7; --md-h3-color: #d9dbdf;
+  --md-h4-color: #cfd1d6; --md-h5-color: #c5c8ce; --md-h6-color: #bcc0c8;
+}
+
+/* ---------- markdown body ---------- */
+.md-body {
+  font-family: var(--md-font-body);
+  font-size: calc(var(--md-fs) * var(--md-zoom));
+  line-height: var(--md-lh); color: var(--md-body-color);
+  padding: 30px 38px;
+}
+.md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 {
+  font-family: var(--md-font-head); color: var(--md-head-color, var(--md-body-color));
+  line-height: 1.4; margin: 1.4em 0 .7em; scroll-margin-top: 20px;
+}
+.md-body h1 { font-size: calc(var(--md-h1-fs) * var(--md-zoom)); color: var(--md-h1-color); }
+.md-body h2 { font-size: calc(var(--md-h2-fs) * var(--md-zoom)); color: var(--md-h2-color); }
+.md-body h3 { font-size: calc(var(--md-h3-fs) * var(--md-zoom)); color: var(--md-h3-color); }
+.md-body h4 { font-size: calc(var(--md-h4-fs) * var(--md-zoom)); color: var(--md-h4-color); }
+.md-body h5 { font-size: calc(var(--md-h5-fs) * var(--md-zoom)); color: var(--md-h5-color); }
+.md-body h6 { font-size: calc(var(--md-h6-fs) * var(--md-zoom)); color: var(--md-h6-color); }
+.md-body h1:first-child, .md-body h2:first-child { margin-top: .2em; }
+.md-body p { margin: .8em 0; }
+.md-body a { color: var(--md-accent); }
+.md-body img { max-width: 100%; border-radius: 4px; display: block; margin: 14px auto; }
+.md-body img.img-missing { display: inline-block; padding: 14px 18px; border: 1px dashed var(--md-muted-color);
+  border-radius: 6px; color: var(--md-muted-color); font-size: 13px; font-family: var(--md-font-head); }
+.md-body blockquote {
+  border-left: 3px solid var(--md-accent); background: var(--md-panel);
+  margin: 1em 0; padding: .6em 1.1em; color: var(--md-muted-color); border-radius: 0 6px 6px 0;
+}
+.md-body code {
+  background: var(--md-code-bg); padding: .15em .4em; border-radius: 4px;
+  font-family: Consolas, monospace; font-size: .88em;
+}
+.md-body pre { background: var(--md-code-bg); padding: 14px 18px; border-radius: 8px; overflow: auto; margin: 1em 0; }
+.md-body pre code { background: none; padding: 0; }
+.md-body hr { border: none; border-top: 1px solid var(--md-border); margin: 2em 0; }
+.md-body ul, .md-body ol { padding-left: 1.8em; margin: .7em 0; }
+.md-body li { margin: .3em 0; }
+.md-body table { border-collapse: collapse; margin: 1.2em auto; max-width:100%; display:block; overflow-x:auto; }
+.md-body th, .md-body td { border: 1px solid var(--md-border); padding: 7px 14px; font-size: .92em; line-height: 1.6; }
+.md-body th { background: var(--md-panel); font-weight: 600; font-family: var(--md-font-head); }
+.md-body tr:nth-child(even) td { background: var(--md-stripe); }
+.md-body .plaintext { white-space: pre-wrap; font-family: Consolas, monospace; font-size: 14.5px; line-height: 1.8; }
+
+/* 阅览视图特有的作品标题与文件分隔线 */
+.md-body .book-title {
+  text-align: center; font-size: 30px; font-weight: 700;
+  font-family: var(--md-font-head);
+  line-height: 1.3; margin: 10px 0 40px;
+}
+.md-body hr.file-boundary {
+  border: none; border-top: 1px dashed var(--md-border); margin: 48px 0; position: relative;
+}
+.md-body hr.file-boundary span {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-canvas, #f6f6f4); color: var(--md-muted-color); font-size: 11px; padding: 0 10px;
+  white-space: nowrap;
+}
+body.book-has-cover .md-body > .book-title { display: none; }
+
+/* 首行缩进：对所有内容区生效（实时预览/单文件预览/成书阅览） */
+body.book-indent .md-body p { text-indent: 2em; }
+
+/* ================= 成书版式（布局层，不写死颜色） ================= */
+
+/* classic 经典书籍：默认值即经典（居中标题），无需额外覆盖 */
+body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }
+
+/* modern 现代简洁：黑体、左对齐标题带竖线 */
+body[data-book-theme="modern"] {
+  --md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --md-fs: 16px; --md-lh: 1.85;
+  --md-h1-fs: 26px;
+}
+body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-body-color); padding-left: 12px; margin-top: 2em; }
+body[data-book-theme="modern"] .md-body p { margin: 1em 0; }
+
+/* academic 学术：宋体小字紧凑 */
+body[data-book-theme="academic"] {
+  --md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
+  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
+  --md-fs: 15.5px; --md-lh: 1.75;
+  --md-h1-fs: 21px; --md-h2-fs: 17px; --md-h3-fs: 15.5px; --md-h4-fs: 15px;
+}
+body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }
+
+/* phone 手机阅览：黑体大字宽行距 */
+body[data-book-theme="phone"] {
+  --md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  --md-fs: 20px; --md-lh: 1.95;
+  --md-h1-fs: 27px; --md-h2-fs: 24px; --md-h3-fs: 22px;
+  --md-h4-fs: 20px; --md-h5-fs: 19px; --md-h6-fs: 18px;
+}
+body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }
+
+/* ================= 封面与扉页目录（阅览视图） ================= */
+.book-front { max-width: 780px; margin: 0 auto; padding: 0 36px; }
+.book-cover {
+  min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px;
+}
+.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; }
+.bc-sub { font-size: 15px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
+.bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
+.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px; }
+.book-toc .toc-h { text-align: center; font-size: 19px; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
+.book-toc a { display: block; color: var(--md-body-color); text-decoration: none; font-size: 14px; line-height: 2.05; }
+.book-toc a.tl1 { font-weight: 700; margin-top: 7px; }
+.book-toc a.tl2 { padding-left: 1.6em; }
+.book-toc a.tl3 { padding-left: 3.2em; }
+.book-toc a.tl4 { padding-left: 4.8em; }
+
+/* modern 封面布局 */
+body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 130px; }
+body[data-book-theme="modern"] .bc-title { font-size: 40px; }
+body[data-book-theme="modern"] .bc-meta { margin-top: 80px; }
+
+/* phone 封面/扉页目录放大 */
+body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 70px 20px 60px; }
+body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
+body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
+body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
+body[data-book-theme="phone"] .book-toc .toc-h { font-size: 23px; }
+body[data-book-theme="phone"] .book-toc a { font-size: 19px; line-height: 1.95; color: var(--md-body-color); }
+
+/* ---------- print: 内容相关 ---------- */
+@media print {
   .md-body { color: #000; background: #fff; padding: 0; max-width: 100%; }
   .md-body p, .md-body li, .md-body h1, .md-body h2, .md-body h3, .md-body h4 { overflow-wrap: anywhere; word-break: break-word; }
+  #mergedBody { width: 100%; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  .md-body .book-title { text-align: center !important; font-size: 28px; margin: 0 0 30px !important; }
+  .md-body hr.file-boundary { display: none; }
+  .md-body hr { margin: 1.2em 0; }
   .book-front { max-width: 100%; padding: 0; }
   .book-cover {
     min-height: 297mm; box-sizing: border-box; margin: 0; padding: 0 26mm;
@@ -316,13 +379,15 @@ body[data-book-theme="phone"] .book-toc a.tl4 { font-size: 19px; line-height: 1.
   }
   body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; }
   .book-toc { border: none; margin: 0; padding: 0; page: tocpage; break-after: page; }
-  #mergedBody .book-chapter { break-before: page; }
+  .book-chapter { break-before: page; }
+  body[data-book-theme="modern"] .md-body h1 { border-left: none; padding-left: 0; }
   h1, h2, h3, h4 { break-after: avoid; break-inside: avoid; }
   img, pre, blockquote, table, figure { break-inside: avoid; max-width: 100%; }
   p, li { widows: 2; orphans: 2; }
-  body[data-book-theme="modern"] #mergedBody h1 { border-left: none; padding-left: 0; }
 }
+</style>
 
+<style>
 /* ---------- status bar ---------- */
 #statusbar {
   display: flex; align-items: center; gap: 14px; padding: 4px 12px;
@@ -410,6 +475,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   max-height: 90px; overflow: auto;
 }
 </style>
+<!-- style.css 注入位（应用内仅亮色主题生效，排在内容默认之后） -->
+<style id="userCssStyle"></style>
 </head>
 <body>
 
@@ -450,8 +517,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <button id="btnHistory" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">历史</button>
    <span class="sep"></span>
    <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
-   <select id="presetSel" disabled title="选择内置样式：写入 style.css 并立即生效（可再点“样式”微调）">
-     <option value="">内置样式…</option>
+   <select id="presetSel" disabled title="选择内置配色：写入项目根目录 style.css 并立即生效（只管颜色；可再点“样式”微调）">
+     <option value="">内置配色…</option>
      <option value="classic">经典黑</option>
      <option value="red">典雅红</option>
      <option value="academic">学术蓝</option>
@@ -512,7 +579,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <div id="readMain">
         <div id="bookBar">
           <b>成书</b>
-          <select id="bookThemeSel" title="成书排版模板">
+          <select id="bookThemeSel" title="成书版式：只管布局（字号/行距/对齐/分页），颜色由内置配色决定">
             <option value="classic">经典书籍</option>
             <option value="modern">现代简洁</option>
             <option value="academic">学术</option>
@@ -632,8 +699,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
     <h4>样式与显示</h4>
     <ul>
-      <li><b>样式</b>：编辑项目根目录的 style.css，保存即生效；<b>内置样式</b>下拉框提供经典黑、典雅红、学术蓝、护眼绿、暖阳橙、典雅紫六套，可在其基础上微调。暗色主题下自定义颜色自动转为浅色，导出时保持原色。</li>
-      <li><b>A- / A+</b>：编辑模式调编辑器字号，预览/阅览调正文字号；🌙 切换明暗主题。</li>
+      <li>样式是两个互相独立、可任意组合的维度：<b>① 配色（只管颜色）</b>——「内置配色」下拉框提供经典黑、典雅红、学术蓝、护眼绿、暖阳橙、典雅紫六套，选中后写入项目根目录的 style.css，点「样式」可直接编辑它继续微调；<b>② 成书版式（只管布局：字体字号/行距/对齐/分页/封面/目录）</b>——「阅览」页顶部切换经典书籍 / 现代简洁 / 学术 / 手机阅览。编辑实时预览、阅览、导出 PDF/HTML 共用同一份样式表，所见即所得。style.css 为浅色背景设计：应用内暗色主题下自动停用并回退暗色配色，导出的 HTML 中始终保持原色。</li>
+      <li><b>A- / A+</b>：编辑模式调编辑器字号；其他模式等比缩放内容字号（标题/目录同步、对所有版式生效）；🌙 切换明暗主题。</li>
     </ul>
     <h4>输出</h4>
     <ul>
@@ -1170,13 +1237,17 @@ async function resolveImg(src, baseDirPath) {
 }
 
 /* ================= 自定义CSS ================= */
-const CSS_TEMPLATE = `/* ===== WriteTools 自定义样式 =====
-   本文件(style.css)保存在项目根目录，保存后立即生效，导出 HTML 也会带上。
-   选择器以 .md-body 开头只影响内容区（预览/阅览），不影响工具界面。示例： */
-.md-body { font-size: 17px; line-height: 2; }
-.md-body h1 { font-size: 30px; color: #b3392f; }
-.md-body h2 { font-size: 24px; color: #1a5276; }
-.md-body h3 { font-size: 20px; color: #1e8449; }
+const CSS_TEMPLATE = `/* ===== WriteTools 自定义样式 (style.css) =====
+   保存在项目根目录，保存即生效，导出 HTML 也会带上。
+   本文件整体作用于 :root（仅亮色主题）：
+   1) 顶部可直接写 CSS 变量（不要加 :root{} 外壳），覆盖内容配色/字号；
+   2) 下方可写普通规则（.md-body 开头只影响内容区，不影响工具界面）。 */
+
+/* --md-body-color: #222;  正文颜色 */
+/* --md-h1-color: #8f1d1d; --md-h2-color: #a82b26;  各级标题颜色 */
+/* --md-fs: 17px;  正文字号    --md-lh: 2;  行距 */
+
+.md-body blockquote { color: #777; }
 `;
 function applyUserCss(cssText) {
   // style.css 里的颜色为浅色背景设计：应用内只在亮色主题生效，暗色主题回退到系统配色（导出 HTML 始终用原色）
@@ -1216,10 +1287,10 @@ const PRESETS = [
   { key: 'red',      name: '典雅红', body: '#332827', h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
 ];
 function buildPresetCss(p) {
-  const sizes = ['1.9em','1.6em','1.38em','1.2em','1.08em','1em'];
-  let s = '/* 内置样式：' + p.name + '（由 WriteTools 生成，可自行修改） */\n';
-  s += '.md-body { color: ' + p.body + '; font-size: 16.5px; }\n';
-  p.h.forEach((c, i) => { s += '.md-body h' + (i + 1) + ' { color: ' + c + '; font-size: ' + sizes[i] + '; }\n'; });
+  // 裸变量声明：applyUserCss 会统一包上 :root（仅亮色主题）；导出时该作用域始终生效
+  let s = '/* 配色：' + p.name + '（由 WriteTools 生成，可在此基础上继续修改） */\n';
+  s += '--md-body-color: ' + p.body + ';\n';
+  p.h.forEach((c, i) => { s += '--md-h' + (i + 1) + '-color: ' + c + ';\n'; });
   return s;
 }
 $('presetSel').onchange = async () => {
@@ -1230,7 +1301,7 @@ $('presetSel').onchange = async () => {
   if (!p) return;
   let exists = false;
   try { await rootHandle.getFileHandle('style.css'); exists = true; } catch (e) {}
-  if (exists && !confirm('将用内置样式「' + p.name + '」覆盖项目根目录的 style.css，原有自定义内容会被替换。确定继续吗？')) return;
+  if (exists && !confirm('将用内置配色「' + p.name + '」覆盖项目根目录的 style.css，原有自定义内容会被替换。确定继续吗？')) return;
   try {
     const css = buildPresetCss(p);
     const fh = await rootHandle.getFileHandle('style.css', { create: true });
@@ -1245,7 +1316,7 @@ $('presetSel').onchange = async () => {
     if (mode === 'read') await renderMerged();
     else if (mode === 'preview') renderSinglePreview();
     else renderLivePreview();
-    toast('已应用内置样式：' + p.name + '（可点“样式”继续微调）');
+    toast('已应用内置配色：' + p.name + '（可点“样式”继续微调）');
   } catch (e) { toast('应用样式失败：' + e.message); }
 };
 
@@ -1451,16 +1522,45 @@ function applyBookTheme() {
   $('bookThemeSel').value = bookCfg.theme;
 }
 
-/* ================= export merged html ================= */
+/* ================= export merged html（统一出口） =================
+   导出文档直接复用应用内 contentCss（内容样式单一来源）+ userCssStyle，
+   不再维护第二套导出样式。本文件中仅保留导出页外壳布局（wrap/toc/toTop），
+   外壳中的字号全部引用内容变量，故随成书版式自动变化。 */
+function serializeStyle(el) {
+  try {
+    const rules = el.sheet && el.sheet.cssRules;
+    if (rules && rules.length) return Array.from(rules).map(r => r.cssText).join('\n');
+  } catch (e) {}
+  return el.textContent || '';
+}
+const EXPORT_SHELL_CSS = `
+body{margin:0;background:#fbfaf7;}
+.wrap{display:flex;align-items:flex-start;gap:40px;max-width:1080px;margin:0 auto;padding:56px 40px 120px 32px;}
+.book{flex:1;min-width:0;max-width:760px;}
+/* 标题下的副标题 / 作者日期（字号引用内容变量，自动随版式缩放） */
+.exp-sub{text-align:center;font-size:calc(var(--md-fs)*.92);color:var(--md-muted-color);letter-spacing:.1em;margin:0 0 10px;}
+.exp-meta{text-align:center;font-size:calc(var(--md-fs)*.85);color:var(--md-muted-color);margin:0 0 36px;line-height:1.9;}
+/* 侧栏目录：字号引用内容变量，经典小、手机自动大 */
+.toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--md-panel);border:1px solid var(--md-border);border-radius:10px;padding:18px 20px}
+.toc-h{font-family:var(--md-font-head);font-weight:700;font-size:calc(var(--md-fs)*.95);letter-spacing:3px;color:var(--md-muted-color);margin-bottom:10px}
+.toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:calc(var(--md-fs)*.88);line-height:1.8}
+.toc a:hover{color:var(--md-accent)}
+.toc a.tl2{padding-left:18px}.toc a.tl3{padding-left:36px}.toc a.tl4{padding-left:54px}
+#toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
+#toTop.show{opacity:.85;pointer-events:auto}#toTop:hover{opacity:1}
+@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
+@media print{#toTop{display:none}.toc{display:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}}
+@page{size:A4;margin:24mm 20mm 22mm}
+`;
 async function exportMerged() {
   await flushSave();
   if (!tree.length) { toast('没有内容'); return; }
-  await renderMerged();  // 确保 toc/图片已加载
+  await renderMerged();  // 确保目录/图片已加载
   const clone = $('mergedBody').cloneNode(true);
-  // 导出为整体：去掉文件分隔线；左侧已有目录，删除正文内嵌目录
+  // 导出为整体：去掉文件分隔线；左侧已有目录，删除正文内嵌扉页
   clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
   clone.querySelector('.book-front')?.remove();
-  // 标题头：书名 + 作者/日期（作者一行、日期一行，日期用宋体）
+  // 标题头：书名 + 作者/日期（作者一行、日期一行）
   const btEl = clone.querySelector('.book-title');
   if (btEl) {
     const metaEl = document.createElement('div');
@@ -1497,17 +1597,17 @@ async function exportMerged() {
       });
     } catch (e) { img.removeAttribute('src'); }
   }
-  let userCss = '';
-  try { userCss = await (await (await rootHandle.getFileHandle('style.css')).getFile()).text(); } catch (e) {}
+  // 直接复用应用内生效的样式表：外壳 + 内容（单一来源）+ style.css
+  const contentCss = serializeStyle($('contentCss'));
+  const userCss = serializeStyle($('userCssStyle'));
+  const bodyCls = bookCfg.indent !== false ? ' class="book-indent"' : '';
   const doc = '<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="UTF-8"><title>' +
-    esc(rootHandle.name) + '</title><style>' + EXPORT_CSS
-    + exportThemeCss(bookCfg.theme)
-    + (bookCfg.indent !== false ? '.book p{text-indent:2em}' : '')
-    + '</style>' +
+    esc(rootHandle.name) + '</title><style>' + EXPORT_SHELL_CSS + '</style><style>' + contentCss + '</style>' +
     (userCss ? '<style>' + userCss + '</style>' : '') +
-      '</head><body><div class="wrap">' + tocHtml + '<main class="book md-body">' + clone.innerHTML + '</main></div>' +
-      '<button id="toTop" title="返回顶部">↑</button>' +
-      '<script>var t=document.getElementById("toTop");window.addEventListener("scroll",function(){t.classList.toggle("show",(window.scrollY||document.documentElement.scrollTop)>300)},{passive:true});t.onclick=function(){window.scrollTo({top:0,behavior:"smooth"})};<\/script></body></html>';
+    '</head><body data-book-theme="' + bookCfg.theme + '"' + bodyCls + '><div class="wrap">' + tocHtml +
+    '<main class="book md-body">' + clone.innerHTML + '</main></div>' +
+    '<button id="toTop" title="返回顶部">↑</button>' +
+    '<script>var t=document.getElementById("toTop");window.addEventListener("scroll",function(){t.classList.toggle("show",(window.scrollY||document.documentElement.scrollTop)>300)},{passive:true});t.onclick=function(){window.scrollTo({top:0,behavior:"smooth"})};<\/script></body></html>';
   const blob = new Blob([doc], { type: 'text/html' });
   const d = new Date();
   const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -1517,69 +1617,6 @@ async function exportMerged() {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   toast('已导出 ' + a.download);
-}
-const EXPORT_CSS = `
-body{margin:0 48px;max-width:1000px;background:#fbfaf7;color:#26282b;}
-.wrap{display:flex;align-items:flex-start;gap:40px;max-width:1080px;margin:0 auto;padding:56px 40px 120px 32px;}
-.book{flex:1;min-width:0;max-width:700px;}
-@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
-h1,h2,h3,h4,h5,h6{line-height:1.4;margin:1.4em 0 .7em;}
-h1{font-size:27px}h2{font-size:22px}h3{font-size:19px}
-p{margin:.8em 0}a{color:#3b7dd8}img{max-width:100%;border-radius:4px;display:block;margin:14px auto}
-blockquote{border-left:3px solid #3b7dd8;background:#fff;margin:1em 0;padding:.6em 1.1em;color:#667;border-radius:0 6px 6px 0}
-code{background:#f0efe9;padding:.15em .4em;border-radius:4px;font-family:Consolas,monospace;font-size:.88em}
-pre{background:#f0efe9;padding:14px 18px;border-radius:8px;overflow:auto}
-hr{border:none;border-top:1px solid #ddd;margin:1.5em 0}
-.book-title{text-align:center;font-size:30px;font-weight:700;margin:0 0 14px;line-height:1.3}
-.exp-sub{text-align:center;font-size:15px;color:#667;letter-spacing:.1em;margin-bottom:10px}
-.exp-meta{text-align:center;font-size:14px;color:#556;margin-bottom:36px;line-height:1.9}
-.exp-author,.exp-date{font-family:inherit}
-#toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
-#toTop.show{opacity:.85;pointer-events:auto}
-#toTop:hover{opacity:1}
-@media print{#toTop{display:none}.toc{display:none!important}.book{max-width:100%}}
-.toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #e5e2d8;border-radius:10px;padding:18px 20px}
-.toc-h{font-weight:700;font-size:15px;letter-spacing:4px;color:#667;margin-bottom:10px}
-.toc a{display:block;color:#26282b;text-decoration:none;padding:3px 0;font-size:14px}
-.toc a:hover{color:#3b7dd8}
-.toc a.tl2{padding-left:18px}
-.toc a.tl3{padding-left:36px}
-.toc a.tl4{padding-left:54px;color:#667;font-size:13px}
-table{border-collapse:collapse;margin:1.2em auto}
-th,td{border:1px solid #ccc;padding:7px 14px}
-.plaintext{white-space:pre-wrap;font-family:Consolas,monospace}
-`;
-// 导出 HTML 主题样式：与 PDF 三套成书主题保持一致（字体、标题、行高）
-function exportThemeCss(theme) {
-  const serif = 'Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif';
-  const sans = '"Microsoft YaHei","PingFang SC",system-ui,sans-serif';
-  if (theme === 'modern') {
-    return `.book{font-family:${sans};font-size:16px;line-height:1.85;}
-.book h1{font-size:26px;border-left:4px solid #26282b;padding-left:12px;margin-top:2em;font-family:${sans};}
-.book h2{font-family:${sans}}.book h3{font-family:${sans}}.book h4{font-family:${sans}}
-.book p{margin:1em 0}
-.book-title{font-family:${sans}}.exp-sub{font-family:${sans}}.exp-meta{font-family:${sans}}`;
-  }
-  if (theme === 'academic') {
-    return `.book{font-family:${serif};font-size:15.5px;line-height:1.75;}
-.book h1{text-align:center;font-size:21px;margin-top:2em;font-family:${serif};}
-.book h2{font-size:17px;font-family:${serif}}.book h3{font-size:15.5px;font-family:${serif}}.book h4{font-family:${serif}}
-.book-title{font-family:${serif}}.exp-sub{font-family:${serif}}.exp-meta{font-family:${serif}}`;
-  }
-  if (theme === 'phone') {
-    return `.book{font-family:${sans};font-size:20px;line-height:1.95;}
-.book h1{text-align:center;font-size:27px;margin-top:2em;font-family:${sans};}
-.book h2{font-size:24px;font-family:${sans}}.book h3{font-size:22px;font-family:${sans}}.book h4{font-family:${sans}}
-.book-title{font-family:${sans};font-size:40px}
-.exp-sub{font-family:${sans};font-size:20px}
-.exp-meta{font-family:${sans};font-size:19px;line-height:2.2;margin-bottom:44px}
-.toc-h{font-size:20px}.toc a,.toc a.tl4{font-size:18px;line-height:1.9;color:#26282b}`;
-  }
-  // classic（默认）
-  return `.book{font-family:${serif};font-size:16.5px;line-height:2.0;}
-.book h1{text-align:center;margin-top:2.4em;font-family:${serif};}
-.book h2{font-family:${serif}}.book h3{font-family:${serif}}.book h4{font-family:${serif}}
-.book-title{font-family:${serif}}.exp-sub{font-family:${serif}}.exp-meta{font-family:${serif}}`;
 }
 
 async function exportMd() {
@@ -2579,11 +2616,12 @@ async function navFile(dir) {
 $('btnPrev').onclick = () => navFile(-1);
 $('btnNext').onclick = () => navFile(1);
 $('btnFullSpace').onclick = () => { insertAtCursor('\u3000'); };
-// 字号调节：编辑模式调编辑器字号，预览/阅览调内容字号
+// 字号调节：编辑模式调编辑器字号；其他模式调内容缩放倍率 --md-zoom（对所有版式等比生效）
 let fsBody = parseFloat(localStorage.getItem('wt-fs')) || 16.5;
 let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
 function applyFs() {
-  document.documentElement.style.setProperty('--fs-body', fsBody + 'px');
+  // zoom 以默认正文 16.5px 为基准等比缩放（含标题/目录/封面相关字号）
+  document.documentElement.style.setProperty('--md-zoom', (fsBody / 16.5).toFixed(3));
   document.documentElement.style.setProperty('--fs-editor', fsEditor + 'px');
   localStorage.setItem('wt-fs', String(fsBody));
   localStorage.setItem('wt-efs', String(fsEditor));
@@ -3033,6 +3071,8 @@ document.addEventListener('keydown', e => {
 
 /* ================= init ================= */
 (async function init() {
+  // 启动即同步成书版式到 body：编辑实时预览也呈现成书字号/行距/缩进
+  applyBookTheme();
   if (!window.showDirectoryPicker) {
     $('welcome').querySelector('.tip').innerHTML =
       '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 writetools.html）。';
