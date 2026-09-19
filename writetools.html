@@ -58,6 +58,14 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 body[data-mode="edit"] #topbar .mode-edit,
 body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-flex; gap: 5px; align-items: center; }
 #topbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+/* 图标按钮（仿 editor.md：B/S/I 用字母，其余内联 SVG，单色跟随主题） */
+#topbar button.ic { width: 26px; min-width: 26px; height: 24px; padding: 0; gap: 0; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+#topbar button.ic svg { width: 15px; height: 15px; flex: none; }
+#topbar button.ic.tb-glyph { font-family: Georgia, "Times New Roman", serif; font-size: 13.5px; font-weight: 700; }
+#topbar button.ic.tb-glyph.tb-i { font-style: italic; }
+#topbar button.ic.tb-glyph.tb-s { text-decoration: line-through; text-decoration-thickness: 1.2px; }
+#topbar button.ic.tb-h { font-size: 11.5px; font-weight: 700; letter-spacing: -0.5px; }
+#topbar button.ic.tb-code { font-family: Consolas, "Courier New", monospace; font-size: 11.5px; font-weight: 700; }
 .tabs { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .tabs button { border: none; border-radius: 0; background: transparent; padding: 4px 14px; }
 .tabs button.active { background: var(--accent); color: #fff; }
@@ -65,7 +73,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 /* ---------- layout ---------- */
 #main { flex: 1; display: flex; min-height: 0; position: relative; }
 #sidebar {
-  width: 250px; min-width: 120px; flex: none; background: var(--panel);
+  width: 260px; min-width: 120px; flex: none; background: var(--panel);
   display: flex; flex-direction: column; overflow: hidden; padding: 6px 4px;
 }
 #tree { flex: 1; min-height: 0; overflow: auto; }
@@ -96,7 +104,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 .vdiv:hover::after { background: var(--accent); width: 2px; }
 /* 折叠目录：项目名标题行右侧的小方块按钮 */
 #sideCollapseBtn {
-  flex: none; width: 22px; height: 22px; padding: 0;
+  flex: none; width: 26px; height: 26px; padding: 0;
   display: flex; align-items: center; justify-content: center;
   background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
   color: var(--muted); font-size: 13px; line-height: 1; cursor: pointer;
@@ -105,7 +113,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 /* 展开目录：侧栏折叠后贴 #main 左上角的小方块（与折叠按钮同位同尺寸） */
 #sideExpandBtn {
   position: absolute; top: 10px; left: 0;
-  width: 22px; height: 22px; z-index: 30; padding: 0; display: none;
+  width: 26px; height: 26px; z-index: 30; padding: 0; display: none;
   align-items: center; justify-content: center;
   background: var(--panel); border: 1px solid var(--border); border-left: none;
   border-radius: 0 5px 5px 0; color: var(--muted); font-size: 13px; line-height: 1;
@@ -120,7 +128,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 /* ---------- tree ---------- */
 .tnode {
   display: flex; align-items: center; gap: 5px; padding: 4px 8px;
-  border-radius: 5px; cursor: pointer; font-size: 13.5px; user-select: none;
+  border-radius: 5px; cursor: pointer; font-size: 14px; user-select: none;
   white-space: nowrap; overflow: hidden;
 }
 .tnode:hover { background: var(--hover); }
@@ -159,7 +167,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 #readView { flex: 1; display: flex; min-width: 0; }
 #outlineView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #outlineView.hidden { display: none; }
-#outlineBar { flex: none; padding: 9px 18px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
+#outlineBar { flex: none; padding: 19px 18px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
 #outlineBar .ol-hint { color: var(--muted); font-size: 12px; }
 #outlineScroll { flex: 1; overflow-y: auto; padding: 16px 22px 60px; }
 #outlineCards { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
@@ -187,10 +195,10 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 .ol-empty { color: var(--muted); text-align: center; padding: 50px 0; font-size: 13px; }
 #tocPanel {
   width: 250px; min-width: 120px; flex: none; overflow: auto;
-  background: var(--panel); padding: 12px 8px;
-  font-size: 13px;
+  background: var(--panel); padding: 16px 16px;
+  font-size: 14px;
 }
-#tocPanel .toc-title { color: var(--muted); font-size: 12px; padding: 0 6px 8px; letter-spacing: 1px; }
+#tocPanel .toc-title { color: var(--muted); font-size: 14px; padding: 0px 16px 13px;text-align: center; letter-spacing: 1px; font-weight: 600;}
 #tocPanel a {
   display: block; color: var(--text); text-decoration: none; padding: 3px 6px;
   border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -266,7 +274,7 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
   font-family: var(--md-font-body);
   font-size: calc(var(--md-fs) * var(--md-zoom));
   line-height: var(--md-lh); color: var(--md-body-color);
-  padding: 30px 38px;
+  padding: 30px 50px;
 }
 .md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 {
   font-family: var(--md-font-head); color: var(--md-head-color, var(--md-body-color));
@@ -340,8 +348,8 @@ body.book-indent .md-body p { text-indent: 2em; }
   text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px;
 }
 .bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; color: var(--md-h1-color); }
-.bc-sub { font-size: 15px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
-.bc-meta { margin-top: 96px; font-size: 14px; line-height: 2.2; }
+.bc-sub { font-size: 18px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
+.bc-meta { margin-top: 96px; font-size: 18px; line-height: 2.2; }
 
 /* 目录（.book-toc）样式已移至成书版式区（BOOK_THEMES / style.css），随 --md-fs 联动 */
 
@@ -513,13 +521,72 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <span class="sep"></span>
    <!-- 编辑模式：编辑工具组 -->
    <div class="mode-edit">
-     <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
-     <button id="btnTable" disabled>插入表格</button>
-     <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
-     <button id="btnFullSpace" disabled title="插入中文全角空格（　），用于中文排版">插入空格</button>
-     <button id="btnInsertComment" disabled title="在光标处插入 HTML 注释 &lt;!--注释--&gt;，仅写作时可见，阅览与导出中不显示">插入注释</button>
-     <button id="btnReplace" disabled title="查找替换：可在当前文件或整个项目中进行">替换</button>
-     <button id="btnHistory" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">历史</button>
+     <!-- 行内格式：粗体/删除线/斜体/引用/大小写 -->
+     <button id="btnMdBold" class="ic tb-glyph needs-file" disabled title="粗体（Ctrl+B）">B</button>
+     <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled title="删除线">S</button>
+     <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled title="斜体（Ctrl+I）">I</button>
+     <button id="btnMdQuote" class="ic needs-file" disabled title="引用块（再点取消）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4C2 4.8 1.4 5.8 1.4 7v3.4h3.2V7.4H3c0-1 .6-1.6 1.5-1.8L3.2 4.4z" fill="currentColor" stroke="none"/><path d="M9.4 4.4c-1.2.4-1.8 1.4-1.8 2.6v3.4h3.2V7.4H9.2c0-1 .6-1.6 1.5-1.8L9.4 4.4z" fill="currentColor" stroke="none"/></svg>
+     </button>
+     <button id="btnMdUpper" class="ic tb-glyph needs-file" disabled title="选中的英文字母转大写">A</button>
+     <button id="btnMdLower" class="ic tb-glyph needs-file" disabled title="选中的英文字母转小写">a</button>
+     <span class="sep"></span>
+     <!-- 标题 H1-H6 -->
+     <button class="ic tb-h needs-file md-h" data-h="1" disabled title="一级标题（再点取消）">H1</button>
+     <button class="ic tb-h needs-file md-h" data-h="2" disabled title="二级标题（再点取消）">H2</button>
+     <button class="ic tb-h needs-file md-h" data-h="3" disabled title="三级标题（再点取消）">H3</button>
+     <button class="ic tb-h needs-file md-h" data-h="4" disabled title="四级标题（再点取消）">H4</button>
+     <button class="ic tb-h needs-file md-h" data-h="5" disabled title="五级标题（再点取消）">H5</button>
+     <button class="ic tb-h needs-file md-h" data-h="6" disabled title="六级标题（再点取消）">H6</button>
+     <span class="sep"></span>
+     <!-- 列表与分隔线 -->
+     <button id="btnMdUl" class="ic needs-file" disabled title="无序列表（再点取消）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="1.6" cy="3" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="8" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="13" r="1.05" fill="currentColor" stroke="none"/><path d="M4.5 3h10M4.5 8h10M4.5 13h10"/></svg>
+     </button>
+     <button id="btnMdOl" class="ic needs-file" disabled title="有序列表（再点取消）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7.5M7 8h7.5M7 13h7.5"/><text x="0.2" y="5" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">1</text><text x="0.2" y="10" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">2</text><text x="0.2" y="15" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">3</text></svg>
+     </button>
+     <button id="btnMdHr" class="ic needs-file" disabled title="插入分隔线">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8h12"/></svg>
+     </button>
+     <span class="sep"></span>
+     <!-- 链接/锚点/图片/代码/表格/日期 -->
+     <button id="btnMdLink" class="ic needs-file" disabled title="插入链接（选中网址可直接包裹）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 9.2a3 3 0 0 0 4.3.4l1.9-1.9a3 3 0 0 0-4.3-4.3L7.6 4.5"/><path d="M9.2 6.8a3 3 0 0 0-4.3-.4L3 8.3a3 3 0 0 0 4.3 4.3l1.1-1.1"/></svg>
+     </button>
+     <button id="btnMdAnchor" class="ic needs-file" disabled title="插入锚点（页内跳转标记 &lt;a id=&quot;name&quot;&gt;）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="2.8" r="1.25"/><path d="M8 4.1v9.4M5.3 6.8h5.4"/><path d="M2.9 10.3a5.1 5.1 0 0 0 10.2 0"/><path d="M2.9 10.3h1.7M11.4 10.3h1.7"/></svg>
+     </button>
+     <button id="btnInsertImg" class="ic needs-file" disabled title="插入图片（也可直接粘贴/拖入）；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="1.2"/><circle cx="5.4" cy="6.8" r="1.1"/><path d="M2.8 11.8l3.2-3.2 2.4 2.4 2.2-2.2 2.6 3"/></svg>
+     </button>
+     <button id="btnMdCode" class="ic tb-code needs-file" disabled title="行内代码">&lt;/&gt;</button>
+     <button id="btnMdCodeBlock" class="ic needs-file" disabled title="代码块（选中多行后点击可包裹）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.2,4 1.8,8 5.2,12"/><polyline points="10.8,4 14.2,8 10.8,12"/><path d="M3 14.3h10"/></svg>
+     </button>
+     <button id="btnTable" class="ic needs-file" disabled title="插入表格">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="2.5" width="12.4" height="11" rx="1"/><path d="M1.8 6h12.4M1.8 9.5h12.4M6 2.5v11M10 2.5v11"/></svg>
+     </button>
+     <button id="btnMdDate" class="ic needs-file" disabled title="插入当前日期时间">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></svg>
+     </button>
+     <span class="sep"></span>
+     <!-- 本工具原有功能 -->
+     <button id="btnPalette" class="ic needs-file" disabled title="调色盘：选择颜色，确认后把色值插入光标处">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 1.7a6.3 6.3 0 1 0 0 12.6c.8 0 1.3-.7 1-1.4-.3-.8.2-1.5 1.1-1.5h1.3a3.2 3.2 0 0 0 3.2-3.2C15.5 4.8 12.1 1.7 7.9 1.7z"/><circle cx="5.3" cy="7" r="0.95" fill="currentColor" stroke="none"/><circle cx="7.9" cy="4.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="10.9" cy="5.5" r="0.95" fill="currentColor" stroke="none"/><circle cx="12.3" cy="8.4" r="0.95" fill="currentColor" stroke="none"/></svg>
+     </button>
+     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格（　），用于中文排版">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
+     </button>
+     <button id="btnInsertComment" class="ic needs-file" disabled title="插入 HTML 注释 &lt;!--注释--&gt;，仅写作时可见，阅览与导出中不显示">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
+     </button>
+     <button id="btnReplace" class="ic" disabled title="查找替换：可在当前文件或整个项目中进行">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.8" cy="9.8" r="3"/><path d="M8 12l3.2 3.2"/><path d="M9.4 2.9h3.9m0 0-1.4-1.2m1.4 1.2-1.4 1.2"/><path d="M6.6 6.3H2.9m0 0 1.2-1.2M2.9 6.3l1.2 1.2"/></svg>
+     </button>
+     <button id="btnHistory" class="ic needs-file" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 5.2a6 6 0 1 1-.9 3.3"/><polyline points="2.3,1.8 2.7,5.1 6,4.8"/><path d="M8 5.4V8l2.2 1.4"/></svg>
+     </button>
    </div>
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
@@ -2544,13 +2611,133 @@ $('editor').addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); if (current) { clearTimeout(saveTimer); saveCurrent(); } return; }
   if (e.key === 'Tab') { e.preventDefault(); insertAtCursor('  '); return; }
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) { listContinue(e); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapSel('**'); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapSel('*'); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', '粗体'); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapInline('*', '斜体'); return; }
 });
-function wrapSel(txt) {
+// 行内包裹：有选区包选区（包完仍选中内部文字），无选区插入占位符并选中
+function wrapInline(marker, ph) {
   const ed = $('editor'); ed.focus();
-  const sel = ed.value.slice(ed.selectionStart, ed.selectionEnd);
-  try { document.execCommand('insertText', false, txt + sel + txt); } catch (e) {}
+  const s = ed.selectionStart, e = ed.selectionEnd;
+  const sel = ed.value.slice(s, e);
+  const inner = sel || ph;
+  ed.setRangeText(marker + inner + marker, s, e);
+  ed.setSelectionRange(s + marker.length, s + marker.length + inner.length);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 对选区覆盖的各行做变换，完成后重新选中这些行
+function transformSelectedLines(fn) {
+  const ed = $('editor'); ed.focus();
+  const v = ed.value;
+  const a = v.lastIndexOf('\n', ed.selectionStart - 1) + 1;
+  let b = v.indexOf('\n', ed.selectionEnd);
+  if (b < 0) b = v.length;
+  const out = v.slice(a, b).split('\n').map(fn).join('\n');
+  ed.setRangeText(out, a, b);
+  ed.setSelectionRange(a, a + out.length);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 标题：同级再点取消；已有别的级别则改级别
+function setHeading(n) {
+  transformSelectedLines(l => {
+    if (!l.trim()) return l;
+    const m = /^(#{1,6})\s+/.exec(l);
+    const stripped = l.replace(/^#{1,6}\s+/, '');
+    if (m && m[1].length === n) return stripped;
+    return '#'.repeat(n) + ' ' + stripped;
+  });
+}
+// 引用 / 无序 / 有序列表：选区行全部已是该格式则取消，否则添加（有序自动编号）
+function toggleBlock(kind) {
+  const ed = $('editor'); ed.focus();
+  const v = ed.value;
+  const a = v.lastIndexOf('\n', ed.selectionStart - 1) + 1;
+  let b = v.indexOf('\n', ed.selectionEnd);
+  if (b < 0) b = v.length;
+  const lines = v.slice(a, b).split('\n');
+  const nonEmpty = lines.filter(l => l.trim());
+  const stripM = l => l.replace(/^(\s*)(?:[-*+]|\d+[.)])\s+/, '$1');
+  const stripQ = l => l.replace(/^>\s?/, '');
+  const on = kind === 'quote'
+    ? nonEmpty.every(l => /^>\s?/.test(l))
+    : kind === 'ul'
+      ? nonEmpty.every(l => /^\s*[-*+]\s+/.test(l))
+      : nonEmpty.every(l => /^\s*\d+[.)]\s+/.test(l));
+  let n = 0;
+  const out = lines.map(l => {
+    if (!l.trim()) return l;
+    if (kind === 'quote') return on ? stripQ(l) : '> ' + stripQ(l);
+    if (on) return stripM(l);
+    if (kind === 'ul') return stripM(l).replace(/^(\s*)/, '$1- ');
+    n++;
+    return stripM(l).replace(/^(\s*)/, '$1' + n + '. ');
+  }).join('\n');
+  ed.setRangeText(out, a, b);
+  ed.setSelectionRange(a, a + out.length);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 选中的英文转大写/小写（中文不受影响）
+function changeCase(upper) {
+  const ed = $('editor'); ed.focus();
+  const s = ed.selectionStart, e = ed.selectionEnd;
+  if (s === e) { toast('请先选中要转换的文字'); return; }
+  const sel = ed.value.slice(s, e);
+  const out = upper ? sel.toUpperCase() : sel.toLowerCase();
+  ed.setRangeText(out, s, e, 'select');
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 分隔线：自动与上下文空一行
+function insertHr() {
+  const ed = $('editor');
+  const v = ed.value, s = ed.selectionStart;
+  let pre = '';
+  if (s > 0 && v[s - 1] !== '\n') pre = '\n\n';
+  else if (s >= 2 && v[s - 2] !== '\n') pre = '\n';
+  insertAtCursor(pre + '---\n\n');
+}
+// 链接：选中网址自动填入，否则弹窗询问
+function insertLink() {
+  const ed = $('editor'); ed.focus();
+  const s = ed.selectionStart, e = ed.selectionEnd;
+  const sel = ed.value.slice(s, e);
+  let url = '';
+  if (/^https?:\/\/\S+$/i.test(sel.trim())) url = sel.trim();
+  else {
+    url = prompt('请输入链接地址：', 'https://');
+    if (url === null) return;
+    url = url.trim();
+    if (!url) return;
+  }
+  const text = /^https?:\/\//i.test(url) && sel.trim() === url ? '链接文字' : (sel || '链接文字');
+  ed.setRangeText('[' + text + '](' + url + ')', s, e);
+  ed.setSelectionRange(s + 1, s + 1 + text.length);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 锚点：插入 <a id="name"></a>
+function insertAnchor() {
+  const raw = prompt('请输入锚点名称（英文、数字、下划线或短横）：', 'anchor');
+  if (raw === null) return;
+  const name = raw.trim().replace(/[^\w-]/g, '');
+  if (!name) { toast('锚点名称无效'); return; }
+  insertAtCursor('<a id="' + name + '"></a>');
+}
+// 代码块：选中多行可整体包裹，无选区插入空代码块并把光标放入
+function insertCodeBlock() {
+  const ed = $('editor'); ed.focus();
+  const v = ed.value, s = ed.selectionStart, e = ed.selectionEnd;
+  const sel = v.slice(s, e);
+  let pre = '';
+  if (s > 0 && v[s - 1] !== '\n') pre = '\n\n';
+  else if (s >= 2 && v[s - 2] !== '\n') pre = '\n';
+  const ins = pre + '```\n' + sel + '\n```\n\n';
+  ed.setRangeText(ins, s, e);
+  const caret = s + pre.length + 4 + sel.length;
+  ed.setSelectionRange(caret, caret);
+  ed.dispatchEvent(new Event('input', { bubbles: true }));
+}
+// 当前日期时间 YYYY-MM-DD HH:mm
+function insertDatetime() {
+  const d = new Date(), p = x => String(x).padStart(2, '0');
+  insertAtCursor(d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()));
 }
 function listContinue(e) {
   const { ed, val, pos } = caretLineInfo();
@@ -2815,12 +3002,10 @@ function updateToolbar() {
   $('btnMerge').disabled = !(hasRoot && multiSel.length >= 2);
   $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
-  $('btnPalette').disabled = !current;
+  document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
-  $('btnFullSpace').disabled = !current;
-  $('btnInsertComment').disabled = !current;
   $('btnNewTxt').disabled = !hasRoot;
   $('btnNewMd').disabled = !hasRoot;
   $('btnNewDir').disabled = !hasRoot;
@@ -2828,8 +3013,6 @@ function updateToolbar() {
   $('btnCopy').disabled = !hasSel;
   $('btnDelete').disabled = !hasSel;
   $('btnTrash').disabled = !hasRoot;
-  $('btnInsertImg').disabled = !current;
-  $('btnTable').disabled = !current;
   $('btnExportMd').disabled = !hasRoot;
   $('btnCss').disabled = !hasRoot;
   $('presetSel').disabled = !hasRoot;
@@ -2896,6 +3079,22 @@ async function navFile(dir) {
 $('btnPrev').onclick = () => navFile(-1);
 $('btnNext').onclick = () => navFile(1);
 $('btnFullSpace').onclick = () => { insertAtCursor('　'); };
+// Markdown 格式工具组
+$('btnMdBold').onclick = () => wrapInline('**', '粗体');
+$('btnMdDel').onclick = () => wrapInline('~~', '删除线');
+$('btnMdItalic').onclick = () => wrapInline('*', '斜体');
+$('btnMdCode').onclick = () => wrapInline('`', '代码');
+$('btnMdQuote').onclick = () => toggleBlock('quote');
+$('btnMdUl').onclick = () => toggleBlock('ul');
+$('btnMdOl').onclick = () => toggleBlock('ol');
+$('btnMdHr').onclick = insertHr;
+$('btnMdLink').onclick = insertLink;
+$('btnMdAnchor').onclick = insertAnchor;
+$('btnMdCodeBlock').onclick = insertCodeBlock;
+$('btnMdDate').onclick = insertDatetime;
+$('btnMdUpper').onclick = () => changeCase(true);
+$('btnMdLower').onclick = () => changeCase(false);
+document.querySelectorAll('.md-h').forEach(b => b.onclick = () => setHeading(+b.dataset.h));
 $('btnInsertComment').onclick = insertComment;
 // 字号调节：编辑模式调编辑器字号（浏览器记忆）；其他模式调内容缩放，写入 style.css 缩放区 --md-zoom
 let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
