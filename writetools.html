@@ -258,7 +258,7 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .book-toc a.tl4 { padding-left: 4.8em; font-size: 12.5px; color: var(--muted); }
 body.book-has-cover #mergedBody > .book-title { display: none; }
 /* 三套成书主题（屏幕阅览同样生效） */
-body[data-book-theme="classic"] #mergedBody p { text-indent: 2em; }
+body.book-indent #mergedBody p { text-indent: 2em; }
 body[data-book-theme="classic"] #mergedBody h1 { text-align: center; margin-top: 2.4em; }
 body[data-book-theme="modern"] #mergedBody,
 body[data-book-theme="modern"] .book-front { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
@@ -274,7 +274,6 @@ body[data-book-theme="academic"] #mergedBody { font-size: 15.5px; line-height: 1
 body[data-book-theme="academic"] #mergedBody h1 { text-align: center; font-size: 21px; margin-top: 2em; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
 body[data-book-theme="academic"] #mergedBody h2 { font-size: 17px; font-family: Georgia, "Noto Serif SC", SimSun, serif; }
 body[data-book-theme="academic"] #mergedBody h3 { font-size: 15.5px; }
-body[data-book-theme="academic"] #mergedBody p { text-indent: 2em; }
 
 /* ---------- print ---------- */
 @media print {
@@ -682,6 +681,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="row"><label style="width:72px">标题编号</label>
     <label><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
+  </div>
+  <div class="row"><label style="width:72px">正文排版</label>
+    <label><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF 与 HTML 统一生效）</label>
   </div>
   <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
   <div class="btns">
@@ -1300,7 +1302,7 @@ async function renderMerged() {
 }
 
 /* ================= book publishing ================= */
-const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false };
+const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false, indent: true };
 let bookCfg = BOOK_DEFAULT_CFG;
 try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
 // 从项目根目录的 setting.ini 读取成书设置（INI 格式：key=value，; 开头为注释）
@@ -1319,7 +1321,8 @@ async function loadBookCfgFile() {
     bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, {
       theme: m.theme || 'classic',
       title: m.title || '', subtitle: m.subtitle || '', author: m.author || '', date: m.date || '',
-      cover: bool('cover'), toc: bool('toc'), chapterBreak: bool('chapterBreak'), headingNumber: bool('headingNumber')
+      cover: bool('cover'), toc: bool('toc'), chapterBreak: bool('chapterBreak'), headingNumber: bool('headingNumber'),
+      indent: m.indent === undefined ? true : (m.indent === 'true')
     });
     localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
   } catch (e) { /* 无 setting.ini 时用 localStorage / 默认值 */ }
@@ -1341,6 +1344,7 @@ cover=${bookCfg.cover}
 toc=${bookCfg.toc}
 chapterBreak=${bookCfg.chapterBreak}
 headingNumber=${bookCfg.headingNumber}
+indent=${bookCfg.indent}
 `;
   try {
     const fh = await rootHandle.getFileHandle('setting.ini', { create: true });
@@ -1418,6 +1422,7 @@ function pageCssFor(theme, title, sub) {
 }
 function applyBookTheme() {
   document.body.dataset.bookTheme = bookCfg.theme;
+  document.body.classList.toggle('book-indent', bookCfg.indent !== false);
   let st = document.getElementById('bookPageStyle');
   if (!st) { st = document.createElement('style'); st.id = 'bookPageStyle'; document.head.appendChild(st); }
   st.textContent = pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || '');
@@ -1473,7 +1478,9 @@ async function exportMerged() {
   let userCss = '';
   try { userCss = await (await (await rootHandle.getFileHandle('style.css')).getFile()).text(); } catch (e) {}
   const doc = '<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="UTF-8"><title>' +
-    esc(rootHandle.name) + '</title><style>' + EXPORT_CSS + '</style>' +
+    esc(rootHandle.name) + '</title><style>' + EXPORT_CSS
+    + (bookCfg.indent !== false ? 'p{text-indent:2em}' : '')
+    + '</style>' +
     (userCss ? '<style>' + userCss + '</style>' : '') +
       '</head><body><div class="wrap">' + tocHtml + '<main class="book md-body">' + clone.innerHTML + '</main></div>' +
       '<button id="toTop" title="返回顶部">↑</button>' +
@@ -2533,6 +2540,7 @@ function openBookDlg() {
   $('bkToc').checked = bookCfg.toc;
   $('bkBreak').checked = bookCfg.chapterBreak;
   $('bkNumber').checked = !!bookCfg.headingNumber;
+  $('bkIndent').checked = bookCfg.indent !== false;
   $('dlgBook').showModal();
 }
 async function readBookDlg() {
@@ -2546,6 +2554,7 @@ async function readBookDlg() {
   bookCfg.toc = $('bkToc').checked;
   bookCfg.chapterBreak = $('bkBreak').checked;
   bookCfg.headingNumber = $('bkNumber').checked;
+  bookCfg.indent = $('bkIndent').checked;
   await saveBookCfg();
 }
 async function applyBookCfgAndRender() {
@@ -2556,12 +2565,14 @@ $('btnBookCfg').onclick = openBookDlg;
 $('bookThemeSel').onchange = async () => {
   bookCfg.theme = $('bookThemeSel').value;
   await saveBookCfg();
+  await refreshTree();
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
-$('bkSave').onclick = async () => { await readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkSave').onclick = async () => { await readBookDlg(); $('dlgBook').close(); await refreshTree(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
 $('bkPrint').onclick = async () => {
   await readBookDlg(); $('dlgBook').close();
+  await refreshTree();
   await applyBookCfgAndRender();
   toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
   setTimeout(() => window.print(), 600);
