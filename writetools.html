@@ -408,9 +408,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
-  <button id="btnPrint" disabled title="按成书模板排版（封面/目录/章首分页/页眉页码），在打印窗口选“另存为 PDF”，关闭浏览器自带页眉页脚">打印/PDF</button>
+  <button id="btnLayout" disabled title="进入成书排版预览：可调整模板、封面设置，再导出 PDF 或 HTML">排版输出</button>
   <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
-  <button id="btnExport" disabled>导出 HTML</button>
   <button id="btnAbout" title="软件使用说明">说明</button>
   <button id="btnTheme" title="切换明暗主题">🌙</button>
  </div>
@@ -495,7 +494,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
             <option value="academic">学术</option>
           </select>
           <button id="btnBookCfg">封面与成书设置</button>
-          <span class="hint">封面 / 目录 / 章首分页按模板自动排版，打印即可另存 PDF；打印对话框请关闭浏览器自带“页眉和页脚”、边距选“默认”</span>
+          <button id="btnExportPdf" class="primary" title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
+          <button id="btnExportHtml" title="导出为单文件 HTML（含左侧目录、自定义样式）">导出 HTML</button>
+          <span class="hint">调整模板与封面设置后预览，确认无误再点「导出 PDF」或「导出 HTML」</span>
         </div>
         <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
       </div>
@@ -611,9 +612,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
     <h4>输出</h4>
     <ul>
+      <li><b>排版输出</b>：点顶部「排版输出」进入成书预览（自动折叠左侧目录树），在阅览页顶部可切换<b>经典书籍 / 现代简洁 / 学术</b>三套模板、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」（打印窗口选“另存为 PDF”，边距选“默认”，关闭浏览器自带页眉页脚，需 Chrome/Edge 131+）或「导出 HTML」。</li>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
-      <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），双击即可在浏览器阅读。</li>
-      <li><b>打印/PDF（成书排版）</b>：阅览页顶部「成书」可切换<b>经典书籍 / 现代简洁 / 学术</b>三套模板，并在「封面与成书设置」里填写书名、副标题、作者、日期，开关封面页、目录页、每章另起一页。模板自动生成封面、无页码目录、章首分页、页眉书名与页脚页码、孤行寡行控制。打印窗口选“另存为 PDF”，边距选“默认”，<b>关闭</b>浏览器自带“页眉和页脚”（页码由模板提供，需 Chrome/Edge 131+）。</li>
+      <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
     </ul>
     <h4>回收站与历史版本</h4>
     <ul>
@@ -676,8 +677,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <label><input type="checkbox" id="bkToc"> 目录页</label>
     <label><input type="checkbox" id="bkBreak"> 每章另起一页</label>
   </div>
-  <div class="row"><label style="width:72px">导出 HTML</label>
-    <label><input type="checkbox" id="bkNumber"> 标题自动编号（1、1.1、1.1.1…）</label>
+  <div class="row"><label style="width:72px">标题编号</label>
+    <label><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
   </div>
   <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
   <div class="btns">
@@ -1225,6 +1226,7 @@ async function renderMerged() {
   body.appendChild(bt);
   let idx = 0;
   const tocItems = [];
+  const headingEls = [];   // 收集所有标题，统一编号后再生成目录
   for (const f of files) {
     let text;
     try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
@@ -1240,14 +1242,26 @@ async function renderMerged() {
     body.appendChild(sec);
     // 目录：先显示文件名（清理编号前缀与扩展名），下面再显示该文件内的标题
     tocItems.push({ level: 1, text: cleanName(f.name), id: 'sec-' + idx });
-    let hIdx = 0;
     for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
-      const id = 'h-' + idx + '-' + (hIdx++);
-      h.id = id;
-      tocItems.push({ level: Math.min(+h.tagName[1] + 1, 4), text: h.textContent.trim() || '（无标题）', id });
+      h.id = 'h-' + idx + '-' + headingEls.length;
+      headingEls.push(h);
     }
     await fixImages(sec, parentPath(f.path));
     idx++;
+  }
+  // 标题自动编号（PDF 与 HTML 共用）
+  if (bookCfg.headingNumber) {
+    const c = [0, 0, 0, 0, 0, 0];
+    for (const h of headingEls) {
+      const lv = +h.tagName[1] - 1;
+      c[lv]++;
+      for (let i = lv + 1; i < 6; i++) c[i] = 0;
+      for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
+      h.textContent = c.slice(0, lv + 1).join('.') + '　' + h.textContent;
+    }
+  }
+  for (const h of headingEls) {
+    tocItems.push({ level: Math.min(+h.tagName[1] + 1, 4), text: h.textContent.trim() || '（无标题）', id: h.id });
   }
   // build toc
   for (const t of tocItems) {
@@ -1350,21 +1364,27 @@ async function exportMerged() {
   if (!tree.length) { toast('没有内容'); return; }
   await renderMerged();  // 确保 toc/图片已加载
   const clone = $('mergedBody').cloneNode(true);
-  // 导出为整体：去掉文件分隔线；生成仅含标题（不含文件名）的目录
+  // 导出为整体：去掉文件分隔线；左侧已有目录，删除正文内嵌目录
   clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
-  // 标题自动编号（1、1.1、1.1.1…，连续编号）
-  if (bookCfg.headingNumber) {
-    const c = [0, 0, 0, 0, 0, 0];
-    for (const h of clone.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
-      const lv = +h.tagName[1] - 1;
-      c[lv]++;
-      for (let i = lv + 1; i < 6; i++) c[i] = 0;
-      // 跳过的层级（如 h1 后直接 h3）视为 1
-      for (let i = lv - 1; i >= 0; i--) { if (c[i] === 0) c[i] = 1; else break; }
-      const parts = c.slice(0, lv + 1);
-      h.textContent = parts.join('.') + '　' + h.textContent;
+  clone.querySelector('.book-front')?.remove();
+  // 标题头：书名 + 作者/日期（放在标题下方）
+  const btEl = clone.querySelector('.book-title');
+  if (btEl) {
+    const meta = [];
+    if (bookCfg.author.trim()) meta.push(esc(bookCfg.author.trim()) + ' 著');
+    meta.push(esc(bookDate()));
+    const metaEl = document.createElement('div');
+    metaEl.className = 'exp-meta';
+    metaEl.textContent = meta.join(' · ');
+    btEl.after(metaEl);
+    if (bookCfg.subtitle.trim()) {
+      const subEl = document.createElement('div');
+      subEl.className = 'exp-sub';
+      subEl.textContent = bookCfg.subtitle.trim();
+      btEl.after(subEl);
     }
   }
+  // 标题编号已在 renderMerged 中完成（PDF/HTML 共用）
   const heads = [];
   for (const h of clone.querySelectorAll('h1,h2,h3,h4')) {
     if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
@@ -1414,7 +1434,9 @@ blockquote{border-left:3px solid #3b7dd8;background:#fff;margin:1em 0;padding:.6
 code{background:#f0efe9;padding:.15em .4em;border-radius:4px;font-family:Consolas,monospace;font-size:.88em}
 pre{background:#f0efe9;padding:14px 18px;border-radius:8px;overflow:auto}
 hr{border:none;border-top:1px solid #ddd;margin:1.5em 0}
-.book-title{text-align:center;font-size:30px;font-weight:700;font-family:"Microsoft YaHei","PingFang SC",sans-serif;margin:0 0 36px;line-height:1.3}
+.book-title{text-align:center;font-size:30px;font-weight:700;font-family:"Microsoft YaHei","PingFang SC",sans-serif;margin:0 0 14px;line-height:1.3}
+.exp-sub{text-align:center;font-size:15px;color:#667;letter-spacing:.1em;margin-bottom:10px}
+.exp-meta{text-align:center;font-size:14px;color:#556;margin-bottom:36px}
 #toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:#3b7dd8;color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}
 #toTop:hover{opacity:1}
@@ -2330,9 +2352,8 @@ function updateToolbar() {
   $('btnTrash').disabled = !hasRoot;
   $('btnInsertImg').disabled = !current;
   $('btnTable').disabled = !current;
-  $('btnExport').disabled = !hasRoot;
+  $('btnLayout').disabled = !hasRoot;
   $('btnExportMd').disabled = !hasRoot;
-  $('btnPrint').disabled = !hasRoot;
   $('btnCss').disabled = !hasRoot;
   $('presetSel').disabled = !hasRoot;
   $('btnRenumber').disabled = !(hasRoot && (selectedNode || current));
@@ -2383,7 +2404,6 @@ async function navFile(dir) {
 $('btnPrev').onclick = () => navFile(-1);
 $('btnNext').onclick = () => navFile(1);
 $('btnFullSpace').onclick = () => { insertAtCursor('\u3000'); };
-$('btnExport').onclick = exportMerged;
 // 字号调节：编辑模式调编辑器字号，预览/阅览调内容字号
 let fsBody = parseFloat(localStorage.getItem('wt-fs')) || 16.5;
 let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
@@ -2414,29 +2434,21 @@ $('btnSide').onclick = () => {
   applySideHidden();
 };
 applySideHidden();
-// 打印 / 导出 PDF：用成书模板渲染合并全书
-$('btnPrint').onclick = () => {
+// 排版输出：进入阅览模式，折叠目录树，显示成书工具条（不弹对话框，由用户预览后再导出）
+$('btnLayout').onclick = () => {
   if (!rootHandle) return;
-  // 先切到阅览模式渲染成书效果，隐藏左侧目录树，再弹出成书设置让用户预览确认
   if (mode !== 'read') setMode('read'); else renderMerged();
-  const wasHidden = localStorage.getItem('wt-side-hidden') === '1';
-  if (!wasHidden) {
+  if (localStorage.getItem('wt-side-hidden') !== '1') {
     localStorage.setItem('wt-side-hidden', '1');
     applySideHidden();
-    printRestoredSide = false;
-  } else {
-    printRestoredSide = true;
   }
-  openBookDlg();
 };
-let printRestoredSide = true;
-$('dlgBook').addEventListener('close', () => {
-  if (!printRestoredSide) {
-    localStorage.removeItem('wt-side-hidden');
-    applySideHidden();
-    printRestoredSide = true;
-  }
-});
+$('btnExportPdf').onclick = () => {
+  if (mode !== 'read') setMode('read'); else renderMerged();
+  toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”，目标可选“另存为 PDF”');
+  setTimeout(() => window.print(), 500);
+};
+$('btnExportHtml').onclick = () => exportMerged();
 
 /* ---------- 成书设置 ---------- */
 function todayInput() {
@@ -2478,22 +2490,14 @@ $('bookThemeSel').onchange = async () => {
   saveBookCfg();
   await applyBookCfgAndRender();
 };
-$('bkCancel').onclick = () => closeBookDlg();
-$('bkSave').onclick = async () => { readBookDlg(); closeBookDlg(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
+$('bkCancel').onclick = () => $('dlgBook').close();
+$('bkSave').onclick = async () => { readBookDlg(); $('dlgBook').close(); await applyBookCfgAndRender(); toast('成书设置已保存'); };
 $('bkPrint').onclick = async () => {
-  readBookDlg(); closeBookDlg();
+  readBookDlg(); $('dlgBook').close();
   await applyBookCfgAndRender();
   toast('请在打印对话框关闭“页眉和页脚”，边距选“默认”');
   setTimeout(() => window.print(), 600);
 };
-function closeBookDlg() {
-  if (!printRestoredSide) {
-    localStorage.removeItem('wt-side-hidden');
-    applySideHidden();
-    printRestoredSide = true;
-  }
-  $('dlgBook').close();
-}
 $('btnExportMd').onclick = exportMd;
 $('btnTheme').onclick = () => {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
