@@ -1335,9 +1335,23 @@ headingNumber=${bookCfg.headingNumber}
 indent=${bookCfg.indent}
 `;
   try {
-    const fh = await rootHandle.getFileHandle('setting.ini', { create: true });
+    // 确保持有文件夹读写权限（重连后可能失效）
+    let perm = 'prompt';
+    try { perm = await rootHandle.queryPermission({ mode: 'readwrite' }); } catch (e) {}
+    if (perm !== 'granted') {
+      perm = await rootHandle.requestPermission({ mode: 'readwrite' });
+    }
+    let fh;
+    try { fh = await rootHandle.getFileHandle('setting.ini'); }
+    catch (e) {
+      // 不存在则创建
+      fh = await rootHandle.getFileHandle('setting.ini', { create: true });
+    }
     const w = await fh.createWritable(); await w.write(ini); await w.close();
-  } catch (e) { /* 磁盘不可用时仅存 localStorage */ }
+  } catch (e) {
+    console.error('setting.ini 写入失败', e);
+    toast('setting.ini 写入失败：' + e.message + '（设置仍已暂存浏览器，关闭会丢失）');
+  }
 }
 function bookDate() {
   const d = new Date();
