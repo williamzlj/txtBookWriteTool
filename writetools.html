@@ -101,7 +101,7 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .tnode .ico { flex: none; font-size: 15px; width: 20px; text-align: center; color: var(--muted); line-height: 1; }
 .tnode.dir .ico { font-size: 16px; }
 .tnode.draft .nm { opacity: .55; font-style: italic; }
-.tnode .dtag { flex: none; margin-left: 6px; font-size: 10px; font-style: normal; color: #b0741a; background: #fdf0d5; border: 1px solid #eccf94; border-radius: 4px; padding: 0 4px; line-height: 16px; }
+.tnode .dtag { flex: none; margin-left: 6px; font-size: 10px; font-style: normal; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; line-height: 16px; }
 .tnode .nm { overflow: hidden; text-overflow: ellipsis; }
 .tnode.dir .nm { font-weight: 600; }
 
@@ -243,6 +243,16 @@ dialog input, dialog select {
 }
 dialog input[type="number"] { width: 64px; }
 dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#dlgAbout { width: min(660px, 94vw); padding: 22px 26px 18px; }
+#dlgAbout .ab-body { max-height: 58vh; overflow-y: auto; font-size: 13.5px; line-height: 1.8; padding-right: 8px; }
+#dlgAbout h4 { font-size: 14px; margin: 15px 0 5px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--accent); }
+#dlgAbout h4:first-child { margin-top: 2px; }
+#dlgAbout ul { padding-left: 1.5em; margin: 3px 0; }
+#dlgAbout li { margin: 2px 0; }
+#dlgAbout code { background: var(--code-bg); padding: 0 .35em; border-radius: 4px; font-family: Consolas, monospace; font-size: .88em; }
+#dlgAbout .author { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--border); text-align: center; font-size: 13.5px; line-height: 1.9; }
+#dlgAbout .author .name { font-weight: 700; font-family: "Microsoft YaHei", sans-serif; }
+#dlgAbout .author .site { display: inline-block; color: var(--accent); text-decoration: none; font-family: Consolas, monospace; }
 #palGrid { display: grid; grid-template-columns: repeat(8, 28px); gap: 8px; margin: 4px 0 10px; }
 #palGrid .sw { width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
 #palGrid .sw.on { border-color: var(--accent); transform: scale(1.12); }
@@ -278,7 +288,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnOpen">打开文件夹</button>
   <button id="btnReconnect" class="hidden">继续上次：<span id="lastName"></span></button>
   <span class="sep"></span>
-  <button id="btnNewFile" class="primary" disabled>新建文件</button>
+  <button id="btnNewTxt" class="primary" disabled title="新建 .txt 文件（按 Markdown 解析），自动编号 +10">新建txt</button>
+  <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
   <button id="btnNewDir" disabled>新建文件夹</button>
   <button id="btnRename" disabled>重命名</button>
   <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
@@ -287,11 +298,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
   <span class="sep"></span>
-  <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
-  <button id="btnTable" disabled>插入表格</button>
-  <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
-  <button id="btnReplaceFile" disabled title="在当前文件中查找替换（替换前确认）">文档内替换</button>
-  <button id="btnReplaceProject" disabled title="在项目全部 md/txt 文件中查找替换（替换前确认，不可撤销）">项目内替换</button>
+  <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
+  <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
+  <button id="btnPrint" disabled title="合并全书后调出打印窗口，选“另存为 PDF”，并取消勾选“页眉和页脚”">打印/PDF</button>
+  <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
+  <button id="btnExport" disabled>导出 HTML</button>
+  <button id="btnAbout" title="软件使用说明">说明</button>
+  <button id="btnTheme" title="切换明暗主题">🌙</button>
  </div>
  <div class="tb-row tb-row2">
    <div id="searchBar"><input id="searchInput" placeholder="搜索文件内容…" title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" title="搜索">🔍</button><button id="btnClearSearch" title="清空搜索，恢复目录显示">✕</button></div>
@@ -314,12 +327,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <option value="red">典雅红</option>
    </select>
    <span class="sep"></span>
-   <button id="btnFontDown" title="减小字号：编辑模式调编辑器，预览/阅览调内容">A-</button>
-   <button id="btnFontUp" title="增大字号：编辑模式调编辑器，预览/阅览调内容">A+</button>
-   <button id="btnPrint" disabled title="合并全书后调出打印窗口，选“另存为 PDF”，并取消勾选“页眉和页脚”">打印/PDF</button>
-   <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
-   <button id="btnExport" disabled>导出 HTML</button>
-   <button id="btnTheme" title="切换明暗主题">🌙</button>
+   <button id="btnInsertImg" disabled title="粘贴/拖入图片即可插入；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">插入图片</button>
+   <button id="btnTable" disabled>插入表格</button>
+   <button id="btnPalette" disabled title="选择颜色，确认后把色值插入光标处">调色盘</button>
+   <button id="btnReplaceFile" disabled title="在当前文件中查找替换（替换前确认）">文档内替换</button>
+   <button id="btnReplaceProject" disabled title="在项目全部 md/txt 文件中查找替换（替换前确认，不可撤销）">项目内替换</button>
  </div>
 </header>
 
@@ -411,6 +423,70 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="btns">
     <button id="rpCancel">取消</button>
     <button id="rpOk" class="primary">替换</button>
+  </div>
+</dialog>
+<dialog id="dlgAbout">
+  <h3>WriteTools 写作工具 · 使用说明</h3>
+  <div class="ab-body">
+    <h4>这是什么</h4>
+    <ul>
+      <li>把电脑上的一个普通文件夹当作书稿：文件夹可任意嵌套，里面放 <code>.txt</code> / <code>.md</code> 文件，全部用 Markdown 语法写作。</li>
+      <li>文件保存为 <code>.txt</code> 但按 Markdown 解析（方便在 Windows 资源管理器里预览）；需要标准 .md 时点「新建md」即可。数据全部在本地文件夹，不联网、不上传。</li>
+      <li>请使用新版 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开；首次选择文件夹时在弹窗里点“允许”。</li>
+    </ul>
+    <h4>开始使用</h4>
+    <ul>
+      <li><b>打开文件夹</b>：选择书稿根目录。授权会被记住，下次打开页面自动加载；旧版浏览器显示“继续上次”按钮，点一下即可。</li>
+    </ul>
+    <h4>编号与排序</h4>
+    <ul>
+      <li>文件名用三位数字编号：<code>110.txt</code>、<code>110-标题.txt</code>。新建文件自动取最大编号 +10，留好插入空位。</li>
+      <li><b>文件夹也可以编号</b>：重命名为 <code>120-正文</code> 后，文件和文件夹按 110、120、130 统一排序，可实现“序言 → 正文文件夹 → 后记”的穿插结构；不编号的文件夹固定排在最前。</li>
+      <li><b>重新编号</b>：先选中一个文件或文件夹，点该按钮，只对所在文件夹内的文件和带编号子文件夹统一重排为 110、120、130…，文字部分保留。</li>
+      <li><b>自动命名</b>：把 <code>110.txt</code> 改成 <code>110-第一行文字.txt</code>（超过 16 字截断）。</li>
+    </ul>
+    <h4>草稿 / 素材</h4>
+    <ul>
+      <li>文件名或文件夹名以 <code>_</code> 开头（也兼容 <code>[草稿]</code>、<code>draft-</code>）即为草稿：可正常编辑、搜索，但不参与阅览和导出；草稿文件夹内的全部内容都不输出。去掉下划线即恢复。</li>
+    </ul>
+    <h4>三种模式</h4>
+    <ul>
+      <li><b>编辑</b>：左边写 Markdown，右边实时预览；自动保存。</li>
+      <li><b>预览</b>：单独预览当前文件。</li>
+      <li><b>阅览</b>：把整个文件夹按顺序合并成一本书（顶部居中显示项目名），左侧目录先列文件名、再列该文件内的标题。</li>
+    </ul>
+    <h4>写作辅助</h4>
+    <ul>
+      <li><b>图片</b>：直接粘贴或拖入即自动存入 assets 并插入；语法 <code>![](路径 =600x400 center)</code>，可只写宽或高，对齐用 center/left/right。</li>
+      <li><b>表格</b>：插入表格对话框；光标在表格内时浮出工具条可增删行列。</li>
+      <li><b>调色盘</b>：选颜色确认后把色值插到光标处。</li>
+      <li><b>替换</b>：文档内替换作用于当前文件；项目内替换批量作用于全部 md/txt 文件（草稿也包含，替换前需确认，不可撤销）。</li>
+      <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
+      <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
+      <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
+    </ul>
+    <h4>样式与显示</h4>
+    <ul>
+      <li><b>样式</b>：编辑项目根目录的 style.css，保存即生效；<b>内置样式</b>下拉框提供经典黑、学术蓝、护眼绿、暖阳橙、典雅紫、典雅红六套，可在其基础上微调。暗色主题下自定义颜色自动转为浅色，导出时保持原色。</li>
+      <li><b>A- / A+</b>：编辑模式调编辑器字号，预览/阅览调正文字号；🌙 切换明暗主题。</li>
+    </ul>
+    <h4>输出</h4>
+    <ul>
+      <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
+      <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），双击即可在浏览器阅读。</li>
+      <li><b>打印/PDF</b>：在打印窗口选“另存为 PDF”；边距选“默认”，并取消勾选“页眉和页脚”。</li>
+    </ul>
+    <h4>注意</h4>
+    <ul>
+      <li>删除、合并、重新编号等操作直接改动本地文件，浏览器不经过回收站，执行前请确认（确认框会列出影响范围）。</li>
+    </ul>
+    <div class="author">
+      <div class="name">张亮军　无锡·海岸城</div>
+      <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
+    </div>
+  </div>
+  <div class="btns">
+    <button id="aboutOk" class="primary">知道了</button>
   </div>
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
@@ -617,7 +693,7 @@ async function scanDir(dirHandle, path) {
     if (h.kind === 'directory') {
       dirs.push({ type: 'dir', name, handle: h, path: path ? path + '/' + name : name, children: [], draft: isDraftName(name) });
     } else if (/\.(md|markdown|txt|css)$/i.test(name)) {
-      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name) });
+      files.push({ type: 'file', name, handle: h, path: path ? path + '/' + name : name, draft: isDraftName(name), aux: name === 'style.css' });
     }
   }
   for (const d of dirs) d.children = await scanDir(d.handle, d.path);
@@ -649,18 +725,20 @@ let dragPath = null;   // 正在拖动的节点路径
 function renderTree() {
   const el = $('tree'); el.innerHTML = '';
   const mk = (node, depth) => {
+    const mutedOut = node.draft || node.aux;   // 草稿或 style.css：弱化显示且不输出
     const row = document.createElement('div');
     row.className = 'tnode ' + node.type
       + (selectedNode === node ? ' selected' : '')
       + (multiSel.includes(node.path) ? ' multisel' : '')
-      + (node.draft ? ' draft' : '');
+      + (mutedOut ? ' draft' : '');
     row.style.paddingLeft = (8 + depth * 16) + 'px';
     let ico;
     if (node.type === 'dir') ico = expanded.has(node.path) ? '📂' : '📁';
     else if (multiSel.includes(node.path)) ico = '✓';
     else ico = '📄';
-    row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (node.draft ? '<span class="dtag">不输出</span>' : '');
-    row.title = (node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
+    row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (mutedOut ? '<span class="dtag">不输出</span>' : '');
+    row.title = (node.aux ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
+      : node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
       + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并用，Esc 或「取消选择」清空）；拖动可移动' : '拖动文件/文件夹到这里可移动');
     row.draggable = true;
     row.ondragstart = e => { dragPath = node.path; e.dataTransfer.setData('text/plain', node.path); e.dataTransfer.effectAllowed = 'move'; };
@@ -681,7 +759,7 @@ function renderTree() {
       if (src && src !== node) await moveNode(src, node);
     };
     row.onclick = async (ev) => {
-      if ((ev.ctrlKey || ev.metaKey) && node.type === 'file') {
+      if ((ev.ctrlKey || ev.metaKey) && node.type === 'file' && /\.(md|markdown|txt)$/i.test(node.name)) {
         const i = multiSel.indexOf(node.path);
         if (i >= 0) multiSel.splice(i, 1); else multiSel.push(node.path);
         selectedNode = node;
@@ -1082,14 +1160,14 @@ async function maxNumInDir(dir) {
   }
   return max;
 }
-async function nextFileName(dir) {
+async function nextFileName(dir, ext) {
   const max = await maxNumInDir(dir);
-  return (max ? max + 10 : 110) + '.txt';
+  return (max ? max + 10 : 110) + '.' + ext;
 }
-async function newFile() {
+async function newFile(ext) {
   if (!rootHandle) return;
   const { handle: dir, path } = await targetDir();
-  const full = await nextFileName(dir);
+  const full = await nextFileName(dir, ext);
   try {
     const fh = await dir.getFileHandle(full, { create: true });
     const w = await fh.createWritable(); await w.write(''); await w.close();
@@ -1152,8 +1230,12 @@ async function autoRename() {
   title = title.replace(/[\\/:*?"<>|.]/g, '').trim();
   if (!title) { toast('第一行没有可用文字'); return; }
   const ext = (n.name.match(/\.\w+$/) || ['.txt'])[0];
-  const pm = n.name.match(/^(\d+)(?:-[^.]*)?/);
-  const newName = (pm ? pm[1] + '-' + title : title) + ext;
+  // 保留草稿前缀（_、[草稿]、draft-），只替换/生成数字编号部分
+  const dm = n.name.match(/^(_|\[草稿\]|draft-)/i);
+  const draftPrefix = dm ? dm[0] : '';
+  const rest = n.name.slice(draftPrefix.length);
+  const pm = rest.match(/^(\d+)(?:-[^.]*)?/);
+  const newName = draftPrefix + (pm ? pm[1] + '-' + title : title) + ext;
   if (newName === n.name) { toast('名称已符合格式'); return; }
   const dirPath = parentPath(n.path);
   try {
@@ -1597,7 +1679,8 @@ function updateToolbar() {
   $('btnPalette').disabled = !current;
   $('btnReplaceFile').disabled = !current;
   $('btnReplaceProject').disabled = !hasRoot;
-  $('btnNewFile').disabled = !hasRoot;
+  $('btnNewTxt').disabled = !hasRoot;
+  $('btnNewMd').disabled = !hasRoot;
   $('btnNewDir').disabled = !hasRoot;
   $('btnRename').disabled = !hasSel;
   $('btnDelete').disabled = !hasSel;
@@ -1609,8 +1692,9 @@ function updateToolbar() {
   $('btnCss').disabled = !hasRoot;
   $('presetSel').disabled = !hasRoot;
   $('btnRenumber').disabled = !(hasRoot && (selectedNode || current));
-  const hasFile = hasRoot && ((selectedNode && selectedNode.type === 'file') || current);
-  $('btnAutoName').disabled = !hasFile;
+  const activeFile = (selectedNode && selectedNode.type === 'file') ? selectedNode : (current ? current.node : null);
+  const hasFile = hasRoot && !!activeFile;
+  $('btnAutoName').disabled = !hasFile || activeFile.name === 'style.css' || !/\.(md|markdown|txt)$/i.test(activeFile.name);
   $('btnRefresh').disabled = !hasRoot;
   document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
 }
@@ -1626,7 +1710,8 @@ $('btnReconnect').onclick = async () => {
   try { const h = await idbGet('root'); if (h) await useRoot(h); }
   catch (e) { toast('重连失败，请重新选择文件夹'); }
 };
-$('btnNewFile').onclick = newFile;
+$('btnNewTxt').onclick = () => newFile('txt');
+$('btnNewMd').onclick = () => newFile('md');
 $('btnNewDir').onclick = newDir;
 $('btnRename').onclick = renameNode;
 $('btnDelete').onclick = deleteNode;
@@ -1681,6 +1766,8 @@ $('btnTheme').onclick = () => {
   $('btnTheme').textContent = cur === 'dark' ? '☀️' : '🌙';
   localStorage.setItem('wt-theme', cur);
 };
+$('btnAbout').onclick = () => $('dlgAbout').showModal();
+$('aboutOk').onclick = () => $('dlgAbout').close();
 if (localStorage.getItem('wt-theme') === 'dark') {
   document.documentElement.dataset.theme = 'dark';
   $('btnTheme').textContent = '☀️';
