@@ -131,6 +131,34 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 
 /* ---------- read (merged) view ---------- */
 #readView { flex: 1; display: flex; min-width: 0; }
+#outlineView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#outlineView.hidden { display: none; }
+#outlineBar { flex: none; padding: 9px 18px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
+#outlineBar .ol-hint { color: var(--muted); font-size: 12px; }
+#outlineScroll { flex: 1; overflow-y: auto; padding: 16px 22px 60px; }
+#outlineCards { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.ol-card {
+  position: relative; border: 1px solid var(--border); border-radius: 9px; background: var(--panel);
+  padding: 9px 14px; cursor: pointer; user-select: none;
+}
+.ol-card:hover { border-color: var(--accent); }
+.ol-card.ol-dir { background: var(--bg); border-style: dashed; }
+.ol-card.ol-draft .ol-title, .ol-card.ol-draft .ol-ex, .ol-card.ol-draft .ol-meta { opacity: .55; font-style: italic; }
+.ol-card .ol-row1 { display: flex; align-items: center; gap: 8px; }
+.ol-card .ol-fold { flex: none; width: 16px; color: var(--muted); font-size: 11px; text-align: center; }
+.ol-card .ol-ico { flex: none; font-size: 15px; }
+.ol-card .ol-title { flex: 1; font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ol-card .ol-num { flex: none; font-family: Consolas, monospace; font-size: 11.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+.ol-card .ol-meta { flex: none; font-size: 11.5px; color: var(--muted); }
+.ol-card .ol-ex { margin: 3px 0 0 24px; font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ol-card.ol-drag { opacity: .4; }
+.ol-card.drop-before::before, .ol-card.drop-after::after {
+  content: ''; position: absolute; left: -4px; right: -4px; height: 3px; background: var(--accent); border-radius: 2px; pointer-events: none;
+}
+.ol-card.drop-before::before { top: -5px; }
+.ol-card.drop-after::after { bottom: -5px; }
+.ol-card.drop-inside { outline: 2px solid var(--accent); outline-offset: 1px; background: var(--sel); }
+.ol-empty { color: var(--muted); text-align: center; padding: 50px 0; font-size: 13px; }
 #tocPanel {
   width: 250px; min-width: 120px; flex: none; overflow: auto;
   background: var(--panel); padding: 12px 8px;
@@ -204,7 +232,7 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 
 /* ---------- print ---------- */
 @media print {
-  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #welcome, #toast, #tableBar, #toTop { display: none !important; }
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop { display: none !important; }
   #main, #workarea, #readView, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; }
   @page { margin: 20mm 16mm 18mm; }
   body { overflow: visible; background: #fff; }
@@ -334,6 +362,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button data-mode="edit" class="active" disabled>编辑</button>
      <button data-mode="preview" disabled>预览</button>
      <button data-mode="read" disabled>阅览</button>
+     <button data-mode="outline" disabled>大纲</button>
    </div>
    <button id="btnSide" title="隐藏/显示左侧文件目录">隐藏目录</button>
    <button id="btnRefresh" disabled>刷新</button>
@@ -397,6 +426,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <nav id="tocPanel"><div class="toc-title">目 录</div><div id="tocList"></div></nav>
       <div class="vdiv" id="divRead"></div>
       <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
+    </div>
+    <div id="outlineView" class="hidden">
+      <div id="outlineBar">
+        <b>全书大纲</b>
+        <span class="ol-hint">拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑</span>
+      </div>
+      <div id="outlineScroll"><div id="outlineCards"></div></div>
     </div>
   </section>
 </div>
@@ -472,11 +508,12 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <ul>
       <li>文件名或文件夹名以 <code>_</code> 开头（也兼容 <code>[草稿]</code>、<code>draft-</code>）即为草稿：可正常编辑、搜索，但不参与阅览和导出；草稿文件夹内的全部内容都不输出。去掉下划线即恢复。</li>
     </ul>
-    <h4>三种模式</h4>
+    <h4>四种模式</h4>
     <ul>
       <li><b>编辑</b>：左边写 Markdown，右边实时预览；自动保存。</li>
       <li><b>预览</b>：单独预览当前文件。</li>
       <li><b>阅览</b>：把整个文件夹按顺序合并成一本书（顶部居中显示项目名），左侧目录先列文件名、再列该文件内的标题。</li>
+      <li><b>大纲</b>：以卡片纵览全书——文件夹是卷、文件是章节，卡片显示标题、摘要和字数；直接拖动卡片即可调整章节顺序，编号自动重排，拖到文件夹卡片中段可移入该文件夹。</li>
     </ul>
     <h4>写作辅助</h4>
     <ul>
@@ -1157,7 +1194,7 @@ async function exportMerged() {
   toast('已导出 ' + a.download);
 }
 const EXPORT_CSS = `
-body{margin:0;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
+body{margin:0px 32px 0px 32px;max-width:1000px;background:#fbfaf7;color:#26282b;font-family:Georgia,"Noto Serif SC","Source Han Serif SC",SimSun,serif;}
 .wrap{display:flex;align-items:flex-start;gap:36px;max-width:1160px;margin:0 auto;padding:50px 120px 120px 32px;}
 .book{flex:1;min-width:0;font-size:16.5px;line-height:1.9;}
 @media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
@@ -1318,36 +1355,26 @@ async function autoRename() {
     toast('已重命名：' + newName);
   } catch (e) { toast('重命名失败：' + e.message); }
 }
-async function renumberAll() {
-  if (!rootHandle) return;
-  // 目标文件夹：选中的文件夹本身；选中/打开的文件则取其所在文件夹
-  const sel = selectedNode || (current ? current.node : null);
-  if (!sel) { toast('请先在目录中选择一个文件或文件夹'); return; }
-  await flushSave();
-  let dirHandle, dirPath, dirLabel;
-  if (sel.type === 'dir') { dirHandle = sel.handle; dirPath = sel.path; dirLabel = sel.name; }
-  else {
-    dirPath = parentPath(sel.path);
-    dirHandle = await getDirHandleByPath(dirPath);
-    dirLabel = dirPath || rootHandle.name;
-  }
-  // 收集该文件夹直接包含的 md/txt 文件和子文件夹（不递归、不含草稿）
+// 扫描一个文件夹，按 preferredOrder（名称数组，可选）排序，生成 110/120… 重编号任务
+async function buildRenumberTasks(dirHandle, dirPath, preferredOrder) {
   const fileEntries = [], dirEntries = [];
   for await (const [name, h] of dirHandle.entries()) {
     if (name.startsWith('.') || isDraftName(name)) continue;
-    if (h.kind === 'file' && /\.(md|markdown|txt)$/i.test(name)) fileEntries.push({ name, handle: h });
-    else if (h.kind === 'directory') dirEntries.push({ name, handle: h });
+    if (h.kind === 'file' && /\.(md|markdown|txt)$/i.test(name)) fileEntries.push({ type: 'file', name, handle: h });
+    else if (h.kind === 'directory') dirEntries.push({ type: 'dir', name, handle: h });
   }
-  // 按全局排序规则排列：无编号文件夹在最前（保持不动、不占槽），
-  // 其余文件和带编号文件夹统一按 110、120、130…重新编号（文件夹也改名）
-  const ordered = sortNodes([
-    ...dirEntries.map(d => ({ type: 'dir', name: d.name, handle: d.handle })),
-    ...fileEntries.map(f => ({ type: 'file', name: f.name, handle: f.handle }))
-  ]);
+  const all = [...dirEntries, ...fileEntries];
+  let ordered;
+  if (Array.isArray(preferredOrder)) {
+    const byName = new Map(all.map(n => [n.name, n]));
+    ordered = preferredOrder.map(nm => byName.get(nm)).filter(Boolean);
+    // 偏好列表没覆盖到的节点按默认排序补在后面
+    for (const n of sortNodes(all)) if (!preferredOrder.includes(n.name)) ordered.push(n);
+  } else ordered = sortNodes(all);
   const tasks = [];
   let slot = 0;
   for (const nd of ordered) {
-    if (nd.type === 'dir' && numOf(nd.name) === null) continue;  // 无编号文件夹：保持在最前，不动
+    if (nd.type === 'dir' && numOf(nd.name) === null) continue;  // 无编号文件夹：最前不动
     const base = String(110 + slot * 10).padStart(3, '0');
     slot++;
     if (nd.type === 'file') {
@@ -1365,7 +1392,6 @@ async function renumberAll() {
         newName: stem ? base + '-' + stem + ext : base + ext
       });
     } else {
-      // 带编号文件夹：替换编号、保留文字（文件夹无扩展名）
       const m = nd.name.match(/^(\d+)(?:-(.*))?$/);
       const stem = m && m[2] ? m[2] : '';
       tasks.push({
@@ -1375,10 +1401,10 @@ async function renumberAll() {
       });
     }
   }
-  if (!tasks.length) { toast('文件夹「' + dirLabel + '」内没有可编号的文件或带编号文件夹'); return; }
-  const examples = tasks.slice(0, 4).map(t => '  ' + t.oldName + '  →  ' + t.newName).join('\n');
-  if (!confirm('将对文件夹「' + dirLabel + '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ' + tasks.length + ' 项（文件 ' + tasks.filter(t => t.kind === 'file').length + ' 个、文件夹 ' + tasks.filter(t => t.kind === 'dir').length + ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n' + examples + '\n\n此操作直接修改文件/文件夹名，不可撤销，确定继续？')) return;
-  const curPath = current ? current.node.path : null;
+  return tasks;
+}
+// 两阶段执行重命名，返回因重名跳过（已回滚原名）的任务
+async function executeRenumberTasks(dirHandle, tasks) {
   const moveToTemp = async (t) => {
     if (t.kind === 'file') {
       const f = await t.handle.getFile();
@@ -1401,22 +1427,40 @@ async function renumberAll() {
       await dirHandle.removeEntry(t.tmp, { recursive: true });
     }
   };
+  for (const t of tasks) await moveToTemp(t);
+  const failed = [];
+  for (const t of tasks) {
+    let clash = false;
+    try {
+      if (t.kind === 'file') await dirHandle.getFileHandle(t.newName);
+      else await dirHandle.getDirectoryHandle(t.newName);
+      clash = true;
+    } catch (e) {}
+    if (clash) { failed.push(t); continue; }
+    await moveToTarget(t, t.newName);
+  }
+  for (const t of failed) await moveToTarget(t, t.oldName);
+  return failed;
+}
+async function renumberAll() {
+  if (!rootHandle) return;
+  const sel = selectedNode || (current ? current.node : null);
+  if (!sel) { toast('请先在目录中选择一个文件或文件夹'); return; }
+  await flushSave();
+  let dirHandle, dirPath, dirLabel;
+  if (sel.type === 'dir') { dirHandle = sel.handle; dirPath = sel.path; dirLabel = sel.name; }
+  else {
+    dirPath = parentPath(sel.path);
+    dirHandle = await getDirHandleByPath(dirPath);
+    dirLabel = dirPath || rootHandle.name;
+  }
+  const tasks = await buildRenumberTasks(dirHandle, dirPath);
+  if (!tasks.length) { toast('文件夹「' + dirLabel + '」内没有可编号的文件或带编号文件夹'); return; }
+  const examples = tasks.slice(0, 4).map(t => '  ' + t.oldName + '  →  ' + t.newName).join('\n');
+  if (!confirm('将对文件夹「' + dirLabel + '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ' + tasks.length + ' 项（文件 ' + tasks.filter(t => t.kind === 'file').length + ' 个、文件夹 ' + tasks.filter(t => t.kind === 'dir').length + ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n' + examples + '\n\n此操作直接修改文件/文件夹名，确定继续？')) return;
+  const curPath = current ? current.node.path : null;
   try {
-    // 阶段1：全部先改为临时名，避免新旧编号互相冲突
-    for (const t of tasks) await moveToTemp(t);
-    // 阶段2：临时名改为目标名；若目标名被未参与项（如图片、无编号文件夹）占用则跳过并回滚
-    const failed = [];
-    for (const t of tasks) {
-      let clash = false;
-      try {
-        if (t.kind === 'file') await dirHandle.getFileHandle(t.newName);
-        else await dirHandle.getDirectoryHandle(t.newName);
-        clash = true;
-      } catch (e) {}
-      if (clash) { failed.push(t); continue; }
-      await moveToTarget(t, t.newName);
-    }
-    for (const t of failed) await moveToTarget(t, t.oldName);
+    const failed = await executeRenumberTasks(dirHandle, tasks);
     multiSel = []; selectedNode = null; current = null;
     $('editor').value = '';
     await refreshTree();
@@ -1822,6 +1866,215 @@ function listContinue(e) {
   try { document.execCommand('insertText', false, '\n' + m[1] + marker); } catch (err) {}
 }
 
+/* ================= outline view ================= */
+let olDragPath = null;
+const olCollapsed = new Set();   // 大纲中折叠的文件夹路径
+// 从文件内容提取：第一个 Markdown 标题（无则用文件名文字）与两行摘要
+function olExtractInfo(name, text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let title = '';
+  const ht = lines.find(l => /^#{1,6}\s+\S/.test(l));
+  if (ht) title = ht.replace(/^#{1,6}\s+/, '').replace(/[*_`~#]/g, '').trim();
+  if (!title) {
+    const m = name.match(/^\d+-(.+)$/);
+    title = m ? m[1].replace(/\.[^.]+$/, '') : name.replace(/\.[^.]+$/, '');
+  }
+  const tIdx = lines.indexOf(ht);
+  const ex = lines.slice(tIdx >= 0 ? tIdx + 1 : 0)
+    .filter(l => !/^```/.test(l))
+    .slice(0, 2).join(' / ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '[图]').replace(/[*_`~#>|\[\]]/g, '')
+    .slice(0, 80);
+  return { title: title.slice(0, 40) || name, ex, count: countChars(text) };
+}
+function countDirMd(node) {
+  let c = 0;
+  for (const ch of node.children) {
+    if (ch.type === 'file') { if (/\.(md|markdown|txt)$/i.test(ch.name) && !ch.draft) c++; }
+    else c += countDirMd(ch);
+  }
+  return c;
+}
+async function renderOutline() {
+  const box = $('outlineCards');
+  box.innerHTML = '';
+  if (!tree.length) { box.innerHTML = '<div class="ol-empty">文件夹为空</div>'; return; }
+  const pending = [];
+  const walk = (nodes, depth) => {
+    for (const n of nodes) {
+      if (n.aux) continue;   // style.css 不是书稿内容
+      const card = document.createElement('div');
+      card.className = 'ol-card ' + (n.type === 'dir' ? 'ol-dir' : 'ol-file') + (n.draft ? ' ol-draft' : '');
+      card.dataset.path = n.path;
+      card.style.marginLeft = (depth * 22) + 'px';
+      const num = numOf(n.name);
+      if (n.type === 'dir') {
+        const folded = olCollapsed.has(n.path);
+        card.innerHTML = '<div class="ol-row1"><span class="ol-fold">' + (folded ? '▶' : '▼') + '</span>'
+          + '<span class="ol-ico">' + (folded ? '📁' : '📂') + '</span>'
+          + '<span class="ol-title">' + esc(n.name.replace(/^\d+-/, '')) + '</span>'
+          + (num !== null ? '<span class="ol-num">' + num + '</span>' : '')
+          + '<span class="ol-meta">' + countDirMd(n) + ' 篇</span></div>';
+        box.appendChild(card);
+        bindOlCard(card, n);
+        card.querySelector('.ol-fold').onclick = ev => {
+          ev.stopPropagation();
+          if (folded) olCollapsed.delete(n.path); else olCollapsed.add(n.path);
+          renderOutline();
+        };
+        if (!folded) walk(n.children, depth + 1);
+      } else {
+        card.innerHTML = '<div class="ol-row1"><span class="ol-fold"></span><span class="ol-ico">📄</span>'
+          + '<span class="ol-title">…</span>'
+          + (num !== null ? '<span class="ol-num">' + num + '</span>' : '')
+          + '<span class="ol-meta">' + (n.draft ? '草稿' : '<span class="ol-cnt"></span>') + '</span></div>'
+          + '<div class="ol-ex ol-ex-txt"></div>';
+        box.appendChild(card);
+        bindOlCard(card, n);
+        pending.push({ n, card });
+      }
+    }
+  };
+  walk(tree, 0);
+  for (const { n, card } of pending) {
+    let info;
+    try { info = olExtractInfo(n.name, await (await n.handle.getFile()).text()); }
+    catch (e) { info = { title: n.name, ex: '', count: 0 }; }
+    card.querySelector('.ol-title').textContent = info.title;
+    card.querySelector('.ol-ex-txt').textContent = info.ex;
+    const c = card.querySelector('.ol-cnt');
+    if (c) c.textContent = info.count + ' 字';
+  }
+}
+function clearOlHints() {
+  document.querySelectorAll('.ol-card.drop-before,.ol-card.drop-after,.ol-card.drop-inside').forEach(el =>
+    el.classList.remove('drop-before', 'drop-after', 'drop-inside'));
+}
+function olDropPos(n, ev) {
+  const r = ev.currentTarget.getBoundingClientRect();
+  const y = ev.clientY - r.top;
+  if (n.type === 'dir') {
+    if (y < r.height * 0.28) return 'before';
+    if (y > r.height * 0.72) return 'after';
+    return 'inside';
+  }
+  return y < r.height / 2 ? 'before' : 'after';
+}
+function bindOlCard(card, n) {
+  card.draggable = true;
+  card.ondragstart = ev => {
+    olDragPath = n.path;
+    ev.dataTransfer.setData('text/plain', n.path);
+    ev.dataTransfer.effectAllowed = 'move';
+    card.classList.add('ol-drag');
+  };
+  card.ondragend = () => {
+    olDragPath = null; clearOlHints();
+    document.querySelectorAll('.ol-card.ol-drag').forEach(el => el.classList.remove('ol-drag'));
+  };
+  card.ondragover = ev => {
+    if (!olDragPath) return;
+    if (olDragPath === n.path) return;
+    const src = findNode(tree, olDragPath);
+    if (src && src.type === 'dir' && (n.path === src.path || n.path.startsWith(src.path + '/'))) return;
+    const pos = olDropPos(n, ev);
+    if (!pos) return;
+    ev.preventDefault();
+    clearOlHints();
+    card.classList.add('drop-' + pos);
+  };
+  card.ondragleave = () => card.classList.remove('drop-before', 'drop-after', 'drop-inside');
+  card.ondrop = async ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const p = ev.dataTransfer.getData('text/plain') || olDragPath;
+    const pos = olDropPos(n, ev);
+    clearOlHints(); olDragPath = null;
+    const src = p && findNode(tree, p);
+    if (src && pos && src.path !== n.path) await outlineDrop(src, n, pos);
+  };
+  if (n.type === 'file') {
+    card.onclick = async () => { selectedNode = n; await openFile(n); setMode('edit'); };
+  }
+}
+// 底层移动：把节点移入目标目录（优先原生 move，否则复制+删除），重名报错
+async function moveEntryTo(srcNode, destDirHandle) {
+  const name = srcNode.name;
+  try { await destDirHandle.getFileHandle(name); throw new Error('目标已存在同名文件：' + name); }
+  catch (e) { if (/同名/.test(e.message)) throw e; }
+  try { await destDirHandle.getDirectoryHandle(name); throw new Error('目标已存在同名文件夹：' + name); }
+  catch (e) { if (/同名/.test(e.message)) throw e; }
+  if (srcNode.handle.move) { try { await srcNode.handle.move(destDirHandle, name); return; } catch (e) {} }
+  if (srcNode.type === 'file') {
+    const nh = await destDirHandle.getFileHandle(name, { create: true });
+    const w = await nh.createWritable(); await w.write(await srcNode.handle.getFile()); await w.close();
+    const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
+    await srcDir.removeEntry(name);
+  } else {
+    await copyDir(srcNode.handle, await destDirHandle.getDirectoryHandle(name, { create: true }));
+    const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
+    await srcDir.removeEntry(name, { recursive: true });
+  }
+}
+async function outlineDrop(src, target, pos) {
+  if (src.type === 'dir' && numOf(src.name) === null && pos !== 'inside') {
+    toast('不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）'); return;
+  }
+  const destParentNode = pos === 'inside' ? target
+    : (parentPath(target.path) ? findNode(tree, parentPath(target.path)) : null);
+  const destPath = destParentNode ? destParentNode.path : '';
+  if (src.type === 'dir' && destPath && (destPath === src.path || destPath.startsWith(src.path + '/'))) {
+    toast('不能移动到自身内部'); return;
+  }
+  const srcParPath = parentPath(src.path);
+  if (destPath === srcParPath && pos !== 'inside') {
+    // 同层重排（位置实际没变时也允许：仅重新规范化编号）
+  }
+  await flushSave();
+  try {
+    const sameDir = srcParPath === destPath;
+    if (!sameDir) {
+      await moveEntryTo(src, destParentNode ? destParentNode.handle : rootHandle);
+      if (pos === 'inside') olCollapsed.delete(target.path);  // 移入后展开目标文件夹
+    }
+    await refreshTree();
+    const target2 = findNode(tree, target.path);
+    const destPar2 = destPath ? findNode(tree, destPath) : null;
+    const siblings = (destPar2 ? destPar2.children : tree).filter(x => !x.aux);
+    let preferred = null;
+    if (pos !== 'inside') {
+      preferred = siblings.map(x => x.name).filter(nm => nm !== src.name);
+      if (target2) {
+        const ti = preferred.indexOf(target2.name);
+        if (ti < 0) preferred.push(src.name);
+        else preferred.splice(pos === 'before' ? ti : ti + 1, 0, src.name);
+      } else preferred.push(src.name);
+    }
+    const destHandle = destPar2 ? destPar2.handle : rootHandle;
+    const tasksDest = await buildRenumberTasks(destHandle, destPath, preferred);
+    const failedDest = tasksDest.length ? await executeRenumberTasks(destHandle, tasksDest) : [];
+    let failedSrc = [];
+    if (!sameDir && srcParPath !== destPath) {
+      const srcParHandle = await getDirHandleByPath(srcParPath);
+      const tasksSrc = await buildRenumberTasks(srcParHandle, srcParPath);
+      failedSrc = tasksSrc.length ? await executeRenumberTasks(srcParHandle, tasksSrc) : [];
+    }
+    if (current) { current = null; $('editor').value = ''; }
+    await refreshTree();
+    const t = tasksDest.find(x => x.oldName === src.name);
+    const finalName = t && !failedDest.includes(t) ? t.newName : src.name;
+    const fn2 = findNode(tree, destPath ? destPath + '/' + finalName : finalName);
+    if (fn2) selectedNode = fn2;
+    renderTree(); updateToolbar();
+    if (mode === 'outline') renderOutline();
+    const nFail = failedDest.length + failedSrc.length;
+    toast(nFail ? '已调整顺序，' + nFail + ' 项因重名跳过' : '顺序已调整（编号已重排）');
+  } catch (e) {
+    toast('移动失败：' + e.message);
+    await refreshTree();
+    if (mode === 'outline') renderOutline();
+  }
+}
+
 /* ================= modes ================= */
 function setMode(m) {
   mode = m;
@@ -1829,6 +2082,7 @@ function setMode(m) {
   $('editView').classList.toggle('hidden', m !== 'edit');
   $('previewView').classList.toggle('hidden', m !== 'preview');
   $('readView').classList.toggle('hidden', m !== 'read');
+  $('outlineView').classList.toggle('hidden', m !== 'outline');
   if (m === 'edit') {
     // 编辑时一律展开左侧目录，方便操作文件
     localStorage.removeItem('wt-side-hidden');
@@ -1837,6 +2091,7 @@ function setMode(m) {
   }
   if (m === 'preview') renderSinglePreview();
   if (m === 'read') renderMerged();
+  if (m === 'outline') renderOutline();
   updateToTopVis();
 }
 function renderSinglePreview() {
@@ -2256,18 +2511,18 @@ $('rpOk').onclick = async () => {
 /* ================= back to top ================= */
 let topTarget = null;
 function updateToTopVis() {
-  const cands = mode === 'read' ? [$('mergedWrap')] : mode === 'preview' ? [$('singlePreview')] : [$('editor'), $('livePreview')];
+  const cands = mode === 'read' ? [$('mergedWrap')] : mode === 'preview' ? [$('singlePreview')] : mode === 'outline' ? [$('outlineScroll')] : [$('editor'), $('livePreview')];
   topTarget = cands.find(el => el && el.scrollTop > 300) || null;
   $('toTop').classList.toggle('show', !!topTarget);
 }
-['mergedWrap', 'editor', 'livePreview', 'singlePreview'].forEach(id => {
+['mergedWrap', 'editor', 'livePreview', 'singlePreview', 'outlineScroll'].forEach(id => {
   $(id).addEventListener('scroll', () => {
     if ($(id).scrollTop > 300) { topTarget = $(id); $('toTop').classList.add('show'); }
     else if (topTarget === $(id)) { topTarget = null; $('toTop').classList.remove('show'); }
   }, { passive: true });
 });
 $('toTop').onclick = () => {
-  const el = topTarget || (mode === 'read' ? $('mergedWrap') : $('editor'));
+  const el = topTarget || (mode === 'read' ? $('mergedWrap') : mode === 'outline' ? $('outlineScroll') : $('editor'));
   el.scrollTo({ top: 0, behavior: 'smooth' });
 };
 // Esc 清空多选
