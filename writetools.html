@@ -1171,10 +1171,6 @@ function numOf(name) {
 function sanitizeFileName(name) {
   return name.replace(/[\\/:*?"<>|]/g, '').replace(/^[\s.]+|[\s.]+$/g, '');
 }
-// 清理文件名用于显示：去掉开头的数字编号（110-）和扩展名（.txt/.md），与大纲视图一致
-function cleanName(name) {
-  return name.replace(/^\d+-/, '').replace(/\.(md|markdown|txt)$/i, '');
-}
 // 同层节点排序：返回新数组
 function sortNodes(nodes) {
   const nat = (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { numeric: true });
