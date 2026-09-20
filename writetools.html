@@ -190,7 +190,7 @@ body[data-mode="edit"] #pvToggleBtn { display: flex; }
 #readView { flex: 1; display: flex; min-width: 0; }
 #outlineView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #outlineView.hidden { display: none; }
-#outlineBar { flex: none; padding: 9px 8px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
+#outlineBar { flex: none; padding: 11px 11px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
 #outlineBar .ol-hint { color: var(--muted); font-size: 12px; }
 #outlineScroll { flex: 1; overflow-y: auto; padding: 16px 22px 60px; }
 #outlineCards { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
@@ -643,7 +643,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
       
-      <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">手动修改样式</button>
+      <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">编辑样式</button>
       <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
         <option value="">内置配色…</option>
         <option value="classic">经典黑</option>
