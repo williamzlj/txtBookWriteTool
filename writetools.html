@@ -164,7 +164,7 @@ body[data-mode="edit"] #pvToggleBtn { display: flex; }
 #welcome .tip { max-width: 460px; line-height: 1.9; font-size: 13.5px; text-align: center; }
 
 /* ---------- editor ---------- */
-#editView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#editView { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 #editRow { flex: 1; display: flex; min-width: 0; min-height: 0; }
 #editor {
   flex: 1; min-width: 0; border: none; outline: none; resize: none;
@@ -413,8 +413,9 @@ body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line
 #stSave.saved { color: #4a9a58; } #stSave.dirty { color: #c47f2e; }
 
 /* ---------- table helper bar ---------- */
+/* 表格工具条：绝对定位悬浮在编辑区顶部（不参与排版，编辑器/预览文字位置都不动；两侧顶部留白足以容纳） */
 #tableBar {
-  flex: none;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
   display: flex; align-items: center; gap: 5px; padding: 5px 10px;
   background: var(--panel); border-bottom: 1px solid var(--border); font-size: 13px;
 }
