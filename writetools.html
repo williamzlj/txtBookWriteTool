@@ -2484,15 +2484,26 @@ function insertAtCursor(text) {
     ed.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
+// 可撤销的范围替换：execCommand 进入 textarea 原生撤销栈（Ctrl+Z/Y 可整体撤销/重做一个动作）；
+// 不可用或失焦时回退 setRangeText。注意 setRangeText 会清空原生撤销栈，不能用于格式动作
+function editReplace(ed, s, e, text) {
+  ed.focus();
+  ed.setSelectionRange(s, e);
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, text); } catch (err) {}
+  if (!ok) {
+    ed.setRangeText(text, s, e, 'end');
+    ed.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
 // 插入 HTML 注释：有选区则把选中文本包成 <!--选中内容-->（内部文字保持选中）；无选区插入 <!--注释--> 并选中占位文字
 function insertComment() {
-  const ed = $('editor'); ed.focus();
+  const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
   const pre = '<!--', post = '-->';
   const inner = ed.value.slice(s, e) || '注释';
-  ed.setRangeText(pre + inner + post, s, e);
+  editReplace(ed, s, e, pre + inner + post);
   ed.setSelectionRange(s + pre.length, s + pre.length + inner.length);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 $('editor').addEventListener('paste', async e => {
   const items = [...(e.clipboardData?.items || [])];
@@ -2590,7 +2601,8 @@ function replaceBlock(a, b, newLines) {
 function tableOp(op) {
   const blk = getTableBlock();
   if (!blk) { toast('光标需放在表格内'); return; }
-  const { lines, a, b, li, ed } = blk;
+  const { lines, a, b, li } = blk;
+  const ed = $('editor');
   const blkLines = lines.slice(a, b + 1);
   const sepIdx = blkLines.findIndex((l, i) => i > 0 && /^\s*\|?[\s:|-]+\|?\s*$/.test(l) && l.includes('-'));
   const colCount = Math.max(...blkLines.map(l => splitRow(l).length));
@@ -2655,25 +2667,23 @@ $('editor').addEventListener('keydown', e => {
 });
 // 行内包裹：有选区包选区（包完仍选中内部文字），无选区插入占位符并选中
 function wrapInline(marker, ph) {
-  const ed = $('editor'); ed.focus();
+  const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
   const sel = ed.value.slice(s, e);
   const inner = sel || ph;
-  ed.setRangeText(marker + inner + marker, s, e);
+  editReplace(ed, s, e, marker + inner + marker);
   ed.setSelectionRange(s + marker.length, s + marker.length + inner.length);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // 对选区覆盖的各行做变换，完成后重新选中这些行
 function transformSelectedLines(fn) {
-  const ed = $('editor'); ed.focus();
+  const ed = $('editor');
   const v = ed.value;
   const a = v.lastIndexOf('\n', ed.selectionStart - 1) + 1;
   let b = v.indexOf('\n', ed.selectionEnd);
   if (b < 0) b = v.length;
   const out = v.slice(a, b).split('\n').map(fn).join('\n');
-  ed.setRangeText(out, a, b);
+  editReplace(ed, a, b, out);
   ed.setSelectionRange(a, a + out.length);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // 标题：同级再点取消；已有别的级别则改级别
 function setHeading(n) {
@@ -2710,19 +2720,18 @@ function toggleBlock(kind) {
     n++;
     return stripM(l).replace(/^(\s*)/, '$1' + n + '. ');
   }).join('\n');
-  ed.setRangeText(out, a, b);
+  editReplace(ed, a, b, out);
   ed.setSelectionRange(a, a + out.length);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // 选中的英文转大写/小写（中文不受影响）
 function changeCase(upper) {
-  const ed = $('editor'); ed.focus();
+  const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
   if (s === e) { toast('请先选中要转换的文字'); return; }
   const sel = ed.value.slice(s, e);
   const out = upper ? sel.toUpperCase() : sel.toLowerCase();
-  ed.setRangeText(out, s, e, 'select');
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
+  editReplace(ed, s, e, out);
+  ed.setSelectionRange(s, s + out.length);
 }
 // 分隔线：自动与上下文空一行
 function insertHr() {
@@ -2747,9 +2756,8 @@ function insertLink() {
     if (!url) return;
   }
   const text = /^https?:\/\//i.test(url) && sel.trim() === url ? '链接文字' : (sel || '链接文字');
-  ed.setRangeText('[' + text + '](' + url + ')', s, e);
+  editReplace(ed, s, e, '[' + text + '](' + url + ')');
   ed.setSelectionRange(s + 1, s + 1 + text.length);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // 锚点：插入 <a id="name"></a>
 function insertAnchor() {
@@ -2768,10 +2776,9 @@ function insertCodeBlock() {
   if (s > 0 && v[s - 1] !== '\n') pre = '\n\n';
   else if (s >= 2 && v[s - 2] !== '\n') pre = '\n';
   const ins = pre + '```\n' + sel + '\n```\n\n';
-  ed.setRangeText(ins, s, e);
+  editReplace(ed, s, e, ins);
   const caret = s + pre.length + 4 + sel.length;
   ed.setSelectionRange(caret, caret);
-  ed.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // 当前日期时间 YYYY-MM-DD HH:mm 星期X
 function insertDatetime() {
@@ -3586,13 +3593,18 @@ $('rpOk').onclick = async () => {
       const ed = $('editor');
       const pos = ed.selectionStart;
       const newText = current.content.split(find).join(to);
-      ed.value = newText;
+      // 整文替换走 execCommand 成为一个撤销步骤（Ctrl+Z 可整体回退）；失败再直接赋值
+      ed.focus(); ed.setSelectionRange(0, ed.value.length);
+      let replaced = false;
+      try { replaced = document.execCommand('insertText', false, newText); } catch (e2) {}
+      if (!replaced) ed.value = newText;
       current.content = newText;
       // 立即写入磁盘，不依赖 900ms 延迟自动保存
       try {
         const w = await current.node.handle.createWritable();
         await w.write(newText); await w.close();
         current.dirty = false;
+        clearTimeout(saveTimer);
         $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
       } catch (e) { markDirty(); }
       ed.setSelectionRange(Math.min(pos, ed.value.length), Math.min(pos, ed.value.length));
