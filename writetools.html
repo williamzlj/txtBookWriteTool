@@ -2995,9 +2995,19 @@ function setMode(m) {
     applySideHidden();
     renderLivePreview(); updateTableBar();
   }
+  if (m === 'read') {
+    // 阅览视图自带成书目录，自动折叠左侧文件目录，避免两个目录并存
+    localStorage.setItem('wt-side-hidden', '1');
+    applySideHidden();
+    renderMerged();
+  }
+  if (m === 'outline') {
+    // 大纲调整的结果会同步到目录树，自动展开方便查看
+    localStorage.removeItem('wt-side-hidden');
+    applySideHidden();
+    renderOutline();
+  }
   if (m === 'preview') renderSinglePreview();
-  if (m === 'read') renderMerged();
-  if (m === 'outline') renderOutline();
   updateToTopVis();
 }
 function renderSinglePreview() {
