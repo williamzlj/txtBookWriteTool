@@ -1263,6 +1263,7 @@ async function openFile(node) {
     const f = await node.handle.getFile();
     const text = (await f.text()).replace(/^\uFEFF/, '');
     current = { node, content: text, dirty: false };
+    histRemember(node.path, text);   // 历史检查点内存基线（打开本就要读文件，零额外 IO）
     expandedAddTo(node.path);
     $('editor').value = text;
     setMode(mode);            // refresh view content
@@ -1282,16 +1283,13 @@ async function flushSave() {
 async function saveCurrent() {
   if (!current) return;
   try {
-    // 写入前：磁盘旧内容与新内容不同则留存历史版本
-    try {
-      const oldText = await (await current.node.handle.getFile()).text();
-      if (oldText !== current.content) await backupHistory(current.node, oldText);
-    } catch (e) {}
     const w = await current.node.handle.createWritable();
     await w.write(current.content); await w.close();
     current.dirty = false;
     $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
     if (current.node.name === 'style.css' && !parentPath(current.node.path)) applyUserCss(current.content);
+    // 历史版本与保存解耦：不在每次保存时读盘备份，由内存基线按 5 分钟节拍判断是否写检查点
+    try { await checkpointHistory(current.node, current.content); } catch (e) {}
   } catch (e) {
     $('stSave').textContent = '保存失败'; $('stSave').className = 'dirty';
     toast('保存失败：' + e.message);
@@ -2324,8 +2322,27 @@ async function restoreTrashItem(batchName, relPath, kind) {
   return finalName;
 }
 
-/* ================= 历史版本（项目内 .history，每文件 20 版） ================= */
-const HIST_KEEP = 20;
+/* ================= 历史版本（项目内 .history，每文件 40 版） ================= */
+const HIST_KEEP = 40;
+// 历史检查点间隔：编辑期内最多每 5 分钟写一版历史，避免跟随 900ms 自动保存频繁读写磁盘
+const HIST_INTERVAL = 5 * 60 * 1000;
+// 内存基线 path -> { text, time, diverged }：
+// text=最近一次写入历史时对应的内容；time=上次写历史的时间；diverged=本轮编辑是否已存过版
+const histBase = new Map();
+function histRemember(path, text) { histBase.set(path, { text, time: Date.now(), diverged: false }); }
+function histSynced(path, text) { histBase.set(path, { text, time: Date.now(), diverged: true }); }
+// 低频历史检查点（全程不读磁盘，只比对内存内容/时间）：
+// 内容与基线相同→不写；本轮首次发散→先存编辑前的基线原文（保留改前原貌）；
+// 此后距上次存版满 HIST_INTERVAL 才再存一版（内容为当时的完整快照）
+async function checkpointHistory(node, text) {
+  if (!/\.(md|markdown|txt|css)$/i.test(node.name)) return;
+  let b = histBase.get(node.path);
+  if (!b) { histRemember(node.path, text); b = histBase.get(node.path); }
+  if (b.text === text) return;
+  if (b.diverged && Date.now() - b.time < HIST_INTERVAL) return;
+  await backupHistory(node, b.diverged ? text : b.text);
+  histSynced(node.path, text);
+}
 // 把一份旧内容存为历史版本（node.path 对应 .history 下同名目录，版本文件 = 时间戳+扩展名）
 async function backupHistory(node, oldText) {
   try {
@@ -3417,6 +3434,7 @@ $('histRestore').onclick = async () => {
       if (cur !== text) await backupHistory(histNode, cur);
     } catch (e) {}
     const w = await histNode.handle.createWritable(); await w.write(text); await w.close();
+    histSynced(histNode.path, text);
     if (current && current.node.path === histNode.path) {
       current.content = text; current.dirty = false;
       $('editor').value = text;
@@ -3437,6 +3455,14 @@ $('editor').addEventListener('input', () => { markDirty(); schedulePreview(); up
 window.addEventListener('beforeunload', e => {
   if (current && current.dirty) { e.preventDefault(); e.returnValue = ''; }
 });
+// 页面隐藏（最小化/切标签页）时先落盘，顺带在满足 5 分钟节拍时补一版历史
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushSave();
+});
+// 兜底节拍：停止编辑后若跨过 5 分钟间隔（如页面长期隐藏），每分钟检查一次补存历史；内容未变/未满间隔时无任何 IO
+setInterval(() => {
+  if (current && !current.dirty) { try { checkpointHistory(current.node, current.content); } catch (e) {} }
+}, 60000);
 
 /* ================= 可拖动分隔条 ================= */
 function makeDivider(div, leftEl, opt) {
@@ -3605,6 +3631,7 @@ $('rpOk').onclick = async () => {
         await w.write(newText); await w.close();
         current.dirty = false;
         clearTimeout(saveTimer);
+        histSynced(current.node.path, newText);  // 显式备份已存旧版，基线推进到替换后内容
         $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
       } catch (e) { markDirty(); }
       ed.setSelectionRange(Math.min(pos, ed.value.length), Math.min(pos, ed.value.length));
@@ -3625,8 +3652,10 @@ $('rpOk').onclick = async () => {
       if (!confirm('项目内共 ' + changed.length + ' 个文件、' + total + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）')) return;
       for (const c of changed) {
         await backupHistory(c.node, c.from);
+        const newText = c.from.split(find).join(to);
         const w = await c.node.handle.createWritable();
-        await w.write(c.from.split(find).join(to)); await w.close();
+        await w.write(newText); await w.close();
+        histSynced(c.node.path, newText);
       }
       // 若当前打开的文件被改动，同步编辑器
       const hit = current && changed.find(c => c.node.path === current.node.path);
