@@ -364,28 +364,22 @@ body.book-indent .md-body p { text-indent: 2em; }
    四套版式的默认变量与标题结构规则由 JS（BOOK_THEMES）生成到
    #bookThemeCss，本表不再手写；style.css 成书版式区可覆盖。 */
 
-/* ================= 封面与扉页目录（阅览视图） ================= */
+/* ================= 封面与扉页目录（阅览视图） =================
+   封面字号/位置/间距全部走 --cover-* 变量（各版式默认见 BOOK_THEMES，
+   写入 style.css 成书版式区，可在「源码编辑」中修改）；此处只留兜底值。 */
 .book-front { max-width: 780px; margin: 0 auto; padding: 0 36px; }
 .book-cover {
-  min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 50px 20px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px;
+  min-height: var(--cover-min-h, 520px); display: flex; flex-direction: column;
+  align-items: var(--cover-halign, center); justify-content: var(--cover-valign, center);
+  text-align: var(--cover-text, center);
+  padding: var(--cover-pad-top, 50px) 20px var(--cover-pad-bottom, 50px);
+  border-bottom: 1px dashed var(--md-border); margin-bottom: 34px;
 }
-.bc-title { font-size: 34px; font-weight: 800; line-height: 1.35; color: var(--md-h1-color); }
-.bc-sub { font-size: 18px; color: var(--md-muted-color); margin-top: 16px; letter-spacing: .12em; }
-.bc-meta { margin-top: 96px; font-size: 18px; line-height: 2.2; }
+.bc-title { font-size: var(--cover-title-fs, 34px); font-weight: 800; line-height: var(--cover-title-lh, 1.35); color: var(--md-h1-color); }
+.bc-sub { font-size: var(--cover-sub-fs, 18px); color: var(--md-muted-color); margin-top: var(--cover-sub-top, 16px); letter-spacing: .12em; }
+.bc-meta { margin-top: var(--cover-meta-top, 96px); font-size: var(--cover-meta-fs, 18px); line-height: var(--cover-meta-lh, 2.2); }
 
 /* 目录（.book-toc）样式已移至成书版式区（BOOK_THEMES / style.css），随 --md-fs 联动 */
-
-/* modern 封面布局 */
-body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; justify-content: flex-start; padding-top: 130px; }
-body[data-book-theme="modern"] .bc-title { font-size: 40px; }
-body[data-book-theme="modern"] .bc-meta { margin-top: 80px; }
-
-/* phone 封面/扉页目录放大 */
-body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 270px 20px 60px; }
-body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
-body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
-body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
 
 /* ---------- print: 内容相关 ---------- */
 @media print {
@@ -400,7 +394,6 @@ body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line
     min-height: 297mm; box-sizing: border-box; margin: 0; padding: 0 26mm;
     border: none; page: cover; break-after: page;
   }
-  body[data-book-theme="modern"] .book-cover { align-items: flex-start; text-align: left; }
   .book-toc { border: none; margin: 0; padding: 0; page: tocpage; break-after: page; }
   .book-chapter { break-before: page; }
   body[data-book-theme="modern"] .md-body h1 { border-left: none; padding-left: 0; }
@@ -1423,21 +1416,25 @@ const BOOK_THEMES = {
   classic: {
     name: '经典',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;\n  --md-fs: 16.5px;\n  --md-lh: 1.9;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 22px;\n  --md-h3-fs: 19px;\n  --md-h4-fs: 17px;\n  --md-h5-fs: 15px;\n  --md-h6-fs: 14px;',
+    cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
     rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="classic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
   },
   modern: {
     name: '现代',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
+    cover: '--cover-halign: flex-start; --cover-valign: flex-start; --cover-text: left;\n  --cover-min-h: 520px; --cover-pad-top: 130px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 40px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 80px; --cover-meta-lh: 2.2;',
     rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="modern"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
   },
   academic: {
     name: '学术',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-fs: 15.5px;\n  --md-lh: 1.75;\n  --md-h1-fs: 21px;\n  --md-h2-fs: 17px;\n  --md-h3-fs: 15.5px;\n  --md-h4-fs: 15px;',
+    cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
     rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="academic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
   },
   phone: {
     name: '手机',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 20px;\n  --md-lh: 1.95;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 24px;\n  --md-h3-fs: 22px;\n  --md-h4-fs: 20px;\n  --md-h5-fs: 19px;\n  --md-h6-fs: 18px;',
+    cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: auto; --cover-pad-top: 270px; --cover-pad-bottom: 60px;\n  --cover-title-fs: 44px; --cover-title-lh: 1.4;\n  --cover-sub-fs: 20px; --cover-sub-top: 22px;\n  --cover-meta-fs: 19px; --cover-meta-top: 64px; --cover-meta-lh: 2.3;',
     rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="phone"] .book-toc a { font-size: calc(var(--md-fs) * 0.95); line-height: 1.95; color: var(--md-body-color); }'
   }
 };
@@ -1453,9 +1450,10 @@ const TOC_BASE_CSS =
 function themeSectionCss(theme) {
   const t = BOOK_THEMES[theme] || BOOK_THEMES.classic;
   // 数据已保证每行一个变量；此处仅做去空白+统一 2 空格缩进，防止手改时格式漂移
-  const vars = t.vars.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => '  ' + l).join('\n');
+  const fmt = s => s.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => '  ' + l).join('\n');
+  const vars = fmt(t.vars) + '\n' + fmt(t.cover);
   return 'body[data-book-theme="' + theme + '"] {\n'
-    + '  /* 版式：' + t.name + '（字体 / 字号 / 行距可自由修改） */\n'
+    + '  /* 版式：' + t.name + '（字体 / 字号 / 行距 / 封面参数可自由修改） */\n'
     + vars + '\n}\n' + t.rules;
 }
 function colorSectionCss(p) {
