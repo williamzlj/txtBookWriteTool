@@ -165,9 +165,10 @@ body[data-mode="edit"] #pvToggleBtn { display: flex; }
 
 /* ---------- editor ---------- */
 #editView { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
-#editRow { flex: 1; display: flex; min-width: 0; min-height: 0; }
+#editRow { flex: 1; display: flex; min-width: 0; min-height: 0; background: var(--panel); }
 #editor {
-  flex: 1; min-width: 0; border: none; outline: none; resize: none;
+  flex: 1; min-width: 0; max-width: 1130px; margin-inline: auto;
+  border: none; outline: none; resize: none;
   background: var(--panel); color: var(--text);
   font-family: Consolas, "Microsoft YaHei", monospace;
   font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 50px 50px;
