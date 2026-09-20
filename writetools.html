@@ -891,6 +891,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <button id="bkSave" class="primary">保存</button>
   </div>
 </dialog>
+<dialog id="dlgStyle">
+  <h3>样式设置（style.css）</h3>
+  <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 10px;line-height:1.6"></div>
+  <div id="stlColorGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px"></div>
+  <div class="row" id="stlZoomRow" style="margin-top:14px"><label style="width:72px">正文字号</label>
+    <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
+    <span id="stlZoomVal" style="width:48px;text-align:right;font-size:12px;color:var(--muted)"></span>
+  </div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:6px">说明：改动立即写入 style.css 并实时预览；页眉页脚在「排版设置」中调整；更复杂的规则点「源码编辑」。</div>
+  <div class="btns">
+    <button id="stlCode">源码编辑</button>
+    <button id="stlClose" class="primary">完成</button>
+  </div>
+</dialog>
 <button id="toTop" title="返回顶部">↑</button>
 <div id="toast"></div>
 <div id="errBanner"></div>
@@ -1201,6 +1215,8 @@ function renderTree() {
         updateToolbar();   // 文件夹选中后重命名/删除等按钮应可用
       } else if (node.name === BOOK_CFG_NAME) {
         openBookDlg();   // 点击成书设置文件直接打开设置对话框
+      } else if (node.name === 'style.css' && node.path === 'style.css') {
+        openStyleDlg();   // 根目录 style.css 打开参数编辑（子目录同名文件仍走文本编辑）
       } else await openFile(node);
     };
     el.appendChild(row);
@@ -1466,6 +1482,106 @@ function applyUserCss(cssText) {
   // style.css 原样注入：配色区自带“仅亮色生效”作用域，@page 等顶层规则也合法
   $('userCssStyle').textContent = cssText || '';
 }
+/* ================= 样式设置对话框（点目录树 style.css 打开） =================
+   一期覆盖：配色区 15 个颜色变量 + 缩放区正文字号；改动即写即预览。
+   写入全部走 upsertSection，只动对应分区，自定义区永不触碰。 */
+// [colorSectionCss 属性 key, 中文标签, CSS 变量名]；h0-h5 对应 h 数组下标（标题一~六）
+const STYLE_COLOR_FIELDS = [
+  ['body', '正文', '--md-body-color'], ['strong', '强调', '--md-strong-color'], ['muted', '次要文字', '--md-muted-color'],
+  ['accent', '主题色', '--md-accent'], ['panel', '表头底', '--md-panel'], ['quote', '引用底', '--md-quote-bg'],
+  ['code', '代码底', '--md-code-bg'], ['border', '分隔线', '--md-border'], ['stripe', '斑马纹', '--md-stripe'],
+  ['h0', '标题一', '--md-h1-color'], ['h1', '标题二', '--md-h2-color'], ['h2', '标题三', '--md-h3-color'],
+  ['h3', '标题四', '--md-h4-color'], ['h4', '标题五', '--md-h5-color'], ['h5', '标题六', '--md-h6-color'],
+];
+let styleDlgCss = null;        // 打开时的 style.css 全文，写入基于它做分区替换
+let styleDlgName = '自定义';   // 配色区注释里的配色名
+let styleDlgOrig = {};         // 打开时解析到的各变量原值（text 兜底 / 空值还原）
+let styleDlgMdFs = null;       // 版式区当前正文字号（缩放倍率换算基准），openStyleDlg 时取 ZOOM_BASE
+let styleDlgColorOk = false;   // 配色区是否存在（纯自定义文件时表单禁用）
+const isHexColor = v => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+const hex6 = v => v.length === 4 ? '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
+// 内置配色下拉回显：配色区与某套内置预设完全一致才显示该预设，手动微调过则显示占位
+function syncPresetSel(css) {
+  const curColor = getSection(css, SEC_COLOR);
+  const hit = curColor === null ? null : PRESETS.find(p => colorSectionCss(p).trim() === curColor);
+  $('presetSel').value = hit ? hit.key : '';
+}
+async function openStyleDlg() {
+  if (!rootHandle) { toast('请先打开项目文件夹'); return; }
+  await flushSave();   // style.css 正在编辑器里且未落盘时先保存，避免对话框读到旧内容
+  let css = await readStyleCssText();
+  try {
+    if (css === null) { css = styleTemplate(bookCfg.theme); await saveStyleCss(css); await refreshTree(); }
+  } catch (e) { toast('初始化 style.css 失败：' + e.message); return; }
+  styleDlgCss = css;
+  // 版式区正文字号 → 缩放换算基准；缩放区当前倍率 → 当前实际字号
+  styleDlgMdFs = ZOOM_BASE;
+  const tsec = getSection(css, SEC_THEME);
+  if (tsec) { const mm = tsec.match(/--md-fs\s*:\s*([0-9.]+)\s*px/); if (mm) styleDlgMdFs = parseFloat(mm[1]); }
+  let px = styleDlgMdFs;
+  const zsec = getSection(css, SEC_ZOOM);
+  if (zsec) { const m = zsec.match(/--md-zoom\s*:\s*([0-9.]+)/); if (m) px = Math.round(parseFloat(m[1]) * styleDlgMdFs * 10) / 10; }
+  $('stlZoom').value = Math.min(26, Math.max(13, px));
+  $('stlZoomVal').textContent = Math.round(Math.min(26, Math.max(13, px))) + ' px';
+  // 配色区解析与回显
+  const sec = getSection(css, SEC_COLOR);
+  styleDlgColorOk = sec !== null;
+  styleDlgOrig = {};
+  const grid = $('stlColorGrid');
+  grid.innerHTML = '';
+  if (styleDlgColorOk) {
+    const nm = /\/\*\s*配色：(.+?)（/.exec(sec);
+    styleDlgName = nm ? nm[1].trim() : '自定义';
+    for (const [key, , varName] of STYLE_COLOR_FIELDS) {
+      const m = new RegExp(varName.replace(/[-]/g, '\\$&') + '\\s*:\\s*([^;]+);').exec(sec);
+      styleDlgOrig[key] = m ? m[1].trim() : null;
+    }
+  } else styleDlgName = '自定义';
+  for (const [key, label] of STYLE_COLOR_FIELDS) {
+    const v = styleDlgOrig[key];
+    const item = document.createElement('label');
+    item.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)';
+    const inp = isHexColor(v)
+      ? '<input type="color" data-k="' + key + '" value="' + hex6(v) + '" title="' + label + '" style="padding:0;width:34px;height:22px">'
+      : '<input type="text" data-k="' + key + '" value="' + esc(v || '') + '" placeholder="' + (v ? '原值' : '分区缺失') + '" title="' + label + '" style="width:84px;padding:2px 6px">';
+    item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + label + '</span>' + inp;
+    if (!styleDlgColorOk) item.querySelectorAll('input').forEach(x => x.disabled = true);
+    grid.appendChild(item);
+  }
+  $('stlMsg').textContent = styleDlgColorOk
+    ? '当前配色：' + styleDlgName + ' · 修改任意颜色立即保存并预览（微调后工具栏「内置配色」会显示为自定义）'
+    : '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用下方色板；正文字号不受影响。';
+  $('dlgStyle').showModal();
+}
+// 汇总色板当前值 → colorSectionCss 对象（空值还原为打开时原值）
+function collectStyleColors() {
+  const obj = { name: styleDlgName, h: [] };
+  for (const [key] of STYLE_COLOR_FIELDS) {
+    const inp = $('stlColorGrid').querySelector('input[data-k="' + key + '"]');
+    let v = inp.value.trim();
+    if (!v) v = styleDlgOrig[key] || '#888888';
+    if (key.startsWith('h')) obj.h[+key.slice(1)] = v; else obj[key] = v;
+  }
+  return obj;
+}
+async function styleDlgSave() {
+  if (!styleDlgCss) return;
+  try { await saveStyleCss(styleDlgCss); syncPresetSel(styleDlgCss); }
+  catch (e) { toast('写入 style.css 失败：' + e.message); }
+}
+$('stlColorGrid').addEventListener('change', async () => {
+  if (!styleDlgColorOk) return;
+  styleDlgCss = upsertSection(styleDlgCss, SEC_COLOR, colorSectionCss(collectStyleColors()));
+  await styleDlgSave();
+});
+$('stlZoom').addEventListener('input', () => { $('stlZoomVal').textContent = $('stlZoom').value + ' px'; });
+$('stlZoom').addEventListener('change', async () => {
+  const px = parseFloat($('stlZoom').value);
+  styleDlgCss = upsertSection(styleDlgCss, SEC_ZOOM, ':root { --md-zoom: ' + (px / styleDlgMdFs).toFixed(3) + '; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
+  await styleDlgSave();
+});
+$('stlCode').onclick = () => { $('dlgStyle').close(); openStyleCss(); };
+$('stlClose').onclick = () => $('dlgStyle').close();
 async function loadUserCss() {
   applyUserCss('');
   $('presetSel').value = '';   // 先回到占位，下面按实际配色区内容回显
@@ -1488,10 +1604,7 @@ async function loadUserCss() {
     }
     if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
     applyUserCss(css);
-    // 配色下拉回显：配色区与某套内置预设完全一致才显示该预设，手动微调过则显示占位
-    const curColor = getSection(css, SEC_COLOR);
-    const hit = curColor === null ? null : PRESETS.find(p => colorSectionCss(p).trim() === curColor);
-    if (hit) $('presetSel').value = hit.key;
+    syncPresetSel(css);
   } catch (e) {}
 }
 async function openStyleCss() {
