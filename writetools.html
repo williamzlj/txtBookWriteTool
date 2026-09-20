@@ -964,6 +964,8 @@ if(__exports != exports)module.exports = exports;return module.exports}));
 <script>
 'use strict';
 window.onerror = function(msg, src, line) {
+  // ResizeObserver 帧内通知是浏览器的良性警告，不影响功能，不弹错误条
+  if (typeof msg === 'string' && msg.indexOf('ResizeObserver loop') === 0) return true;
   const el = document.getElementById('errBanner');
   el.style.display = 'block';
   el.textContent = '脚本错误: ' + msg + ' @' + (line || '?');
@@ -3425,11 +3427,15 @@ $('editor').addEventListener('input', () => { markDirty(); schedulePreview(); up
 
 // 编辑文字列限宽居中：按编辑器自身宽度（非 #editRow 行宽，百分比 padding 会错算到含预览）对称设置左右内边距
 const EDIT_TEXT_COL = 870, EDIT_PAD_MIN = 50;
+let editorPad = -1;
 function fitEditorPadding() {
-  const pad = Math.max(EDIT_PAD_MIN, Math.round(($('editor').clientWidth - EDIT_TEXT_COL) / 2));
+  // 用 border-box 宽度（不随 padding 变化），避免 RO 默认观察 content-box 时改 padding 触发反馈回路
+  const pad = Math.max(EDIT_PAD_MIN, Math.round(($('editor').getBoundingClientRect().width - EDIT_TEXT_COL) / 2));
+  if (pad === editorPad) return;
+  editorPad = pad;
   $('editor').style.paddingLeft = $('editor').style.paddingRight = pad + 'px';
 }
-new ResizeObserver(fitEditorPadding).observe($('editor'));
+new ResizeObserver(fitEditorPadding).observe($('editor'), { box: 'border-box' });
 fitEditorPadding();
 window.addEventListener('beforeunload', e => {
   if (current && current.dirty) { e.preventDefault(); e.returnValue = ''; }
