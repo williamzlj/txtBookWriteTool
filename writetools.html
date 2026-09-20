@@ -180,6 +180,8 @@ body[data-mode="edit"] #pvToggleBtn { display: flex; }
   width: 46%; min-width: 220px; flex: none; overflow: auto;
   background: var(--bg);
 }
+/* 预览内容列宽限制：宽屏（如把分隔条拖宽）时文字列居中限 870px，与编辑区一致；窄预览时自然占满 */
+#livePreview .pv-inner, #singlePreview .pv-inner { max-width: 870px; margin-inline: auto; }
 #previewView { flex: 1; overflow: auto; background: var(--bg); }
 
 /* ---------- read (merged) view ---------- */
@@ -1316,7 +1318,7 @@ function schedulePreview() {
 function renderLivePreview() {
   if (!current || !livePreviewOn) return;
   const c = $('livePreview');
-  c.innerHTML = mdToHtml(current.content);
+  c.innerHTML = '<div class="pv-inner">' + mdToHtml(current.content) + '</div>';
   fixImages(c, parentPath(current.node.path));
 }
 async function fixImages(container, baseDirPath) {
@@ -3038,7 +3040,7 @@ function setMode(m) {
 }
 function renderSinglePreview() {
   if (!current) { $('singlePreview').innerHTML = '<div style="color:var(--muted)">未选择文件</div>'; return; }
-  $('singlePreview').innerHTML = mdToHtml(current.content);
+  $('singlePreview').innerHTML = '<div class="pv-inner">' + mdToHtml(current.content) + '</div>';
   fixImages($('singlePreview'), parentPath(current.node.path));
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
