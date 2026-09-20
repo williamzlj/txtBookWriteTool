@@ -152,7 +152,8 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
 #welcome .tip { max-width: 460px; line-height: 1.9; font-size: 13.5px; text-align: center; }
 
 /* ---------- editor ---------- */
-#editView { flex: 1; display: flex; min-width: 0; }
+#editView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#editRow { flex: 1; display: flex; min-width: 0; min-height: 0; }
 #editor {
   flex: 1; min-width: 0; border: none; outline: none; resize: none;
   background: var(--panel); color: var(--text);
@@ -401,6 +402,7 @@ body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line
 
 /* ---------- table helper bar ---------- */
 #tableBar {
+  flex: none;
   display: flex; align-items: center; gap: 5px; padding: 5px 10px;
   background: var(--panel); border-bottom: 1px solid var(--border); font-size: 13px;
 }
@@ -662,9 +664,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         <span class="flex"></span>
         <span class="lbl" style="font-size:12px">光标放在表格任意单元格内即可编辑</span>
       </div>
-      <textarea id="editor" spellcheck="false" placeholder=""></textarea>
-      <div class="vdiv" id="divEdit"></div>
-      <div id="livePreview" class="md-body"></div>
+      <div id="editRow">
+       <textarea id="editor" spellcheck="false" placeholder=""></textarea>
+       <div class="vdiv" id="divEdit"></div>
+       <div id="livePreview" class="md-body"></div>
+      </div>
     </div>
     <div id="previewView" class="hidden"><div id="singlePreview" class="md-body"></div></div>
     <div id="readView" class="hidden">
