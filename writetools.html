@@ -124,6 +124,18 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
 }
 #sideExpandBtn:hover { color: var(--accent); border-color: var(--accent); }
 #main.side-collapsed #sideExpandBtn { display: flex; }
+/* 隐藏/展开右侧实时预览：贴 #main 右上角的小方块（与左侧目录折叠按钮对称，仅编辑模式显示） */
+#pvToggleBtn {
+  position: absolute; top: 10px; right: 0;
+  width: 26px; height: 26px; z-index: 30; padding: 0; display: none;
+  align-items: center; justify-content: center;
+  background: var(--panel); border: 1px solid var(--border); border-right: none;
+  border-radius: 5px 0 0 5px; color: var(--muted); font-size: 13px; line-height: 1;
+  cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,.18);
+}
+#pvToggleBtn:hover { color: var(--accent); border-color: var(--accent); }
+body[data-mode="edit"] #pvToggleBtn { display: flex; }
+#main.pv-collapsed #livePreview, #main.pv-collapsed #divEdit { display: none; }
 .tnode.multisel { background: color-mix(in srgb, var(--sel) 70%, transparent); }
 .tnode.multisel .ico { color: #4a9a58; font-weight: 700; }
 #workarea { flex: 1; display: flex; min-width: 0; position: relative; }
@@ -224,7 +236,7 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
 /* ---------- print (chrome: hide UI + baseline page) ---------- */
 @media print {
   * { box-sizing: border-box; }
-  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #sideExpandBtn { display: none !important; }
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #sideExpandBtn, #pvToggleBtn { display: none !important; }
   #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; width: 100%; }
   @page { size: A4; margin: 24mm 20mm 22mm; }
   body { margin: 0; overflow: visible; background: #fff; }
@@ -687,6 +699,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </div>
   </section>
   <button id="sideExpandBtn" title="展开文件目录" aria-label="展开文件目录">›</button>
+  <button id="pvToggleBtn" class="hidden" title="隐藏右侧预览，专心编辑" aria-label="隐藏右侧预览">›</button>
 </div>
 
 <footer id="statusbar">
@@ -1295,7 +1308,7 @@ function schedulePreview() {
   previewTimer = setTimeout(renderLivePreview, 250);
 }
 function renderLivePreview() {
-  if (!current) return;
+  if (!current || !livePreviewOn) return;
   const c = $('livePreview');
   c.innerHTML = mdToHtml(current.content);
   fixImages(c, parentPath(current.node.path));
@@ -3032,6 +3045,7 @@ function updateToolbar() {
   $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
+  $('pvToggleBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
@@ -3181,6 +3195,23 @@ function toggleSidebar() {
 $('sideCollapseBtn').onclick = toggleSidebar;
 $('sideExpandBtn').onclick = toggleSidebar;
 applySideHidden();
+// 隐藏/显示右侧实时预览（仅编辑模式；状态记忆；隐藏期间停止预览渲染，恢复时立即刷新）
+function applyPvHidden() {
+  const hid = localStorage.getItem('wt-pv-hidden') === '1';
+  livePreviewOn = !hid;
+  $('main').classList.toggle('pv-collapsed', hid);
+  const b = $('pvToggleBtn');
+  b.textContent = hid ? '‹' : '›';
+  b.title = hid ? '显示右侧 Markdown 预览' : '隐藏右侧预览，专心编辑';
+  b.setAttribute('aria-label', b.title);
+  if (!hid && mode === 'edit') renderLivePreview();
+}
+function togglePreviewPane() {
+  localStorage.setItem('wt-pv-hidden', localStorage.getItem('wt-pv-hidden') === '1' ? '0' : '1');
+  applyPvHidden();
+}
+$('pvToggleBtn').onclick = togglePreviewPane;
+applyPvHidden();
 $('btnExportPdf').onclick = () => {
   if (mode !== 'read') setMode('read'); else renderMerged();
   // 打印另存为 PDF 时浏览器用 document.title 作默认文件名，临时设为「项目名-日期」
