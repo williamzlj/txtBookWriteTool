@@ -172,8 +172,8 @@ body[data-mode="edit"] #pvToggleBtn { display: flex; }
   background: var(--panel); color: var(--text);
   font-family: Consolas, "Microsoft YaHei", monospace;
   font-size: var(--fs-editor, 15px); line-height: 1.75;
-  /* 上下 50；左右在宽屏自动取 (容器宽-1030)/2 使文字列居中约 1000px（含双侧 15px 滚动条预留），窄屏回落到 50 */
-  padding: 50px max(50px, calc(50% - 515px));
+  /* 上下 50；左右内边距由 JS 按编辑器自身宽度对称计算（EDIT_TEXT_COL），让文字列在宽屏居中 */
+  padding: 50px;
   scrollbar-gutter: stable both-edges; caret-color: var(--accent);
 }
 #livePreview {
@@ -3422,6 +3422,15 @@ if (localStorage.getItem('wt-theme') === 'dark') {
 }
 // 编辑器双向绑定
 $('editor').addEventListener('input', () => { markDirty(); schedulePreview(); updateTableBar(); });
+
+// 编辑文字列限宽居中：按编辑器自身宽度（非 #editRow 行宽，百分比 padding 会错算到含预览）对称设置左右内边距
+const EDIT_TEXT_COL = 870, EDIT_PAD_MIN = 50;
+function fitEditorPadding() {
+  const pad = Math.max(EDIT_PAD_MIN, Math.round(($('editor').clientWidth - EDIT_TEXT_COL) / 2));
+  $('editor').style.paddingLeft = $('editor').style.paddingRight = pad + 'px';
+}
+new ResizeObserver(fitEditorPadding).observe($('editor'));
+fitEditorPadding();
 window.addEventListener('beforeunload', e => {
   if (current && current.dirty) { e.preventDefault(); e.returnValue = ''; }
 });
