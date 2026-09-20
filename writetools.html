@@ -2971,6 +2971,13 @@ function toggleBlock(kind) {
   const a = v.lastIndexOf('\n', ed.selectionStart - 1) + 1;
   let b = v.indexOf('\n', ed.selectionEnd);
   if (b < 0) b = v.length;
+  // 列表：无选区且当前行为空时插入最基本的列表标记（光标停在空格后）
+  if ((kind === 'ul' || kind === 'ol') && ed.selectionStart === ed.selectionEnd && !v.slice(a, b).trim()) {
+    const prefix = kind === 'ul' ? '- ' : '1. ';
+    editReplace(ed, a, b, prefix);
+    ed.setSelectionRange(a + prefix.length, a + prefix.length);
+    return;
+  }
   const lines = v.slice(a, b).split('\n');
   const nonEmpty = lines.filter(l => l.trim());
   const stripM = l => l.replace(/^(\s*)(?:[-*+]|\d+[.)])\s+/, '$1');
