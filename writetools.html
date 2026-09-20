@@ -45,11 +45,12 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .tb-row { display: flex; align-items: center; gap: 5px; }
 .tb-row1 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
 .tb-row1 > * { flex: none; }
+.tb-row1 #btnOpen {margin-left: 10px;}
 .tb-row1::-webkit-scrollbar, .tb-row2::-webkit-scrollbar { height: 6px; }
 .tb-row1::-webkit-scrollbar-thumb, .tb-row2::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .tb-row2 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); padding-top: 6px; }
 .tb-row2 > * { flex: none; }
-.tb-row2 .tabs { margin-left: 10px; }
+.tb-row2 .tabs { margin-left: 10px;margin-right: 6px; }
 #presetSel, #bookThemeSel { font-size: 12.5px; padding: 4px 4px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 /* 模式分组：编辑组仅编辑模式可见，成书组仅预览/阅览/大纲可见（避免第三行） */
 #topbar .mode-edit, #topbar .mode-view { display: none; }
@@ -261,7 +262,7 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
   --md-body-color: #d8d9db;
   --md-strong-color: #ececee;
   --md-muted-color: #9aa0a8;
-  --md-accent: #6aa3e0;
+  --md-accent: #ececee;
   --md-panel: #2a2d31;
   --md-quote-bg: rgba(255,255,255,.045);
   --md-code-bg: #2a2d31;
@@ -302,7 +303,7 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
   border-radius: 6px; color: var(--md-muted-color); font-size: 13px; font-family: var(--md-font-head); }
 .md-body blockquote {
   border-left: 3px solid var(--md-accent); background: var(--md-quote-bg);
-  margin: 1em 0; padding: .6em 1.1em; color: var(--md-muted-color); border-radius: 0 6px 6px 0;
+  margin: 1em 0; padding: 0.1em 0em; color: var(--md-muted-color); border-radius: 0 6px 6px 0;
 }
 .md-body code {
   background: var(--md-code-bg); color: inherit; padding: .15em .4em; border-radius: 4px;
@@ -493,9 +494,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
   <button id="btnNewDir" disabled>新建文件夹</button>
   <button id="btnRename" disabled>重命名</button>
-  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动命名</button>
+  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动文件名</button>
   <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
-  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">👁</button>
+  <span class="sep"></span>
+  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
   <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy（同名时自动依次为 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
@@ -788,7 +790,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li>点「阅览」标签即进入成书预览；第二行工具栏会自动换成成书组：切换<b>经典书籍 / 现代简洁 / 学术 / 手机阅览</b>四套版式（手机阅览为大字号宽行距，适合在手机浏览器阅读）、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、首行缩进、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>（保存时自动填好「项目名-日期」文件名），<b>不要选「Microsoft Print to PDF」</b>（Win11 已知缺陷：其保存对话框文件名为空）；边距选“默认”、关闭浏览器自带页眉页脚，PDF 页面自动带输出日期，需 Chrome/Edge 131+。或直接「导出 HTML」。</li>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
-      <li><b>👁 快速隐藏</b>：选中任意文件或文件夹点眼睛按钮，名称前会加上 <code>_</code> 立即退出输出（阅览/PDF/HTML/MD 均不含）；选中已隐藏项目时按钮变成 🙈，再点恢复，适合临时控制输出内容（若目标位置已有同名文件会中止并提示）。</li>
+      <li><b>👁 快速隐藏</b>：选中任意文件或文件夹点眼睛按钮，名称前会加上 <code>_</code> 立即退出输出（阅览/PDF/HTML/MD 均不含）；选中已隐藏项目时按钮变成取消隐藏，再点恢复，适合临时控制输出内容（若目标位置已有同名文件会中止并提示）。</li>
     </ul>
     <h4>回收站与历史版本</h4>
     <ul>
@@ -3042,7 +3044,7 @@ function updateToolbar() {
   const selN = selectedNode || (current ? current.node : null);
   const tbHide = $('btnToggleHide');
   tbHide.disabled = !selN;
-  tbHide.textContent = selN && selN.name.startsWith('_') ? '🙈' : '👁';
+  tbHide.textContent = selN && selN.name.startsWith('_') ? '取消隐藏' : '隐藏文件';
   tbHide.title = selN && selN.name.startsWith('_')
     ? '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）'
     : '隐藏：名称前加 _，不参与阅览/PDF/导出';
