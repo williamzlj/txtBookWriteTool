@@ -437,6 +437,10 @@ dialog {
 }
 dialog::backdrop { background: rgba(0,0,0,.35); }
 dialog h3 { margin-bottom: 14px; font-size: 16px; }
+#dlgStyle { width: min(580px, 94vw); max-height: 88vh; overflow: auto; }
+#dlgStyle .stl-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+/* 取色器按浅色外观渲染：深色模式下 UA 默认深色底/边框会让色块边界糊在面板里 */
+#dlgStyle input[type="color"] { background: #fff; color-scheme: light; }
 dialog .row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px; }
 dialog input, dialog select {
   font: inherit; color: var(--text); background: var(--bg);
@@ -894,15 +898,27 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 <dialog id="dlgStyle">
   <h3>样式设置（style.css）</h3>
   <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 10px;line-height:1.6"></div>
+  <div class="stl-h">配色</div>
   <div id="stlColorGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px"></div>
-  <div class="row" id="stlZoomRow" style="margin-top:14px"><label style="width:72px">正文字号</label>
+  <div class="stl-h" style="margin-top:16px">成书版式</div>
+  <div class="row"><label style="width:72px">正文字体</label><input id="stlFontBody" list="stlFontList" style="flex:1;min-width:0" placeholder="字体栈，如 Georgia, SimSun, serif"></div>
+  <div class="row"><label style="width:72px">标题字体</label><input id="stlFontHead" list="stlFontList" style="flex:1;min-width:0" placeholder="留空则跟随正文字体"></div>
+  <datalist id="stlFontList">
+    <option value='Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif'>宋体（衬线）</option>
+    <option value='"Microsoft YaHei", "PingFang SC", system-ui, sans-serif'>黑体（无衬线）</option>
+    <option value='KaiTi, STKaiti, serif'>楷体</option>
+    <option value='FangSong, STFangsong, serif'>仿宋</option>
+  </datalist>
+  <div id="stlThemeGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px 16px;margin-top:4px"></div>
+  <div class="row" id="stlZoomRow" style="margin-top:14px"><label style="width:72px">整体缩放</label>
     <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
     <span id="stlZoomVal" style="width:48px;text-align:right;font-size:12px;color:var(--muted)"></span>
   </div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:6px">说明：改动立即写入 style.css 并实时预览；页眉页脚在「排版设置」中调整；更复杂的规则点「源码编辑」。</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:6px">说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。</div>
   <div class="btns">
     <button id="stlCode">源码编辑</button>
-    <button id="stlClose" class="primary">完成</button>
+    <button id="stlCancel">取消</button>
+    <button id="stlSave" class="primary">保存</button>
   </div>
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
@@ -1483,8 +1499,8 @@ function applyUserCss(cssText) {
   $('userCssStyle').textContent = cssText || '';
 }
 /* ================= 样式设置对话框（点目录树 style.css 打开） =================
-   一期覆盖：配色区 15 个颜色变量 + 缩放区正文字号；改动即写即预览。
-   写入全部走 upsertSection，只动对应分区，自定义区永不触碰。 */
+   配色区 15 色 + 成书版式区（字体/字号/行距/标题字号）+ 缩放区。
+   所有编辑只改内存草稿并实时预览，点「保存」才写盘，「取消」/Esc 放弃并还原。 */
 // [colorSectionCss 属性 key, 中文标签, CSS 变量名]；h0-h5 对应 h 数组下标（标题一~六）
 const STYLE_COLOR_FIELDS = [
   ['body', '正文', '--md-body-color'], ['strong', '强调', '--md-strong-color'], ['muted', '次要文字', '--md-muted-color'],
@@ -1493,38 +1509,46 @@ const STYLE_COLOR_FIELDS = [
   ['h0', '标题一', '--md-h1-color'], ['h1', '标题二', '--md-h2-color'], ['h2', '标题三', '--md-h3-color'],
   ['h3', '标题四', '--md-h4-color'], ['h4', '标题五', '--md-h5-color'], ['h5', '标题六', '--md-h6-color'],
 ];
-let styleDlgCss = null;        // 打开时的 style.css 全文，写入基于它做分区替换
+// 成书版式字段 [变量名, 标签, 单位, step]
+const STYLE_THEME_NUM_FIELDS = [
+  ['--md-fs', '正文字号', 'px', 0.5], ['--md-lh', '行距', '', 0.05],
+  ['--md-h1-fs', '标题一', 'px', 0.5], ['--md-h2-fs', '标题二', 'px', 0.5], ['--md-h3-fs', '标题三', 'px', 0.5],
+  ['--md-h4-fs', '标题四', 'px', 0.5], ['--md-h5-fs', '标题五', 'px', 0.5], ['--md-h6-fs', '标题六', 'px', 0.5],
+];
+let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
+let styleDlgCss = null;        // 内存草稿，实时预览基于它
 let styleDlgName = '自定义';   // 配色区注释里的配色名
-let styleDlgOrig = {};         // 打开时解析到的各变量原值（text 兜底 / 空值还原）
-let styleDlgMdFs = null;       // 版式区当前正文字号（缩放倍率换算基准），openStyleDlg 时取 ZOOM_BASE
-let styleDlgColorOk = false;   // 配色区是否存在（纯自定义文件时表单禁用）
+let styleDlgOrig = {};         // 打开时解析到的各颜色变量原值（text 兜底 / 空值还原）
+let styleDlgColorOk = false;   // 配色区是否存在（纯自定义文件时色板禁用）
+let styleDlgThemeOk = false;   // 版式区是否存在
+let styleDlgAccepted = false;  // 本次打开是否点了保存（close 事件据此决定放弃还是提交）
 const isHexColor = v => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
 const hex6 = v => v.length === 4 ? '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
 // 内置配色下拉回显：配色区与某套内置预设完全一致才显示该预设，手动微调过则显示占位
 function syncPresetSel(css) {
-  const curColor = getSection(css, SEC_COLOR);
+  const curColor = css ? getSection(css, SEC_COLOR) : null;
   const hit = curColor === null ? null : PRESETS.find(p => colorSectionCss(p).trim() === curColor);
   $('presetSel').value = hit ? hit.key : '';
 }
 async function openStyleDlg() {
   if (!rootHandle) { toast('请先打开项目文件夹'); return; }
   await flushSave();   // style.css 正在编辑器里且未落盘时先保存，避免对话框读到旧内容
-  let css = await readStyleCssText();
-  try {
-    if (css === null) { css = styleTemplate(bookCfg.theme); await saveStyleCss(css); await refreshTree(); }
-  } catch (e) { toast('初始化 style.css 失败：' + e.message); return; }
-  styleDlgCss = css;
-  // 版式区正文字号 → 缩放换算基准；缩放区当前倍率 → 当前实际字号
-  styleDlgMdFs = ZOOM_BASE;
-  const tsec = getSection(css, SEC_THEME);
-  if (tsec) { const mm = tsec.match(/--md-fs\s*:\s*([0-9.]+)\s*px/); if (mm) styleDlgMdFs = parseFloat(mm[1]); }
-  let px = styleDlgMdFs;
-  const zsec = getSection(css, SEC_ZOOM);
-  if (zsec) { const m = zsec.match(/--md-zoom\s*:\s*([0-9.]+)/); if (m) px = Math.round(parseFloat(m[1]) * styleDlgMdFs * 10) / 10; }
-  $('stlZoom').value = Math.min(26, Math.max(13, px));
-  $('stlZoomVal').textContent = Math.round(Math.min(26, Math.max(13, px))) + ' px';
-  // 配色区解析与回显
-  const sec = getSection(css, SEC_COLOR);
+  const disk = await readStyleCssText();
+  styleDlgSavedCss = disk;
+  styleDlgCss = disk === null ? styleTemplate(bookCfg.theme) : disk;  // 无文件：用模板做草稿，保存时才真正创建
+  styleDlgAccepted = false;
+  buildStyleColorGrid();
+  buildStyleThemeFields();
+  refreshStyleZoomFromDraft();
+  $('stlMsg').textContent = (disk === null ? '项目中还没有 style.css，当前为默认样式预览；' : '')
+    + (styleDlgColorOk ? '当前配色：' + styleDlgName + ' · 调整实时预览，保存后写入 style.css'
+      : '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。');
+  $('dlgStyle').showModal();
+  applyUserCss(styleDlgCss);   // 无文件时也能预览模板
+}
+// ---- 配色色板 ----
+function buildStyleColorGrid() {
+  const sec = getSection(styleDlgCss, SEC_COLOR);
   styleDlgColorOk = sec !== null;
   styleDlgOrig = {};
   const grid = $('stlColorGrid');
@@ -1543,15 +1567,11 @@ async function openStyleDlg() {
     item.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)';
     const inp = isHexColor(v)
       ? '<input type="color" data-k="' + key + '" value="' + hex6(v) + '" title="' + label + '" style="padding:0;width:34px;height:22px">'
-      : '<input type="text" data-k="' + key + '" value="' + esc(v || '') + '" placeholder="' + (v ? '原值' : '分区缺失') + '" title="' + label + '" style="width:84px;padding:2px 6px">';
+      : '<input type="text" data-k="' + key + '" value="' + esc(v || '') + '" placeholder="' + (v ? '原值' : '默认') + '" title="' + label + '" style="width:84px;padding:2px 6px">';
     item.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + label + '</span>' + inp;
     if (!styleDlgColorOk) item.querySelectorAll('input').forEach(x => x.disabled = true);
     grid.appendChild(item);
   }
-  $('stlMsg').textContent = styleDlgColorOk
-    ? '当前配色：' + styleDlgName + ' · 修改任意颜色立即保存并预览（微调后工具栏「内置配色」会显示为自定义）'
-    : '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用下方色板；正文字号不受影响。';
-  $('dlgStyle').showModal();
 }
 // 汇总色板当前值 → colorSectionCss 对象（空值还原为打开时原值）
 function collectStyleColors() {
@@ -1564,24 +1584,113 @@ function collectStyleColors() {
   }
   return obj;
 }
-async function styleDlgSave() {
-  if (!styleDlgCss) return;
-  try { await saveStyleCss(styleDlgCss); syncPresetSel(styleDlgCss); }
-  catch (e) { toast('写入 style.css 失败：' + e.message); }
+// ---- 成书版式字段 ----
+function buildStyleThemeFields() {
+  const sec = getSection(styleDlgCss, SEC_THEME);
+  styleDlgThemeOk = sec !== null;
+  const readVar = name => {
+    if (!sec) return '';
+    const m = new RegExp(name.replace(/[-]/g, '\\$&') + '\\s*:\\s*([^;]+);').exec(sec);
+    return m ? m[1].trim() : '';
+  };
+  $('stlFontBody').value = readVar('--md-font-body');
+  $('stlFontHead').value = readVar('--md-font-head');
+  const grid = $('stlThemeGrid');
+  grid.innerHTML = '';
+  for (const [name, label, unit, step] of STYLE_THEME_NUM_FIELDS) {
+    const raw = readVar(name);
+    const num = raw ? (parseFloat(raw) || '') : '';
+    const item = document.createElement('label');
+    item.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)';
+    item.innerHTML = '<span>' + label + '</span>'
+      + '<input type="number" data-v="' + name + '" data-u="' + unit + '" step="' + step + '" min="0"'
+      + ' value="' + (num === '' ? '' : num) + '" placeholder="默认"'
+      + ' style="width:100%;min-width:0;padding:2px 6px"'
+      + (styleDlgThemeOk ? '' : ' disabled') + '>'
+      + (unit ? '<span>' + unit + '</span>' : '');
+    grid.appendChild(item);
+  }
+  $('stlFontBody').disabled = !styleDlgThemeOk;
+  $('stlFontHead').disabled = !styleDlgThemeOk;
 }
-$('stlColorGrid').addEventListener('change', async () => {
+// 在版式区文本里设置/删除一个变量；变量原本不存在时插入到首个 } 前；空值=删除覆盖（回退默认）
+function setThemeVarInSec(sec, name, raw) {
+  const re = new RegExp('[ \\t]*' + name.replace(/[-]/g, '\\$&') + '\\s*:\\s*[^;]+;\\r?\\n?');
+  const val = (raw || '').trim();
+  if (re.test(sec)) {
+    if (val) return sec.replace(re, '  ' + name + ': ' + val + ';\n');
+    return sec.replace(re, '');
+  }
+  if (!val) return sec;
+  const bi = sec.indexOf('}');
+  if (bi < 0) return sec;
+  const lb = sec.lastIndexOf('\n', bi) + 1;
+  return sec.slice(0, lb) + '  ' + name + ': ' + val + ';\n' + sec.slice(lb);
+}
+// ---- 缩放（只读草稿，倍率基准随版式正文字号联动） ----
+function draftMdFs() {
+  const tsec = getSection(styleDlgCss, SEC_THEME);
+  if (tsec) { const mm = tsec.match(/--md-fs\s*:\s*([0-9.]+)\s*px/); if (mm) return parseFloat(mm[1]); }
+  return ZOOM_BASE;
+}
+function refreshStyleZoomFromDraft() {
+  let px = draftMdFs();
+  const zsec = getSection(styleDlgCss, SEC_ZOOM);
+  if (zsec) { const m = zsec.match(/--md-zoom\s*:\s*([0-9.]+)/); if (m) px = Math.round(parseFloat(m[1]) * draftMdFs() * 10) / 10; }
+  const v = Math.min(26, Math.max(13, px));
+  $('stlZoom').value = v;
+  $('stlZoomVal').textContent = Math.round(v) + ' px';
+}
+// 把草稿应用到页面（仅内存预览，不写盘）
+function styleDlgPreview() { applyUserCss(styleDlgCss); }
+$('stlColorGrid').addEventListener('input', () => {
   if (!styleDlgColorOk) return;
   styleDlgCss = upsertSection(styleDlgCss, SEC_COLOR, colorSectionCss(collectStyleColors()));
-  await styleDlgSave();
+  styleDlgPreview();
 });
+function applyThemeDraft() {
+  if (!styleDlgThemeOk) return;
+  let sec = getSection(styleDlgCss, SEC_THEME);
+  sec = setThemeVarInSec(sec, '--md-font-body', $('stlFontBody').value.trim());
+  // 标题字体留空：删除覆盖以跟随正文字体
+  sec = setThemeVarInSec(sec, '--md-font-head', $('stlFontHead').value.trim());
+  for (const inp of $('stlThemeGrid').querySelectorAll('input[data-v]')) {
+    sec = setThemeVarInSec(sec, inp.dataset.v, inp.value === '' ? '' : inp.value + inp.dataset.u);
+  }
+  styleDlgCss = upsertSection(styleDlgCss, SEC_THEME, sec);
+}
+['stlFontBody', 'stlFontHead'].forEach(id => $(id).addEventListener('input', () => { applyThemeDraft(); styleDlgPreview(); }));
+$('stlThemeGrid').addEventListener('input', () => { applyThemeDraft(); styleDlgPreview(); });
 $('stlZoom').addEventListener('input', () => { $('stlZoomVal').textContent = $('stlZoom').value + ' px'; });
-$('stlZoom').addEventListener('change', async () => {
+$('stlZoom').addEventListener('change', () => {
   const px = parseFloat($('stlZoom').value);
-  styleDlgCss = upsertSection(styleDlgCss, SEC_ZOOM, ':root { --md-zoom: ' + (px / styleDlgMdFs).toFixed(3) + '; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
-  await styleDlgSave();
+  styleDlgCss = upsertSection(styleDlgCss, SEC_ZOOM, ':root { --md-zoom: ' + (px / draftMdFs()).toFixed(3) + '; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
+  styleDlgPreview();
 });
-$('stlCode').onclick = () => { $('dlgStyle').close(); openStyleCss(); };
-$('stlClose').onclick = () => $('dlgStyle').close();
+// 保存：草稿落盘（文件不存在时由此创建）
+$('stlSave').onclick = async () => {
+  try {
+    await saveStyleCss(styleDlgCss);
+    syncPresetSel(styleDlgCss);
+    await refreshTree();
+    styleDlgAccepted = true;
+    $('dlgStyle').close();
+  } catch (e) { toast('写入 style.css 失败：' + e.message); }
+};
+$('stlCancel').onclick = () => $('dlgStyle').close();   // close 事件负责放弃
+// 源码编辑：有未保存调整时先确认放弃
+$('stlCode').onclick = () => {
+  if (styleDlgCss !== styleDlgSavedCss && !confirm('有尚未保存的调整，确定放弃并进入源码编辑吗？')) return;
+  styleDlgAccepted = false;
+  $('dlgStyle').close();
+  openStyleCss();
+};
+// 关闭统一收口：保存→保持新样式；取消/Esc→把页面样式还原到磁盘版本（不写盘）
+$('dlgStyle').addEventListener('close', () => {
+  if (styleDlgAccepted) return;
+  applyUserCss(styleDlgSavedCss || '');
+  syncPresetSel(styleDlgSavedCss || '');
+});
 async function loadUserCss() {
   applyUserCss('');
   $('presetSel').value = '';   // 先回到占位，下面按实际配色区内容回显
