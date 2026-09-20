@@ -1468,6 +1468,7 @@ function applyUserCss(cssText) {
 }
 async function loadUserCss() {
   applyUserCss('');
+  $('presetSel').value = '';   // 先回到占位，下面按实际配色区内容回显
   if (!rootHandle) return;
   try {
     const fh = await rootHandle.getFileHandle('style.css');
@@ -1487,6 +1488,10 @@ async function loadUserCss() {
     }
     if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
     applyUserCss(css);
+    // 配色下拉回显：配色区与某套内置预设完全一致才显示该预设，手动微调过则显示占位
+    const curColor = getSection(css, SEC_COLOR);
+    const hit = curColor === null ? null : PRESETS.find(p => colorSectionCss(p).trim() === curColor);
+    if (hit) $('presetSel').value = hit.key;
   } catch (e) {}
 }
 async function openStyleCss() {
@@ -1533,8 +1538,7 @@ const PRESETS = [
     h: ['#8f1d1d','#a82b26','#c0392b','#d15043','#de6f63','#e88e84'] }
 ];
 $('presetSel').onchange = async () => {
-  const key = $('presetSel').value;
-  $('presetSel').value = '';
+  const key = $('presetSel').value;   // 选中后保留显示当前配色，与成书版式下拉一致
   if (!key || !rootHandle) return;
   const p = PRESETS.find(x => x.key === key);
   if (!p) return;
@@ -1549,7 +1553,7 @@ $('presetSel').onchange = async () => {
     else if (mode === 'preview') renderSinglePreview();
     else renderLivePreview();
     toast(created ? '已创建 style.css 并应用配色：' + p.name : '配色「' + p.name + '」已写入配色区（点“样式”可微调）');
-  } catch (e) { toast('应用样式失败：' + e.message); }
+  } catch (e) { $('presetSel').value = ''; toast('应用样式失败：' + e.message); }
 };
 
 /* ================= merged (read) view ================= */
