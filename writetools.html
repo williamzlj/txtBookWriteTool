@@ -2941,8 +2941,21 @@ function transformSelectedLines(fn) {
   editReplace(ed, a, b, out);
   ed.setSelectionRange(a, a + out.length);
 }
-// 标题：同级再点取消；已有别的级别则改级别
+// 标题：无选区且当前行为空时插入最基本的 # 前缀（光标停在空格后）；
+// 有文字时同级再点取消、已有别的级别则改级别；多选区时跳过其中的空行
 function setHeading(n) {
+  const ed = $('editor');
+  const s = ed.selectionStart, e = ed.selectionEnd;
+  const v = ed.value;
+  const a = v.lastIndexOf('\n', s - 1) + 1;
+  let b = v.indexOf('\n', e);
+  if (b < 0) b = v.length;
+  if (s === e && !v.slice(a, b).trim()) {
+    const prefix = '#'.repeat(n) + ' ';
+    editReplace(ed, a, b, prefix);
+    ed.setSelectionRange(a + prefix.length, a + prefix.length);
+    return;
+  }
   transformSelectedLines(l => {
     if (!l.trim()) return l;
     const m = /^(#{1,6})\s+/.exec(l);
