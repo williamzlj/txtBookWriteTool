@@ -437,20 +437,22 @@ dialog {
 }
 dialog::backdrop { background: rgba(0,0,0,.35); }
 dialog h3 { margin-bottom: 14px; font-size: 16px; }
-#dlgStyle { width: min(720px, 96vw); max-height: 88vh; overflow: auto; }
-#dlgStyle .stl-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-#dlgStyle .stl-c-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 20px; }
+#dlgStyle { width: min(720px, 96vw); max-height: 95vh; overflow: auto; }
+#dlgStyle h3 { margin-bottom: 8px; }
+#dlgStyle .stl-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
+#dlgStyle .stl-c-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 20px; }
 #dlgStyle .stl-c-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; min-width: 0; }
 #dlgStyle .stl-c-item .stl-c-lab { overflow: hidden; text-overflow: ellipsis; }
 #dlgStyle .stl-c-item input[type="color"] { padding: 0; width: 34px; height: 22px; flex: none; }
 #dlgStyle .stl-c-item input[type="text"] { width: 150px; flex: none; padding: 2px 6px; }
-#dlgStyle .stl-n-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 28px; margin-top: 4px; }
+#dlgStyle .row { margin: 7px 0; }
+#dlgStyle .stl-n-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 28px; margin-top: 2px; }
 #dlgStyle .stl-n-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 #dlgStyle .stl-n-item > span:first-child { width: 52px; flex: none; }
 #dlgStyle .stl-n-item input { flex: 1; min-width: 0; width: auto; padding: 2px 6px; }
 #dlgStyle .stl-n-item .stl-u { width: 20px; flex: none; }
 /* 底部按钮栏吸底，内容滚动时始终可见 */
-#dlgStyle .btns { position: sticky; bottom: -22px; background: var(--panel); margin: 16px -26px -22px; padding: 12px 26px 0; border-top: 1px solid var(--border); }
+#dlgStyle .btns { position: sticky; bottom: -22px; background: var(--panel); margin: 12px -26px -22px; padding: 12px 26px 0; border-top: 1px solid var(--border); }
 /* 取色器按浅色外观渲染：深色模式下 UA 默认深色底/边框会让色块边界糊在面板里 */
 #dlgStyle input[type="color"] { background: #fff; color-scheme: light; }
 dialog .row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px; }
@@ -641,7 +643,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
       
-      <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">样式</button>
+      <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">手动修改样式</button>
       <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
         <option value="">内置配色…</option>
         <option value="classic">经典黑</option>
@@ -909,10 +911,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <dialog id="dlgStyle">
   <h3>样式设置（style.css）</h3>
-  <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 10px;line-height:1.6"></div>
+  <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 6px;line-height:1.6"></div>
   <div class="stl-h">配色</div>
   <div id="stlColorGrid" class="stl-c-grid"></div>
-  <div class="stl-h" style="margin-top:16px">成书版式</div>
+  <div class="stl-h" style="margin-top:12px">成书版式</div>
   <div class="row"><label style="width:72px;flex:none">正文字体</label><input id="stlFontBody" list="stlFontList" style="flex:1;min-width:0" placeholder="字体栈，如 Georgia, SimSun, serif"></div>
   <div class="row"><label style="width:72px;flex:none">标题字体</label><input id="stlFontHead" list="stlFontList" style="flex:1;min-width:0" placeholder="留空则跟随正文字体"></div>
   <datalist id="stlFontList">
@@ -922,11 +924,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <option value='FangSong, STFangsong, serif'>仿宋</option>
   </datalist>
   <div id="stlThemeGrid" class="stl-n-grid"></div>
-  <div class="row" id="stlZoomRow" style="margin-top:14px"><label style="width:72px;flex:none">整体缩放</label>
+  <div class="row" id="stlZoomRow" style="margin-top:10px"><label style="width:72px;flex:none">整体缩放</label>
     <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
     <span id="stlZoomVal" style="width:48px;text-align:right;font-size:12px;color:var(--muted)"></span>
   </div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:6px">说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px">说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。</div>
   <div class="btns">
     <button id="stlCode">源码编辑</button>
     <button id="stlCancel">取消</button>
