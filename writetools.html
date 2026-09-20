@@ -8,7 +8,7 @@
 :root {
   --fs-editor: 15px;
   --bg: #f6f6f4; --panel: #ffffff; --text: #26282b; --muted: #8a8f98;
-  --border: #e4e4e0; --accent: #3b7dd8; --sel: #eaf2fd; --hover: #f0f2f5;
+  --border: #e4e4e0; --accent: #3b7dd8; --sel: #eaf2fd; --hover: #e8e9eb;
   --code-bg: #f2f2ee; --toolbar: #fbfbfa;
 }
 [data-theme="dark"] {
@@ -49,9 +49,7 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 .tb-row1::-webkit-scrollbar-thumb, .tb-row2::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .tb-row2 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); padding-top: 6px; }
 .tb-row2 > * { flex: none; }
-.tb-row2 #searchBar { padding: 0; width: 250px; max-width: 100%; flex: none; }
 .tb-row2 .tabs { margin-left: 10px; }
-.tb-row2 #searchBar input { font-size: 13px; padding: 5px 9px; }
 #presetSel, #bookThemeSel { font-size: 12.5px; padding: 4px 4px; border-radius: 6px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 /* 模式分组：编辑组仅编辑模式可见，成书组仅预览/阅览/大纲可见（避免第三行） */
 #topbar .mode-edit, #topbar .mode-view { display: none; }
@@ -60,16 +58,16 @@ body[data-mode]:not([data-mode="edit"]) #topbar .mode-view { display: inline-fle
 #topbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 /* 图标按钮（仿 editor.md：B/S/I 用字母，其余内联 SVG，单色跟随主题） */
 /* 编辑组：无边框、无水平间距的紧凑图标排 */
-body[data-mode="edit"] #topbar .mode-edit { gap: 0; }
-#topbar button.ic { width: 24px; min-width: 24px; height: 24px; padding: 0; gap: 0; display: inline-flex; align-items: center; justify-content: center; line-height: 1; border: none; background: transparent; border-radius: 5px; }
+body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
+#topbar button.ic { width: 26px; min-width: 24px; height: 26px; padding: 0; gap: 0; display: inline-flex; align-items: center; justify-content: center; line-height: 1; border: none; background: transparent; border-radius: 5px; }
 #topbar button.ic:hover:not(:disabled) { background: var(--hover); }
-#topbar .mode-edit .sep { display: none; }
-#topbar button.ic svg { width: 15px; height: 15px; flex: none; }
-#topbar button.ic.tb-glyph { font-family: Georgia, "Times New Roman", serif; font-size: 13.5px; font-weight: 700; }
+#topbar .mode-edit .sep { display: 2px solid var(--border); }
+#topbar button.ic svg { width: 20px; height: 20px; flex: none; }
+#topbar button.ic.tb-glyph { font-family: Georgia, "Times New Roman", serif; font-size: 18px; font-weight: 700; }
 #topbar button.ic.tb-glyph.tb-i { font-style: italic; }
 #topbar button.ic.tb-glyph.tb-s { text-decoration: line-through; text-decoration-thickness: 1.2px; }
-#topbar button.ic.tb-h { font-size: 11.5px; font-weight: 700; letter-spacing: -0.5px; }
-#topbar button.ic.tb-code { font-family: Consolas, "Courier New", monospace; font-size: 11.5px; font-weight: 700; }
+#topbar button.ic.tb-h { font-size: 15px; font-weight: 600; letter-spacing: -0.5px; }
+#topbar button.ic.tb-code { font-family: Consolas, "Courier New", monospace; font-size: 14px; font-weight: 700; }
 .tabs { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .tabs button { border: none; border-radius: 0; background: transparent; padding: 4px 14px; }
 .tabs button.active { background: var(--accent); color: #fff; }
@@ -81,10 +79,10 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0; }
   display: flex; flex-direction: column; overflow: hidden; padding: 6px 4px;
 }
 #tree { flex: 1; min-height: 0; overflow: auto; }
-#searchBar { display: flex; gap: 4px; padding: 2px 2px 6px; }
+#searchBar { display: flex; gap: 4px; padding: 6px 2px 8px; }
 #searchBar input {
   flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 6px; color: var(--text); padding: 4px 8px; font-size: 12px; outline: none;
+  border-radius: 6px; color: var(--text); padding: 4px 8px; font-size: 14px; outline: none;
 }
 #searchBar input:focus { border-color: var(--accent); }
 #searchBar button { flex: none; font-size: 12px; }
@@ -158,7 +156,7 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0; }
   flex: 1; min-width: 0; border: none; outline: none; resize: none;
   background: var(--panel); color: var(--text);
   font-family: Consolas, "Microsoft YaHei", monospace;
-  font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 26px 30px;
+  font-size: var(--fs-editor, 15px); line-height: 1.75; padding: 50px 50px;
   scrollbar-gutter: stable both-edges; caret-color: var(--accent);
 }
 #livePreview {
@@ -363,7 +361,7 @@ body[data-book-theme="modern"] .bc-title { font-size: 40px; }
 body[data-book-theme="modern"] .bc-meta { margin-top: 80px; }
 
 /* phone 封面/扉页目录放大 */
-body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 70px 20px 60px; }
+body[data-book-theme="phone"] .book-cover { min-height: auto; padding: 270px 20px 60px; }
 body[data-book-theme="phone"] .bc-title { font-size: 44px; line-height: 1.4; }
 body[data-book-theme="phone"] .bc-sub { font-size: 20px; margin-top: 22px; }
 body[data-book-theme="phone"] .bc-meta { margin-top: 64px; font-size: 19px; line-height: 2.3; }
@@ -511,12 +509,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnTheme" title="切换明暗主题">🌙</button>
  </div>
  <div class="tb-row tb-row2">
-   <div id="searchBar"><input id="searchInput" placeholder="搜索文件内容…" title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" title="搜索">🔍</button><button id="btnClearSearch" title="清空搜索，恢复目录显示">✕</button></div>
    <div class="tabs">
      <button data-mode="edit" class="active" disabled>编辑</button>
-     <button data-mode="preview" disabled>预览</button>
-     <button data-mode="read" disabled>阅览</button>
+     <button data-mode="preview" disabled>预览</button>     
      <button data-mode="outline" disabled>大纲</button>
+     <button data-mode="read" disabled>阅览</button>
    </div>
    <button id="btnRefresh" disabled>刷新</button>
    <span class="sep"></span>
@@ -525,17 +522,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <span class="sep"></span>
    <!-- 编辑模式：编辑工具组 -->
    <div class="mode-edit">
-     <!-- 行内格式：粗体/删除线/斜体/引用/大小写 -->
-     <button id="btnMdBold" class="ic tb-glyph needs-file" disabled title="粗体（Ctrl+B）">B</button>
-     <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled title="删除线">S</button>
-     <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled title="斜体（Ctrl+I）">I</button>
-     <button id="btnMdQuote" class="ic needs-file" disabled title="引用块（再点取消）">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4C2 4.8 1.4 5.8 1.4 7v3.4h3.2V7.4H3c0-1 .6-1.6 1.5-1.8L3.2 4.4z" fill="currentColor" stroke="none"/><path d="M9.4 4.4c-1.2.4-1.8 1.4-1.8 2.6v3.4h3.2V7.4H9.2c0-1 .6-1.6 1.5-1.8L9.4 4.4z" fill="currentColor" stroke="none"/></svg>
-     </button>
-     <button id="btnMdUpper" class="ic tb-glyph needs-file" disabled title="选中的英文字母转大写">A</button>
-     <button id="btnMdLower" class="ic tb-glyph needs-file" disabled title="选中的英文字母转小写">a</button>
-     <span class="sep"></span>
-     <!-- 标题 H1-H6 -->
+    <!-- 标题 H1-H6 -->
      <button class="ic tb-h needs-file md-h" data-h="1" disabled title="一级标题（再点取消）">H1</button>
      <button class="ic tb-h needs-file md-h" data-h="2" disabled title="二级标题（再点取消）">H2</button>
      <button class="ic tb-h needs-file md-h" data-h="3" disabled title="三级标题（再点取消）">H3</button>
@@ -543,6 +530,16 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button class="ic tb-h needs-file md-h" data-h="5" disabled title="五级标题（再点取消）">H5</button>
      <button class="ic tb-h needs-file md-h" data-h="6" disabled title="六级标题（再点取消）">H6</button>
      <span class="sep"></span>
+     <!-- 行内格式：粗体/删除线/斜体/引用/大小写 -->
+     <button id="btnMdBold" class="ic tb-glyph needs-file" disabled title="粗体（Ctrl+B）">B</button>
+     <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled title="删除线">S</button>
+     <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled title="斜体（Ctrl+I）">I</button>
+     
+     <button id="btnMdUpper" class="ic tb-glyph needs-file" disabled title="选中的英文字母转大写">A</button>
+     <button id="btnMdLower" class="ic tb-glyph needs-file" disabled title="选中的英文字母转小写">a</button>
+     <span class="sep"></span>
+     
+     
      <!-- 列表与分隔线 -->
      <button id="btnMdUl" class="ic needs-file" disabled title="无序列表（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="1.6" cy="3" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="8" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="13" r="1.05" fill="currentColor" stroke="none"/><path d="M4.5 3h10M4.5 8h10M4.5 13h10"/></svg>
@@ -550,8 +547,31 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnMdOl" class="ic needs-file" disabled title="有序列表（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7.5M7 8h7.5M7 13h7.5"/><text x="0.2" y="5" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">1</text><text x="0.2" y="10" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">2</text><text x="0.2" y="15" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">3</text></svg>
      </button>
+     
+     <span class="sep"></span>
+     <!-- 本工具原有功能 -->
      <button id="btnMdHr" class="ic needs-file" disabled title="插入分隔线">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8h12"/></svg>
+     </button>
+     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格（　），用于中文排版">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
+     </button>
+     <button id="btnInsertComment" class="ic needs-file" disabled title="插入 HTML 注释 &lt;!--注释--&gt;，仅写作时可见，阅览与导出中不显示">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
+     </button>
+     <button id="btnMdDate" class="ic needs-file" disabled title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></svg>
+     </button>
+     <span class="sep"></span>
+     <button id="btnMdQuote" class="ic needs-file" disabled title="引用块（再点取消）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4C2 4.8 1.4 5.8 1.4 7v3.4h3.2V7.4H3c0-1 .6-1.6 1.5-1.8L3.2 4.4z" fill="currentColor" stroke="none"/><path d="M9.4 4.4c-1.2.4-1.8 1.4-1.8 2.6v3.4h3.2V7.4H9.2c0-1 .6-1.6 1.5-1.8L9.4 4.4z" fill="currentColor" stroke="none"/></svg>
+     </button>
+     <button id="btnMdCode" class="ic tb-code needs-file" disabled title="行内代码">&lt;/&gt;</button>
+     <button id="btnMdCodeBlock" class="ic needs-file" disabled title="代码块（选中多行后点击可包裹）">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.2,4 1.8,8 5.2,12"/><polyline points="10.8,4 14.2,8 10.8,12"/><path d="M3 14.3h10"/></svg>
+     </button>
+     <button id="btnPalette" class="ic needs-file" disabled title="调色盘：选择颜色，确认后把色值插入光标处">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 1.7a6.3 6.3 0 1 0 0 12.6c.8 0 1.3-.7 1-1.4-.3-.8.2-1.5 1.1-1.5h1.3a3.2 3.2 0 0 0 3.2-3.2C15.5 4.8 12.1 1.7 7.9 1.7z"/><circle cx="5.3" cy="7" r="0.95" fill="currentColor" stroke="none"/><circle cx="7.9" cy="4.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="10.9" cy="5.5" r="0.95" fill="currentColor" stroke="none"/><circle cx="12.3" cy="8.4" r="0.95" fill="currentColor" stroke="none"/></svg>
      </button>
      <span class="sep"></span>
      <!-- 链接/锚点/图片/代码/表格/日期 -->
@@ -564,27 +584,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnInsertImg" class="ic needs-file" disabled title="插入图片（也可直接粘贴/拖入）；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="1.2"/><circle cx="5.4" cy="6.8" r="1.1"/><path d="M2.8 11.8l3.2-3.2 2.4 2.4 2.2-2.2 2.6 3"/></svg>
      </button>
-     <button id="btnMdCode" class="ic tb-code needs-file" disabled title="行内代码">&lt;/&gt;</button>
-     <button id="btnMdCodeBlock" class="ic needs-file" disabled title="代码块（选中多行后点击可包裹）">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.2,4 1.8,8 5.2,12"/><polyline points="10.8,4 14.2,8 10.8,12"/><path d="M3 14.3h10"/></svg>
-     </button>
+     
      <button id="btnTable" class="ic needs-file" disabled title="插入表格">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="2.5" width="12.4" height="11" rx="1"/><path d="M1.8 6h12.4M1.8 9.5h12.4M6 2.5v11M10 2.5v11"/></svg>
      </button>
-     <button id="btnMdDate" class="ic needs-file" disabled title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></svg>
-     </button>
+     
      <span class="sep"></span>
-     <!-- 本工具原有功能 -->
-     <button id="btnPalette" class="ic needs-file" disabled title="调色盘：选择颜色，确认后把色值插入光标处">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 1.7a6.3 6.3 0 1 0 0 12.6c.8 0 1.3-.7 1-1.4-.3-.8.2-1.5 1.1-1.5h1.3a3.2 3.2 0 0 0 3.2-3.2C15.5 4.8 12.1 1.7 7.9 1.7z"/><circle cx="5.3" cy="7" r="0.95" fill="currentColor" stroke="none"/><circle cx="7.9" cy="4.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="10.9" cy="5.5" r="0.95" fill="currentColor" stroke="none"/><circle cx="12.3" cy="8.4" r="0.95" fill="currentColor" stroke="none"/></svg>
-     </button>
-     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格（　），用于中文排版">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
-     </button>
-     <button id="btnInsertComment" class="ic needs-file" disabled title="插入 HTML 注释 &lt;!--注释--&gt;，仅写作时可见，阅览与导出中不显示">
-       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
-     </button>
+     
      <button id="btnReplace" class="ic" disabled title="查找替换：可在当前文件或整个项目中进行">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.8" cy="9.8" r="3"/><path d="M8 12l3.2 3.2"/><path d="M9.4 2.9h3.9m0 0-1.4-1.2m1.4 1.2-1.4 1.2"/><path d="M6.6 6.3H2.9m0 0 1.2-1.2M2.9 6.3l1.2 1.2"/></svg>
      </button>
@@ -626,6 +632,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <div id="projName"></div>
       <button id="sideCollapseBtn" title="折叠文件目录（腾出编辑空间）" aria-label="折叠文件目录">‹</button>
     </div>
+    <div id="searchBar"><input id="searchInput" placeholder="搜索文件内容…" title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" title="搜索">🔍</button><button id="btnClearSearch" title="清空搜索，恢复目录显示">✕</button></div>
     <div id="tree"></div>
     <div id="searchResults" class="hidden"></div>
   </aside>
