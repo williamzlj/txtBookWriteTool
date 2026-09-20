@@ -643,7 +643,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
       
-      <button id="btnCss" disabled title="编辑项目根目录下的 style.css，保存后立即生效">手动修改样式</button>
+      <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">手动修改样式</button>
       <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
         <option value="">内置配色…</option>
         <option value="classic">经典黑</option>
@@ -3379,7 +3379,7 @@ $('btnMerge').onclick = mergeSelected;
 $('btnUnsel').onclick = () => { multiSel = []; renderTree(); updateToolbar(); };
 $('btnAutoName').onclick = autoRename;
 $('btnRenumber').onclick = renumberAll;
-$('btnCss').onclick = openStyleCss;
+$('btnCss').onclick = openStyleDlg;
 $('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') await renderMerged(); if (mode === 'outline') renderOutline(); toast('已刷新'); };
 // 上一个 / 下一个文件
 async function navFile(dir) {
