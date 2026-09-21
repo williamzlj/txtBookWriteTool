@@ -388,6 +388,7 @@ body.book-indent .md-body p { text-indent: 2em; }
   #mergedBody { width: 100%; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
   .md-body .book-title { text-align: center !important; font-size: 28px; margin: 0 0 30px !important; }
   .md-body hr.file-boundary { display: none; }
+  .book-toc { border-bottom: none !important; }   /* 打印/导出 PDF 时隐藏目录底部分隔线（屏幕预览保留） */
   .md-body hr { margin: 1.2em 0; }
   .book-front { max-width: 100%; padding: 0; }
   .book-cover {
@@ -457,6 +458,8 @@ dialog input, dialog select {
 }
 dialog input[type="number"] { width: 64px; }
 dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#dlgSplit { width: min(500px, 94vw); }
+#dlgSplit .sp-names { margin-top: 4px; line-height: 1.9; word-break: break-all; }
 #dlgAbout { width: min(660px, 94vw); padding: 22px 26px 18px; }
 #dlgAbout .ab-body { max-height: 58vh; overflow-y: auto; font-size: 13.5px; line-height: 1.8; padding-right: 8px; }
 #dlgAbout h4 { font-size: 14px; margin: 15px 0 5px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--accent); }
@@ -554,6 +557,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
+  <button id="btnSplit" disabled title="把选中的文件按标题级别或行首关键词拆分成多个文件：统一命名为 xxx-split-0、xxx-split-1…（编号从 0 开始，原文件移入回收站，可恢复）">拆分</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
@@ -801,6 +805,33 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <button id="rpOk" class="primary">替换</button>
   </div>
 </dialog>
+<dialog id="dlgSplit">
+  <h3>拆分文件</h3>
+  <div class="row"><label style="width:72px">文件：</label><span id="spName" style="font-size:13px;font-family:monospace"></span></div>
+  <div class="row"><label style="width:72px">方式：</label>
+    <label><input type="radio" name="spMode" value="heading" checked> 按标题拆分</label>
+    <label><input type="radio" name="spMode" value="keyword"> 按关键词拆分</label>
+  </div>
+  <div class="row" id="spHeadingRow"><label style="width:72px">标题级别：</label>
+    <select id="spLevel">
+      <option value="1">H1（#）</option>
+      <option value="2" selected>H2（##）</option>
+      <option value="3">H3（###）</option>
+      <option value="4">H4（####）</option>
+      <option value="5">H5（#####）</option>
+      <option value="6">H6（######）</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted)">只按该级别标题拆分，忽略其他级别</span>
+  </div>
+  <div class="row hidden" id="spKeywordRow"><label style="width:64px">关键词：</label>
+    <input id="spKeyword" style="flex:1" placeholder="行首出现该关键词的行即拆分点">
+  </div>
+  <div id="spInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0">​</div>
+  <div class="btns">
+    <button id="spCancel">取消</button>
+    <button id="spOk" class="primary">拆分</button>
+  </div>
+</dialog>
 <dialog id="dlgAbout">
   <h3>txtBookWriteTool （一款用txt写作的小工具） · 使用说明</h3>
   <div class="author">
@@ -852,6 +883,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认）。<b>替换前的内容会自动存入「历史版本」，可随时恢复。</b></li>
       <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
       <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
+      <li><b>拆分</b>：选中一个文件点「拆分」，可按指定级别的标题（#）或行首关键词拆成多个文件：统一命名为 <code>xxx-split-0.txt</code>、<code>xxx-split-1.txt</code>…（编号从 0 开始保证排序连续，原文件移入回收站可恢复）。适合把论文大纲拆开后逐章编写。</li>
       <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
     </ul>
     <h4>输出</h4>
@@ -1453,28 +1485,32 @@ const BOOK_THEMES = {
     name: '经典',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;\n  --md-fs: 16.5px;\n  --md-lh: 1.9;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 22px;\n  --md-h3-fs: 19px;\n  --md-h4-fs: 17px;\n  --md-h5-fs: 15px;\n  --md-h6-fs: 14px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="classic"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
+    toc: '--toc-h-fs: 19px; --toc-a-fs: 14px; --toc-a-lh: 2.05;',
+    rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: var(--toc-h-fs); }\nbody[data-book-theme="classic"] .book-toc a { font-size: var(--toc-a-fs); line-height: var(--toc-a-lh); }'
   },
   modern: {
     name: '现代',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
     cover: '--cover-halign: flex-start; --cover-valign: flex-start; --cover-text: left;\n  --cover-min-h: 520px; --cover-pad-top: 130px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 40px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 80px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="modern"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
+    toc: '--toc-h-fs: 18px; --toc-a-fs: 14px; --toc-a-lh: 2.05;',
+    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: var(--toc-h-fs); }\nbody[data-book-theme="modern"] .book-toc a { font-size: var(--toc-a-fs); line-height: var(--toc-a-lh); }'
   },
   academic: {
     name: '学术',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-fs: 15.5px;\n  --md-lh: 1.75;\n  --md-h1-fs: 21px;\n  --md-h2-fs: 17px;\n  --md-h3-fs: 15.5px;\n  --md-h4-fs: 15px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="academic"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
+    toc: '--toc-h-fs: 18px; --toc-a-fs: 13px; --toc-a-lh: 2.05;',
+    rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: var(--toc-h-fs); }\nbody[data-book-theme="academic"] .book-toc a { font-size: var(--toc-a-fs); line-height: var(--toc-a-lh); }'
   },
   phone: {
     name: '手机',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 20px;\n  --md-lh: 1.95;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 24px;\n  --md-h3-fs: 22px;\n  --md-h4-fs: 20px;\n  --md-h5-fs: 19px;\n  --md-h6-fs: 18px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: auto; --cover-pad-top: 270px; --cover-pad-bottom: 60px;\n  --cover-title-fs: 44px; --cover-title-lh: 1.4;\n  --cover-sub-fs: 20px; --cover-sub-top: 22px;\n  --cover-meta-fs: 19px; --cover-meta-top: 64px; --cover-meta-lh: 2.3;',
-    rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="phone"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.95)); line-height: var(--toc-a-lh, 1.95); color: var(--md-body-color); }'
+    toc: '--toc-h-fs: 23px; --toc-a-fs: 19px; --toc-a-lh: 1.95;',
+    rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: var(--toc-h-fs); }\nbody[data-book-theme="phone"] .book-toc a { font-size: var(--toc-a-fs); line-height: var(--toc-a-lh); color: var(--md-body-color); }'
   }
 };
-// 目录共享结构（与版式无关：容器/缩进/对齐，所有版式共用；字号在各主题 rules 中随 --md-fs 联动）
+// 目录共享结构（与版式无关：容器/缩进/对齐，所有版式共用；字号在各主题 vars 中独立声明 --toc-* 变量）
 const TOC_BASE_CSS =
 `.book-toc { padding: 6px 4px 36px; border-bottom: 1px dashed var(--md-border); margin-bottom: 34px; }
 .book-toc .toc-h { text-align: center; font-weight: 700; letter-spacing: .5em; text-indent: .5em; margin-bottom: 18px; }
@@ -1487,7 +1523,7 @@ function themeSectionCss(theme) {
   const t = BOOK_THEMES[theme] || BOOK_THEMES.classic;
   // 数据已保证每行一个变量；此处仅做去空白+统一 2 空格缩进，防止手改时格式漂移
   const fmt = s => s.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => '  ' + l).join('\n');
-  const vars = fmt(t.vars) + '\n' + fmt(t.cover);
+  const vars = fmt(t.vars) + '\n' + fmt(t.cover) + '\n' + fmt(t.toc);
   return 'body[data-book-theme="' + theme + '"] {\n'
     + '  /* 版式：' + t.name + '（字体 / 字号 / 行距 / 封面参数可自由修改） */\n'
     + vars + '\n}\n' + t.rules;
@@ -1575,7 +1611,7 @@ const STYLE_COVER_ENUM_FIELDS = [
   ['--cover-valign', '纵向布局', [['居中','center'], ['顶','flex-start'], ['底','flex-end']]],
   ['--cover-text', '文字对齐', [['居中','center'], ['左','left'], ['右','right']]],
 ];
-// 目录数字字段（与版式 vars 同在 SEC_THEME 区；留空=不覆盖，回退到版式 rules 里的 calc 默认）
+// 目录数字字段（与版式 vars 同在 SEC_THEME 区；留空=不覆盖，回退到版式默认）
 const STYLE_TOC_NUM_FIELDS = [
   ['--toc-h-fs', '标题字号', 'px', 1], ['--toc-a-fs', '条目字号', 'px', 1], ['--toc-a-lh', '条目行距', '', 0.05],
 ];
@@ -1613,6 +1649,11 @@ async function openStyleDlg() {
   const disk = await readStyleCssText();
   styleDlgSavedCss = disk;
   styleDlgCss = disk === null ? styleTemplate(bookCfg.theme) : disk;  // 无文件：用模板做草稿，保存时才真正创建
+  // 旧 style.css 缺 --toc-* 声明时补齐草稿（保存时落盘），保证目录字号/行距字段可显示可修改
+  {
+    const tsec = getSection(styleDlgCss, SEC_THEME);
+    if (tsec) { const ns = ensureTocVarDecls(tsec, bookCfg.theme); if (ns !== tsec) styleDlgCss = upsertSection(styleDlgCss, SEC_THEME, ns); }
+  }
   styleDlgAccepted = false;
   buildStyleColorGrid();
   buildStyleThemeFields();
@@ -1699,7 +1740,7 @@ function buildStyleThemeFields() {
       insertedTocSubh = true;
     }
     const raw = readVar(name);
-    // --cover-min-h 可能是 'auto'、--toc-* 默认是 calc(...)：number input 无法表达，回退显示空
+    // --cover-min-h 可能是 'auto'：number input 无法表达，回退显示空
     const num = (raw && !/^calc\(/.test(raw) && raw !== 'auto') ? (parseFloat(raw) || '') : '';
     const item = document.createElement('label');
     item.className = 'stl-n-item';
@@ -1741,6 +1782,24 @@ function setThemeVarInSec(sec, name, raw) {
   if (bi < 0) return sec;
   const lb = sec.lastIndexOf('\n', bi) + 1;
   return sec.slice(0, lb) + '  ' + name + ': ' + val + ';\n' + sec.slice(lb);
+}
+// 目录字号旧格式迁移：.book-toc 规则只写 var(--toc-*) 引用而区内无变量声明时，
+// 按当前主题预设默认值补上声明（--toc-h-fs: 19px; 风格），
+// 否则样式设置界面读不到目录标题/条目字号，渲染时 var() 也无值失效
+function ensureTocVarDecls(sec, theme) {
+  const defs = {};
+  const tl = (BOOK_THEMES[theme] || BOOK_THEMES.classic).toc;
+  tl.split(';').forEach(kv => { const m = /(--[\w-]+)\s*:\s*(.+)/.exec(kv); if (m) defs[m[1]] = m[2].trim(); });
+  let ns = sec;
+  for (const [name, val] of Object.entries(defs)) {
+    if (!val) continue;
+    // 仅当规则中真实引用了该变量且区内无声明时才注入，不动用户已有声明
+    const vn = name.replace(/[-]/g, '\\$&');
+    if (!new RegExp('var\\(' + vn + '[,)]').test(ns)) continue;
+    if (new RegExp(vn + '\\s*:\\s*[^;]+;').test(ns)) continue;
+    ns = setThemeVarInSec(ns, name, val);
+  }
+  return ns;
 }
 // ---- 缩放（只读草稿，倍率基准随版式正文字号联动） ----
 function draftMdFs() {
@@ -1835,17 +1894,35 @@ async function loadUserCss() {
       const preset = hm && PRESETS.find(x => x.h[0].toLowerCase() === hm[1].toLowerCase());
       if (preset) { css = upsertSection(css, SEC_COLOR, colorSectionCss(preset)); changed = true; }
     }
-    // 旧版 .book-toc 字号是直接 calc 形式（不引用 --toc-* 变量）；迁移为 var(--toc-*, calc(...)) 形式，保留 calc 作 fallback
+    // 旧版 .book-toc 字号迁移：直接 calc 或 var(--toc-*, fallback) → vars 声明 + var(--toc-*) 引用
     const tsec = getSection(css, SEC_THEME);
-    if (tsec && tsec.indexOf('var(--toc-') < 0) {
+    if (tsec) {
       let ns = tsec;
       const calcPat = 'calc\\((?:[^()]|\\([^()]*\\))*\\)';   // 匹配 calc(...) 整体（含一层嵌套）
-      ns = ns.replace(new RegExp('\\.book-toc \\.toc-h \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
-        '.book-toc .toc-h {$1font-size: var(--toc-h-fs, $2)');
-      ns = ns.replace(new RegExp('\\.book-toc a \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
-        '.book-toc a {$1font-size: var(--toc-a-fs, $2)');
-      ns = ns.replace(/\.book-toc a \{([^}]*?)line-height:\s*([0-9.]+)\s*;/g,
-        '.book-toc a {$1line-height: var(--toc-a-lh, $2);');
+      // Case 1: 直接 calc/数字形式（不引用 --toc-* 变量）→ var(--toc-*, fallback) 形式
+      if (ns.indexOf('var(--toc-') < 0) {
+        ns = ns.replace(new RegExp('\\.book-toc \\.toc-h \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
+          '.book-toc .toc-h {$1font-size: var(--toc-h-fs, $2)');
+        ns = ns.replace(new RegExp('\\.book-toc a \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
+          '.book-toc a {$1font-size: var(--toc-a-fs, $2)');
+        ns = ns.replace(/\.book-toc a \{([^}]*?)line-height:\s*([0-9.]+)\s*;/g,
+          '.book-toc a {$1line-height: var(--toc-a-lh, $2);');
+      }
+      // Case 2: var(--toc-*, fallback) → vars 声明 + var(--toc-*) 无 fallback
+      for (const [varName, pat] of [
+        ['--toc-h-fs', calcPat + '|[0-9.]+'],
+        ['--toc-a-fs', calcPat + '|[0-9.]+'],
+        ['--toc-a-lh', '[0-9.]+'],
+      ]) {
+        const re = new RegExp('var\\(' + varName.replace(/[-]/g, '\\$&') + ',\\s*(' + pat + ')\\)', 'g');
+        const m = re.exec(ns);
+        if (m) {
+          ns = setThemeVarInSec(ns, varName, m[1].trim());
+          ns = ns.replace(re, 'var(' + varName + ')');
+        }
+      }
+      // Case 3: var(--toc-*) 无 fallback 且无声明 → 按当前主题预设补声明
+      ns = ensureTocVarDecls(ns, bookCfg.theme);
       if (ns !== tsec) { css = upsertSection(css, SEC_THEME, ns); changed = true; }
     }
     if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
@@ -2232,17 +2309,18 @@ body{margin:0;background:#fbfaf7;}
 /* 标题下的副标题 / 作者日期（字号引用内容变量，自动随版式缩放） */
 .exp-sub{text-align:center;font-size:calc(var(--md-fs)*.92);color:var(--md-muted-color);letter-spacing:.1em;margin:0 0 10px;}
 .exp-meta{text-align:center;font-size:calc(var(--md-fs)*.85);color:var(--md-muted-color);margin:0 0 36px;line-height:1.9;}
-/* 侧栏目录：双类 .toc.book-toc 提高特异性，覆盖 TOC_BASE_CSS 的 .book-toc 布局冲突；
-   字号规则由 style.css 的 body[data-book-theme=...] .book-toc a 进一步覆盖（用户改 style.css 即生效） */
-.toc.book-toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--md-panel);border:1px solid var(--md-border);border-radius:10px;padding:18px 20px;margin:0}
-.toc.book-toc .toc-h{font-family:var(--md-font-head);font-weight:700;font-size:calc(var(--md-fs)*.95);letter-spacing:3px;color:var(--md-muted-color);margin-bottom:10px;text-align:left;text-indent:0}
-.toc.book-toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:calc(var(--md-fs)*.88);line-height:1.8}
+/* 输出的html，侧栏目录css定义：双类 .toc.book-toc 提高特异性，覆盖 TOC_BASE_CSS 的 .book-toc 布局冲突；
+   字号/行距用 !important 独立控制（否则会被后注入的 style.css 规则
+   body[data-book-theme=...] .book-toc a{font-size:var(--toc-a-fs)} 按特异性和顺序覆盖，倍率改动不生效） */
+.toc.book-toc{width:230px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--md-panel);border:1px solid var(--md-border);border-radius:10px;padding:18px 20px;margin:0}
+.toc.book-toc .toc-h{font-family:var(--md-font-head);font-weight:700;font-size:18px!important;letter-spacing:3px;color:var(--md-muted-color);margin-bottom:10px;text-align:left;text-indent:0}
+.toc.book-toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:15px!important;line-height:1.3!important}
 .toc.book-toc a:hover{color:var(--md-accent)}
 .toc.book-toc a.tl2{padding-left:18px}.toc.book-toc a.tl3{padding-left:36px}.toc.book-toc a.tl4{padding-left:54px}
 #toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:var(--md-accent);color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}#toTop:hover{opacity:1}
 @media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc.book-toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
-@media print{#toTop{display:none}.toc.book-toc{display:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}}
+@media print{#toTop{display:none}.toc.book-toc{display:none!important}.book-toc{border-bottom:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}.book-title{margin-top:0!important;padding-top:60mm;padding-bottom:120mm;font-size:44px!important;}}   /* book-title 用 padding 下移至页面上中部（margin 会被打印分页截断，40mm 可调） */
 @page{size:A4;margin:24mm 20mm 22mm}
 `;
 async function exportMerged() {
@@ -2968,6 +3046,118 @@ async function mergeSelected() {
   } catch (e) { toast('合并失败：' + e.message); }
 }
 
+/* ================= split: 按标题级别 / 按行首关键词拆分 ================= */
+let spTarget = null, spText = '';   // 拆分目标节点与内容快照（打开对话框时读取）
+// 找出所有拆分行下标；标题模式按精确级别匹配（## 不算进 H3），跳过 ``` / ~~~ 代码块内的行
+function findSplitPoints(lines, mode, level, kw) {
+  const pts = [];
+  let fence = false;
+  const re = mode === 'heading' ? new RegExp('^ {0,3}' + '#'.repeat(level) + '(?!#)(?:\\s|$)') : null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^ {0,3}(`{3,}|~{3,})/.test(line)) { fence = !fence; continue; }
+    if (fence) continue;
+    if (mode === 'heading') { if (re.test(line)) pts.push(i); }
+    else if (kw && line.replace(/^\s+/, '').startsWith(kw)) pts.push(i);
+  }
+  return pts;
+}
+// 按拆分点切块：每块从某个拆分行开始，到下一个拆分行前结束；首块为空（文件以拆分行开头）时并入原文件名
+function splitParts(text, mode, level, kw) {
+  const lines = text.split('\n');
+  const pts = findSplitPoints(lines, mode, level, kw);
+  if (!pts.length) return [];
+  const parts = [];
+  for (let i = 0; i < pts.length; i++) parts.push(lines.slice(i ? pts[i - 1] : 0, pts[i]).join('\n'));
+  parts.push(lines.slice(pts[pts.length - 1]).join('\n'));
+  if (!parts[0].trim()) parts.shift();
+  return parts;
+}
+function splitNameInfo(name) {
+  const dot = name.lastIndexOf('.');
+  return { base: dot > 0 ? name.slice(0, dot) : name, ext: dot > 0 ? name.slice(dot) : '' };
+}
+function splitParams() {
+  return {
+    mode: document.querySelector('input[name="spMode"]:checked').value,
+    level: +$('spLevel').value,
+    kw: $('spKeyword').value.trim()
+  };
+}
+function updateSplitInfo() {
+  const p = splitParams();
+  if (p.mode === 'keyword' && !p.kw) { $('spInfo').textContent = '请输入关键词'; return; }
+  const parts = splitParts(spText, p.mode, p.level, p.kw);
+  if (parts.length < 2) { $('spInfo').textContent = parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'; return; }
+  const { base, ext } = splitNameInfo(spTarget.name);
+  const names = [];
+  for (let k = 0; k < parts.length && k < 4; k++) names.push(base + '-split-' + k + ext);
+  // 文件名单独一行显示，避免一行过长撑宽对话框
+  $('spInfo').innerHTML = '找到 ' + (parts.length - 1) + ' 个拆分点，将拆为 ' + parts.length + ' 个文件：'
+    + '<div class="sp-names">' + names.map(n => '· ' + esc(n)).join('<br>') + (parts.length > 4 ? '<br>…' : '') + '</div>';
+}
+async function openSplit() {
+  const n = selectedNode || (current ? current.node : null);
+  if (!rootHandle) { toast('请先打开文件夹'); return; }
+  if (!n || n.type !== 'file' || n.external) { toast('请先选中项目内的一个文件'); return; }
+  await flushSave();
+  clearTimeout(saveTimer);
+  let text;
+  try { text = await (await n.handle.getFile()).text(); } catch (e) { toast('读取失败：' + e.message); return; }
+  spTarget = n; spText = text.replace(/^\uFEFF/, '');
+  $('spName').textContent = n.name;
+  $('spKeyword').value = '';
+  document.querySelector('input[name="spMode"][value="heading"]').checked = true;
+  $('spHeadingRow').classList.remove('hidden');
+  $('spKeywordRow').classList.add('hidden');
+  updateSplitInfo();
+  $('dlgSplit').showModal();
+}
+$('btnSplit').onclick = openSplit;
+document.querySelectorAll('input[name="spMode"]').forEach(r => r.onchange = () => {
+  const heading = splitParams().mode === 'heading';
+  $('spHeadingRow').classList.toggle('hidden', !heading);
+  $('spKeywordRow').classList.toggle('hidden', heading);
+  updateSplitInfo();
+});
+$('spLevel').onchange = updateSplitInfo;
+$('spKeyword').oninput = updateSplitInfo;
+$('spCancel').onclick = () => $('dlgSplit').close();
+$('spOk').onclick = async () => {
+  const node = spTarget;
+  if (!node) return;
+  const p = splitParams();
+  if (p.mode === 'keyword' && !p.kw) { toast('请输入关键词'); return; }
+  const parts = splitParts(spText, p.mode, p.level, p.kw);
+  if (parts.length < 2) { toast(parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'); return; }
+  const { base, ext } = splitNameInfo(node.name);
+  try {
+    const dir0 = await getDirHandleByPath(parentPath(node.path));
+    // 目标文件名冲突检查：已存在同名 -split-N 文件则中止，避免覆盖
+    for (let k = 0; k < parts.length; k++) {
+      const nm = base + '-split-' + k + ext;
+      try { await dir0.getFileHandle(nm); toast('已存在同名文件「' + nm + '」，请先重命名或删除后再拆分'); return; } catch (e) {}
+    }
+    await backupHistory(node, spText);   // 拆分前旧内容存入历史版本
+    // 全部分块统一命名 base-split-0..N-1（编号从 0 开始，保证与后续 split-N 排序连续）
+    for (let k = 0; k < parts.length; k++) {
+      const nm = base + '-split-' + k + ext;
+      const fh = await dir0.getFileHandle(nm, { create: true });
+      const w = await fh.createWritable(); await w.write(parts[k].replace(/\s+$/, '') + '\n'); await w.close();
+    }
+    const firstPath = parentPath(node.path) ? parentPath(node.path) + '/' + base + '-split-0' + ext : base + '-split-0' + ext;
+    await trashMove(node.handle, node.path, 'file');   // 原文件（内容已全部拆入分块）移入回收站，可恢复
+    $('dlgSplit').close();
+    if (current && current.node === node) current = null;
+    clearTimeout(saveTimer);
+    await refreshTree();
+    const nn = findNode(tree, firstPath);
+    if (nn) { selectedNode = nn; await openFile(nn); }
+    renderTree(); updateToolbar();
+    toast('已拆分为 ' + parts.length + ' 个文件，原文件已移入回收站');
+  } catch (e) { toast('拆分失败：' + e.message); }
+};
+
 /* ================= images: paste / drop / pick ================= */
 const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp' };
 async function saveAsset(blob, name) {
@@ -3685,6 +3875,8 @@ function updateToolbar() {
   const hasSel = hasRoot && (selectedNode || current);
   $('btnMerge').disabled = !(hasRoot && multiSel.length >= 2);
   $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
+  const splitN = selectedNode || (current ? current.node : null);
+  $('btnSplit').disabled = !(hasRoot && splitN && splitN.type === 'file' && !splitN.external);
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('pvToggleBtn').classList.toggle('hidden', !current);
