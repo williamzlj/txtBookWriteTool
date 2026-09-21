@@ -1453,25 +1453,25 @@ const BOOK_THEMES = {
     name: '经典',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", sans-serif;\n  --md-fs: 16.5px;\n  --md-lh: 1.9;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 22px;\n  --md-h3-fs: 19px;\n  --md-h4-fs: 17px;\n  --md-h5-fs: 15px;\n  --md-h6-fs: 14px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="classic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+    rules: 'body[data-book-theme="classic"] .md-body h1 { text-align: center; margin-top: 2.4em; }\nbody[data-book-theme="classic"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="classic"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
   },
   modern: {
     name: '现代',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
     cover: '--cover-halign: flex-start; --cover-valign: flex-start; --cover-text: left;\n  --cover-min-h: 520px; --cover-pad-top: 130px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 40px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 80px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="modern"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+    rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="modern"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
   },
   academic: {
     name: '学术',
     vars: '--md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-font-head: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;\n  --md-fs: 15.5px;\n  --md-lh: 1.75;\n  --md-h1-fs: 21px;\n  --md-h2-fs: 17px;\n  --md-h3-fs: 15.5px;\n  --md-h4-fs: 15px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: 520px; --cover-pad-top: 50px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 34px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 96px; --cover-meta-lh: 2.2;',
-    rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="academic"] .book-toc a { font-size: calc(var(--md-fs) * 0.85); line-height: 2.05; }'
+    rules: 'body[data-book-theme="academic"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="academic"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="academic"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.85)); line-height: var(--toc-a-lh, 2.05); }'
   },
   phone: {
     name: '手机',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 20px;\n  --md-lh: 1.95;\n  --md-h1-fs: 27px;\n  --md-h2-fs: 24px;\n  --md-h3-fs: 22px;\n  --md-h4-fs: 20px;\n  --md-h5-fs: 19px;\n  --md-h6-fs: 18px;',
     cover: '--cover-halign: center; --cover-valign: center; --cover-text: center;\n  --cover-min-h: auto; --cover-pad-top: 270px; --cover-pad-bottom: 60px;\n  --cover-title-fs: 44px; --cover-title-lh: 1.4;\n  --cover-sub-fs: 20px; --cover-sub-top: 22px;\n  --cover-meta-fs: 19px; --cover-meta-top: 64px; --cover-meta-lh: 2.3;',
-    rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: calc(var(--md-fs) * 1.15); }\nbody[data-book-theme="phone"] .book-toc a { font-size: calc(var(--md-fs) * 0.95); line-height: 1.95; color: var(--md-body-color); }'
+    rules: 'body[data-book-theme="phone"] .md-body h1 { text-align: center; margin-top: 2em; }\nbody[data-book-theme="phone"] .book-toc .toc-h { font-size: var(--toc-h-fs, calc(var(--md-fs) * 1.15)); }\nbody[data-book-theme="phone"] .book-toc a { font-size: var(--toc-a-fs, calc(var(--md-fs) * 0.95)); line-height: var(--toc-a-lh, 1.95); color: var(--md-body-color); }'
   }
 };
 // 目录共享结构（与版式无关：容器/缩进/对齐，所有版式共用；字号在各主题 rules 中随 --md-fs 联动）
@@ -1575,6 +1575,10 @@ const STYLE_COVER_ENUM_FIELDS = [
   ['--cover-valign', '纵向布局', [['居中','center'], ['顶','flex-start'], ['底','flex-end']]],
   ['--cover-text', '文字对齐', [['居中','center'], ['左','left'], ['右','right']]],
 ];
+// 目录数字字段（与版式 vars 同在 SEC_THEME 区；留空=不覆盖，回退到版式 rules 里的 calc 默认）
+const STYLE_TOC_NUM_FIELDS = [
+  ['--toc-h-fs', '标题字号', 'px', 1], ['--toc-a-fs', '条目字号', 'px', 1], ['--toc-a-lh', '条目行距', '', 0.05],
+];
 let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
 let styleDlgCss = null;        // 内存草稿，实时预览基于它
 let styleDlgName = '自定义';   // 配色区注释里的配色名
@@ -1675,10 +1679,10 @@ function buildStyleThemeFields() {
   $('stlFontHead').value = readVar('--md-font-head');
   const grid = $('stlThemeGrid');
   grid.innerHTML = '';
-  // 数字字段（版式 vars + 封面尺寸）：留空=不覆盖、回退默认
-  const numFields = STYLE_THEME_NUM_FIELDS.concat(STYLE_COVER_NUM_FIELDS);
-  // 在封面段前插入跨列小标题
-  let insertedCoverSubh = false;
+  // 数字字段（版式 vars + 封面尺寸 + 目录字号/行距）：留空=不覆盖、回退默认
+  const numFields = STYLE_THEME_NUM_FIELDS.concat(STYLE_COVER_NUM_FIELDS).concat(STYLE_TOC_NUM_FIELDS);
+  // 在封面/目录段前各插入跨列小标题
+  let insertedCoverSubh = false, insertedTocSubh = false;
   for (const [name, label, unit, step] of numFields) {
     if (!insertedCoverSubh && name.startsWith('--cover-')) {
       const subh = document.createElement('div');
@@ -1687,9 +1691,16 @@ function buildStyleThemeFields() {
       grid.appendChild(subh);
       insertedCoverSubh = true;
     }
+    if (!insertedTocSubh && name.startsWith('--toc-')) {
+      const subh = document.createElement('div');
+      subh.className = 'stl-subh';
+      subh.textContent = '目录';
+      grid.appendChild(subh);
+      insertedTocSubh = true;
+    }
     const raw = readVar(name);
-    // --cover-min-h 可能是 'auto'：number input 无法表达，回退显示空（用户改 auto 走源码）
-    const num = (raw && raw !== 'auto') ? (parseFloat(raw) || '') : '';
+    // --cover-min-h 可能是 'auto'、--toc-* 默认是 calc(...)：number input 无法表达，回退显示空
+    const num = (raw && !/^calc\(/.test(raw) && raw !== 'auto') ? (parseFloat(raw) || '') : '';
     const item = document.createElement('label');
     item.className = 'stl-n-item';
     item.innerHTML = '<span>' + label + '</span>'
@@ -1823,6 +1834,19 @@ async function loadUserCss() {
       const hm = /--md-h1-color:\s*(#[0-9a-fA-F]{3,6})/.exec(oldColor);
       const preset = hm && PRESETS.find(x => x.h[0].toLowerCase() === hm[1].toLowerCase());
       if (preset) { css = upsertSection(css, SEC_COLOR, colorSectionCss(preset)); changed = true; }
+    }
+    // 旧版 .book-toc 字号是直接 calc 形式（不引用 --toc-* 变量）；迁移为 var(--toc-*, calc(...)) 形式，保留 calc 作 fallback
+    const tsec = getSection(css, SEC_THEME);
+    if (tsec && tsec.indexOf('var(--toc-') < 0) {
+      let ns = tsec;
+      const calcPat = 'calc\\((?:[^()]|\\([^()]*\\))*\\)';   // 匹配 calc(...) 整体（含一层嵌套）
+      ns = ns.replace(new RegExp('\\.book-toc \\.toc-h \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
+        '.book-toc .toc-h {$1font-size: var(--toc-h-fs, $2)');
+      ns = ns.replace(new RegExp('\\.book-toc a \\{([^}]*?)font-size:\\s*(' + calcPat + ')', 'g'),
+        '.book-toc a {$1font-size: var(--toc-a-fs, $2)');
+      ns = ns.replace(/\.book-toc a \{([^}]*?)line-height:\s*([0-9.]+)\s*;/g,
+        '.book-toc a {$1line-height: var(--toc-a-lh, $2);');
+      if (ns !== tsec) { css = upsertSection(css, SEC_THEME, ns); changed = true; }
     }
     if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
     applyUserCss(css);
@@ -2208,16 +2232,17 @@ body{margin:0;background:#fbfaf7;}
 /* 标题下的副标题 / 作者日期（字号引用内容变量，自动随版式缩放） */
 .exp-sub{text-align:center;font-size:calc(var(--md-fs)*.92);color:var(--md-muted-color);letter-spacing:.1em;margin:0 0 10px;}
 .exp-meta{text-align:center;font-size:calc(var(--md-fs)*.85);color:var(--md-muted-color);margin:0 0 36px;line-height:1.9;}
-/* 侧栏目录：字号引用内容变量，经典小、手机自动大 */
-.toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--md-panel);border:1px solid var(--md-border);border-radius:10px;padding:18px 20px}
-.toc-h{font-family:var(--md-font-head);font-weight:700;font-size:calc(var(--md-fs)*.95);letter-spacing:3px;color:var(--md-muted-color);margin-bottom:10px}
-.toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:calc(var(--md-fs)*.88);line-height:1.8}
-.toc a:hover{color:var(--md-accent)}
-.toc a.tl2{padding-left:18px}.toc a.tl3{padding-left:36px}.toc a.tl4{padding-left:54px}
+/* 侧栏目录：双类 .toc.book-toc 提高特异性，覆盖 TOC_BASE_CSS 的 .book-toc 布局冲突；
+   字号规则由 style.css 的 body[data-book-theme=...] .book-toc a 进一步覆盖（用户改 style.css 即生效） */
+.toc.book-toc{width:210px;flex:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--md-panel);border:1px solid var(--md-border);border-radius:10px;padding:18px 20px;margin:0}
+.toc.book-toc .toc-h{font-family:var(--md-font-head);font-weight:700;font-size:calc(var(--md-fs)*.95);letter-spacing:3px;color:var(--md-muted-color);margin-bottom:10px;text-align:left;text-indent:0}
+.toc.book-toc a{display:block;font-family:var(--md-font-head);color:var(--md-body-color);text-decoration:none;padding:3px 0;font-size:calc(var(--md-fs)*.88);line-height:1.8}
+.toc.book-toc a:hover{color:var(--md-accent)}
+.toc.book-toc a.tl2{padding-left:18px}.toc.book-toc a.tl3{padding-left:36px}.toc.book-toc a.tl4{padding-left:54px}
 #toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:var(--md-accent);color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}#toTop:hover{opacity:1}
-@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
-@media print{#toTop{display:none}.toc{display:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}}
+@media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc.book-toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
+@media print{#toTop{display:none}.toc.book-toc{display:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}}
 @page{size:A4;margin:24mm 20mm 22mm}
 `;
 async function exportMerged() {
@@ -2251,7 +2276,7 @@ async function exportMerged() {
     if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
   }
   const tocHtml = heads.length
-    ? '<nav class="toc"><div class="toc-h">目 录</div>' +
+    ? '<nav class="toc book-toc"><div class="toc-h">目 录</div>' +
       heads.map(t => '<a class="tl' + t.level + '" href="#' + t.id + '">' + esc(t.text) + '</a>').join('') +
       '</nav>'
     : '';
