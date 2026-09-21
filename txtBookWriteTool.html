@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WriteTools 写作工具</title>
+<title>txtBookWriteTool 写作工具</title>
 <style id="chromeCss">
 :root {
   --fs-editor: 15px;
@@ -691,7 +691,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="vdiv" id="divSidebar"></div>
   <section id="workarea">
     <div id="welcome">
-      <h1>WriteTools 写作工具</h1>
+      <h1>txtBookWriteTool 写作工具</h1>
       <div class="tip">
         选择一个本地文件夹作为书稿目录：文件夹可任意嵌套，.md / .txt 文件自动按目录树管理。<br>
         「阅览」模式会把整个文件夹里的内容按顺序合并成一本书连续显示。<br>
@@ -791,7 +791,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgAbout">
-  <h3>WriteTools 写作工具 · 使用说明</h3>
+  <h3>txtBookWriteTool 写作工具 · 使用说明</h3>
   <div class="ab-body">
     <h4>这是什么</h4>
     <ul>
@@ -1051,7 +1051,7 @@ let livePreviewOn = true;
 /* ================= idb (记住上次文件夹) ================= */
 function idbOpen() {
   return new Promise((res, rej) => {
-    const r = indexedDB.open('writetools', 1);
+    const r = indexedDB.open('txtBookWriteTool', 1);
     r.onupgradeneeded = () => r.result.createObjectStore('kv');
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
@@ -1067,7 +1067,7 @@ async function idbSet(k, v) {
 }
 function idbGet(k) {
   return new Promise((res, rej) => {
-    const r = indexedDB.open('writetools', 1);
+    const r = indexedDB.open('txtBookWriteTool', 1);
     r.onupgradeneeded = () => r.result.createObjectStore('kv');
     r.onsuccess = () => {
       const t = r.result.transaction('kv', 'readonly');
@@ -1504,7 +1504,7 @@ function colorSectionCss(p) {
 }
 function styleTemplate(theme) {
   const t = BOOK_THEMES[theme] ? theme : 'classic';
-  return '/* ═══════════ WriteTools 项目样式 style.css ═══════════\n' +
+  return '/* ═══════════ txtBookWriteTool 项目样式 style.css ═══════════\n' +
     '   保存即生效；阅览、打印 PDF、导出 HTML 共用本文件。\n' +
     '   四个 ═══ 分区由程序管理（内置配色 / 成书版式 / 页眉页脚 / A+A- 缩放），\n' +
     '   分区内的参数可自由修改（程序更新时会被对应功能覆盖），\n' +
@@ -4084,7 +4084,7 @@ document.addEventListener('keydown', e => {
   applyBookTheme();
   if (!window.showDirectoryPicker) {
     $('welcome').querySelector('.tip').innerHTML =
-      '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 writetools.html）。';
+      '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 txtBookWriteTool.html）。';
     return;
   }
   try {
