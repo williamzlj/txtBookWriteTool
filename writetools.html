@@ -510,6 +510,23 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   padding: 8px 14px; font: 12px Consolas, monospace; z-index: 100; display: none;
   max-height: 90px; overflow: auto;
 }
+
+/* ---------- 拖放打开遮罩（拖入文件夹/文件） ---------- */
+#dropMask {
+  position: fixed; inset: 10px; z-index: 200; display: none;
+  align-items: center; justify-content: center; text-align: center;
+  border: 3px dashed var(--accent); border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  pointer-events: none;
+}
+#dropMask.show { display: flex; }
+#dropMask .dm-main { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+#dropMask .dm-sub { font-size: 14px; color: var(--muted); line-height: 1.9; }
+#btnExtDir {
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  border-radius: 5px; font-size: 12px; padding: 1px 8px; margin-left: 8px; cursor: pointer;
+}
+#btnExtDir:hover { border-color: var(--accent); }
 </style>
 <!-- 四套成书版式默认规则（JS 由 BOOK_THEMES 生成，导出 HTML 一并带上） -->
 <style id="bookThemeCss"></style>
@@ -678,7 +695,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <div class="tip">
         选择一个本地文件夹作为书稿目录：文件夹可任意嵌套，.md / .txt 文件自动按目录树管理。<br>
         「阅览」模式会把整个文件夹里的内容按顺序合并成一本书连续显示。<br>
-      文件名以 <b>_</b> 开头（如 _灵感.txt、_素材/）为草稿，不参与阅览和导出，但可正常编辑搜索。<br><br>
+      文件名以 <b>_</b> 开头（如 _灵感.txt、_素材/）为草稿，不参与阅览和导出，但可正常编辑搜索。<br>
+      也可以直接把<b>文件夹</b>或 <b>.md / .txt 文件</b>拖入窗口打开（Chrome / Edge）。<br><br>
         请使用 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开本页面。
       </div>
       <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">选择写作文件夹</button>
@@ -722,7 +740,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </div>
 
 <footer id="statusbar">
-  <span id="stPath"></span>
+  <span id="stPath"></span><button id="btnExtDir" class="hidden" title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
   <span class="flex"></span>
   <span id="stCount"></span>
   <span id="stSave"></span>
@@ -930,6 +948,12 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <button id="toTop" title="返回顶部">↑</button>
 <div id="toast"></div>
+<div id="dropMask">
+  <div>
+    <div class="dm-main">松开以打开</div>
+    <div class="dm-sub">拖入文件夹＝作为书稿项目打开<br>拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）</div>
+  </div>
+</div>
 <div id="errBanner"></div>
 
 <script id="marked-lib">/**
@@ -1127,6 +1151,7 @@ async function useRoot(handle) {
   setMode('edit');
   toast('已打开：' + handle.name);
   updateToolbar();
+  updateStatus();
 }
 async function refreshTree() {
   tree = await scanDir(rootHandle, '');
@@ -1298,8 +1323,8 @@ async function openFile(node) {
     const f = await node.handle.getFile();
     const text = (await f.text()).replace(/^\uFEFF/, '');
     current = { node, content: text, dirty: false };
-    histRemember(node.path, text);   // 历史检查点内存基线（打开本就要读文件，零额外 IO）
-    expandedAddTo(node.path);
+    if (!node.external) histRemember(node.path, text);   // 历史检查点内存基线（外部文件无项目 .history）
+    if (!node.external) expandedAddTo(node.path);
     $('editor').value = text;
     setMode(mode);            // refresh view content
     syncTreeSelected();       // 大纲卡片/搜索结果跳转时同步目录树高亮
@@ -1324,7 +1349,8 @@ async function saveCurrent() {
     $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
     if (current.node.name === 'style.css' && !parentPath(current.node.path)) applyUserCss(current.content);
     // 历史版本与保存解耦：不在每次保存时读盘备份，由内存基线按 5 分钟节拍判断是否写检查点
-    try { await checkpointHistory(current.node, current.content); } catch (e) {}
+    // （外部拖入的文件不属于当前项目，不写项目 .history）
+    if (!current.node.external) { try { await checkpointHistory(current.node, current.content); } catch (e) {} }
   } catch (e) {
     $('stSave').textContent = '保存失败'; $('stSave').className = 'dirty';
     toast('保存失败：' + e.message);
@@ -1339,7 +1365,11 @@ function markDirty() {
   saveTimer = setTimeout(saveCurrent, 900);
 }
 function updateStatus() {
-  $('stPath').textContent = current ? current.node.path : (rootHandle ? rootHandle.name : '');
+  const ext = !!(current && current.node.external);
+  $('stPath').textContent = current
+    ? (ext ? '📄 外部文件：' + current.node.name : current.node.path)
+    : (rootHandle ? rootHandle.name : '');
+  $('btnExtDir').classList.toggle('hidden', !ext);
   $('stCount').textContent = current ? countChars(current.content) + ' 字' : '';
 }
 
@@ -2769,12 +2799,92 @@ $('editor').addEventListener('paste', async e => {
   const files = imgs.map(i => i.getAsFile()).filter(Boolean);
   await insertImages(files);
 });
-$('workarea').addEventListener('dragover', e => { e.preventDefault(); });
-$('workarea').addEventListener('drop', async e => {
-  e.preventDefault();
-  const files = [...(e.dataTransfer?.files || [])];
-  if (files.length) await insertImages(files);
-});
+/* ================= 拖入文件夹 / 文件打开（Chrome/Edge 可写句柄） =================
+   拖文件夹＝作为书稿项目打开；拖 .md/.txt＝项目内则直接定位打开，项目外作为
+   外部可写文件打开（可写回原文件；状态栏提供「打开所在文件夹」入口）。
+   Firefox/Safari 无 getAsFileSystemHandle，不拦截（保持浏览器默认行为）。 */
+const DROP_FS_SUPPORTED = typeof DataTransferItem !== 'undefined' &&
+  typeof DataTransferItem.prototype.getAsFileSystemHandle === 'function';
+const TEXT_FILE_RE = /\.(md|markdown|txt)$/i;
+async function ensureWritablePermission(h) {
+  let p = 'prompt';
+  try { p = await h.queryPermission({ mode: 'readwrite' }); } catch (e) {}
+  if (p === 'granted') return true;
+  try { p = await h.requestPermission({ mode: 'readwrite' }); } catch (e) {}
+  return p === 'granted';
+}
+// 外部文件（不在当前项目内）：构造虚拟节点直接编辑，保存经其自身句柄写回原位置
+async function openExternalFile(fh) {
+  await flushSave();
+  const node = { type: 'file', name: fh.name, handle: fh, path: fh.name, external: true };
+  mode = 'edit';
+  $('welcome').classList.add('hidden');
+  await openFile(node);
+  toast('已打开外部文件：' + fh.name + '（可直接写回）');
+}
+// 拖入的文本文件：若位于当前项目内则定位到树中节点，否则按外部文件打开
+async function openDroppedFile(fh) {
+  if (rootHandle) {
+    try {
+      const parts = await rootHandle.resolve(fh);
+      if (parts && parts.length) {
+        const node = findNode(tree, parts.join('/'));
+        if (node) { selectedNode = node; await openFile(node); renderTree(); return; }
+      }
+    } catch (e) {}
+  }
+  await openExternalFile(fh);
+}
+if (DROP_FS_SUPPORTED) {
+  const mask = $('dropMask');
+  let depth = 0;
+  const hasFiles = e => [...(e.dataTransfer?.types || [])].includes('Files');
+  window.addEventListener('dragenter', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    depth++;
+    mask.classList.add('show');
+  });
+  window.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+  window.addEventListener('dragleave', e => {
+    if (!hasFiles(e)) return;
+    depth = Math.max(0, depth - 1);
+    if (!depth) mask.classList.remove('show');
+  });
+  window.addEventListener('drop', async e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    depth = 0; mask.classList.remove('show');
+    // getAsFileSystemHandle 必须在 drop 当拍同步调用，不能先 await
+    const promises = [...e.dataTransfer.items]
+      .filter(it => it.kind === 'file')
+      .map(it => { try { return it.getAsFileSystemHandle(); } catch (err) { return null; } });
+    let handles = [];
+    try { handles = (await Promise.all(promises)).filter(Boolean); } catch (err) {}
+    if (!handles.length) return;
+    const dirs = handles.filter(h => h.kind === 'directory');
+    const texts = handles.filter(h => h.kind === 'file' && TEXT_FILE_RE.test(h.name));
+    if (dirs.length) {
+      await useRoot(dirs[0]);
+      if (dirs.length > 1 || texts.length) toast('已打开文件夹，其余拖入项已忽略');
+      return;
+    }
+    if (texts.length) {
+      if (!(await ensureWritablePermission(texts[0]))) { toast('未获得读写权限'); return; }
+      await openDroppedFile(texts[0]);
+      if (texts.length > 1) toast('其余 ' + (texts.length - 1) + ' 个文件已忽略（一次打开一个）');
+      return;
+    }
+    // 图片：保持原有插入素材逻辑（仅编辑项目内文件时）
+    if (current && rootHandle && !current.node.external) {
+      const files = [];
+      for (const h of handles) { try { files.push(await h.getFile()); } catch (err) {} }
+      if (files.length) await insertImages(files);
+    } else {
+      toast('仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入');
+    }
+  });
+}
 $('btnInsertImg').onclick = () => $('imgInput').click();
 $('imgInput').onchange = async e => {
   await insertImages([...e.target.files]);
@@ -3382,6 +3492,22 @@ async function pickFolder() {
 $('btnReconnect').onclick = async () => {
   try { const h = await idbGet('root'); if (h) await useRoot(h); }
   catch (e) { toast('重连失败，请重新选择文件夹'); }
+};
+// 外部文件标签上的「打开所在文件夹」：选目录作为项目后自动定位打开该文件
+$('btnExtDir').onclick = async () => {
+  const fh = current && current.node.external ? current.node.handle : null;
+  if (!fh || !window.showDirectoryPicker) return;
+  try {
+    await flushSave();
+    const dir = await showDirectoryPicker({ mode: 'readwrite' });
+    await useRoot(dir);
+    const parts = await dir.resolve(fh);
+    if (parts && parts.length) {
+      const node = findNode(tree, parts.join('/'));
+      if (node) { selectedNode = node; await openFile(node); renderTree(); return; }
+    }
+    toast('所选文件夹中没有该文件');
+  } catch (e) { if (e.name !== 'AbortError') toast('打开失败：' + e.message); }
 };
 $('btnNewTxt').onclick = () => newFile('txt');
 $('btnNewMd').onclick = () => newFile('md');
