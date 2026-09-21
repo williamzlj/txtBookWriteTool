@@ -439,11 +439,13 @@ dialog h3 { margin-bottom: 14px; font-size: 16px; }
 #dlgStyle .stl-c-item input[type="color"] { padding: 0; width: 34px; height: 22px; flex: none; }
 #dlgStyle .stl-c-item input[type="text"] { width: 150px; flex: none; padding: 2px 6px; }
 #dlgStyle .row { margin: 7px 0; }
-#dlgStyle .stl-n-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 28px; margin-top: 2px; }
-#dlgStyle .stl-n-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); white-space: nowrap; }
-#dlgStyle .stl-n-item > span:first-child { width: 52px; flex: none; }
-#dlgStyle .stl-n-item input { width: 64px; flex: none; padding: 2px 6px; }
-#dlgStyle .stl-n-item .stl-u { width: 20px; flex: none; }
+#dlgStyle .stl-n-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 24px; margin-top: 2px; }
+#dlgStyle .stl-n-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+#dlgStyle .stl-n-item > span:first-child { width: 56px; flex: none; }
+#dlgStyle .stl-n-item input { width: 56px; flex: none; padding: 2px 6px; }
+#dlgStyle .stl-n-item select { width: 64px; flex: none; padding: 2px 4px; font-size: 12px; }
+#dlgStyle .stl-n-item .stl-u { width: 18px; flex: none; }
+#dlgStyle .stl-subh { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--text); margin: 8px 0 2px; padding-bottom: 3px; border-bottom: 1px dashed var(--border); }
 /* 底部按钮栏吸底，内容滚动时始终可见 */
 #dlgStyle .btns { position: sticky; bottom: -22px; background: var(--panel); margin: 12px -26px -22px; padding: 12px 26px 14px; border-top: 1px solid var(--border); }
 /* 取色器按浅色外观渲染：深色模式下 UA 默认深色底/边框会让色块边界糊在面板里 */
@@ -655,19 +657,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       
       <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">编辑样式</button>
       <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
-        <option value="">内置配色…</option>
         <option value="classic">经典黑</option>
         <option value="red">典雅红</option>
         <option value="academic">学术蓝</option>
         <option value="green">护眼绿</option>
         <option value="warm">暖阳橙</option>
         <option value="purple">典雅紫</option>
+        <option value="">自定义配色</option>
       </select>
      <select id="bookThemeSel" title="成书版式：替换 style.css 成书版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
        <option value="classic">经典书籍</option>
        <option value="modern">现代简洁</option>
        <option value="academic">学术</option>
        <option value="phone">手机阅览</option>
+       <option value="">自定义版式</option>
      </select>
      <span class="sep"></span>
      <button id="btnBookCfg" title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
@@ -691,13 +694,21 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="vdiv" id="divSidebar"></div>
   <section id="workarea">
     <div id="welcome">
-      <h1>txtBookWriteTool 写作工具</h1>
+      <h1>txtBookWriteTool</h1>
+      <h3>一款用txt写作的小工具</h3>
       <div class="tip">
-        选择一个本地文件夹作为书稿目录：文件夹可任意嵌套，.md / .txt 文件自动按目录树管理。<br>
-        「阅览」模式会把整个文件夹里的内容按顺序合并成一本书连续显示。<br>
-      文件名以 <b>_</b> 开头（如 _灵感.txt、_素材/）为草稿，不参与阅览和导出，但可正常编辑搜索。<br>
-      也可以直接把<b>文件夹</b>或 <b>.md / .txt 文件</b>拖入窗口打开（Chrome / Edge）。<br><br>
-        请使用 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开本页面。
+        软件特色：单文件运行、利用简单的txt和文件夹结构来灵活管理写作内容。<br><br>
+        使用说明：<br>
+        <ol class="list" style="font-size:14px;text-align:left;">
+        <li>请选择一个<b>本地文件夹</b>作为书稿目录<br> </li>
+        <li>文件夹内的<b>.txt/.md文件</b>自动按目录树管理<br> </li>
+        <li>「编辑」模式支持<b>markdown</b>格式编辑和预览<br> </li>
+        <li>「大纲」模式支持拖动调整文件顺序<br> </li>
+        <li>「阅览」模式会把文件夹里的内容<b>合并成一本书</b>连续显示<br> </li>
+        <li>软件支持草稿模式，当文件名以 <b>_</b> 开头（如 _灵感.txt）时被视为为草稿，不参与阅览和PDF导出<br> </li>
+        <li>单文件编辑：也可以直接把<b>文件夹</b>或 <b>.txt/.md文件</b>拖入窗口打开<br> </li>
+        <li>请使用 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开本页面</li>
+        </ol>
       </div>
       <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">选择写作文件夹</button>
     </div>
@@ -791,21 +802,29 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgAbout">
-  <h3>txtBookWriteTool 写作工具 · 使用说明</h3>
+  <h3>txtBookWriteTool （一款用txt写作的小工具） · 使用说明</h3>
+  <div class="author">
+      <div class="name">张亮军　无锡·海岸城</div>
+      <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
+  </div>
   <div class="ab-body">
     <h4>这是什么</h4>
     <ul>
-      <li>把电脑上的一个普通文件夹当作书稿：文件夹可任意嵌套，里面放 <code>.txt</code> / <code>.md</code> 文件，全部用 Markdown 语法写作。</li>
-      <li>文件保存为 <code>.txt</code> 但按 Markdown 解析（方便在 Windows 资源管理器里预览）；需要标准 .md 时点「新建md」即可。数据全部在本地文件夹，不联网、不上传。</li>
+      <li>这是一款用txt写作的小工具。单文件运行，小巧轻便。</li>
+      <li>软件支持把电脑上的一个普通文件夹当作书稿目录，里面放 <code>.txt</code> / <code>.md</code> 文件，全部用 Markdown 语法写作。</li>
+      <li>软件支持把目录下所有 <code>.txt</code> / <code>.md</code> 文件合并为一个文件，方便阅览和导出。</li>
+      <li>软件支持用下划线<code>_</code>前缀来标记隐藏文件(比如<code> _灵感.txt</code>)，方便管理素材资料。</li>
+      <li>文件默认保存为 <code>.txt</code> 但按 Markdown 解析（方便在 Windows 资源管理器里预览）</li>
+      <li>数据全部在本地文件夹，不联网、不上传。</li>
       <li>请使用新版 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开；首次选择文件夹时在弹窗里点“允许”。</li>
     </ul>
     <h4>开始使用</h4>
     <ul>
-      <li><b>打开文件夹</b>：选择书稿根目录。授权会被记住，下次打开页面自动加载；旧版浏览器显示“继续上次”按钮，点一下即可。</li>
+      <li><b>打开文件夹</b>：选择书稿根目录。授权会被记住，下次打开页面自动加载；</li>
     </ul>
     <h4>编号与排序</h4>
     <ul>
-      <li>文件名用三位数字编号：<code>110.txt</code>、<code>110-标题.txt</code>。新建文件自动取最大编号 +10，留好插入空位。</li>
+      <li>文件名用三位数字编号：<code>110.txt</code>、<code>110-标题.txt</code>。新建文件自动取当前目录下最大编号并 +10，留好未来文件的插入空位。</li>
       <li><b>文件夹也可以编号</b>：重命名为 <code>120-正文</code> 后，文件和文件夹按 110、120、130 统一排序，可实现“序言 → 正文文件夹 → 后记”的穿插结构；不编号的文件夹固定排在最前。</li>
       <li><b>重新编号</b>：先选中一个文件或文件夹，点该按钮，只对所在文件夹内的文件和带编号子文件夹统一重排为 110、120、130…，文字部分保留。</li>
       <li><b>自动命名</b>：把 <code>110.txt</code> 改成 <code>110-第一行文字.txt</code>（超过 16 字截断）。</li>
@@ -813,6 +832,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <h4>草稿 / 素材</h4>
     <ul>
       <li>文件名或文件夹名以 <code>_</code> 开头（也兼容 <code>[草稿]</code>、<code>draft-</code>）即为草稿：可正常编辑、搜索，但不参与阅览和导出；草稿文件夹内的全部内容都不输出。去掉下划线即恢复。</li>
+      <li><b>快速隐藏</b>：选中任意文件或文件夹点隐藏文件按钮，名称前会加上 <code>_</code> ，不予输出（阅览/PDF/HTML/MD 均不含）；当选中已隐藏项目时按钮变成取消隐藏，再点恢复。</li>
     </ul>
     <h4>四种模式</h4>
     <ul>
@@ -834,32 +854,26 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
       <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
     </ul>
-    <h4>样式与显示</h4>
-    <ul>
-      <li>样式集中在项目根目录的 <b>style.css</b>（点「样式」随时编辑，保存即生效），文件内分为四个程序管理分区和一个自定义区：<b>配色区</b>（正文与各级标题颜色）、<b>成书版式区</b>（字体/字号/行距/标题对齐）、<b>页眉页脚区</b>（打印 PDF 的页眉书名、页脚日期页码）、<b>缩放区</b>（A+/A- 写入的缩放倍率）。分区都带 <code>═══ … START/END ═══</code> 标记注释，程序更新时<b>只替换对应分区</b>，分区外的内容永不改动；分区内的参数你也可以直接手改。「内置配色」下拉（六套）只更新配色区；「成书版式」（经典/现代/学术/手机）只更新版式区与页眉页脚区。编辑实时预览、阅览、导出 PDF/HTML 共用同一份样式，所见即所得。配色为浅色背景设计：应用内暗色主题下自动停用并回退暗色配色，导出的 HTML 中始终保持原色。</li>
-      <li><b>A- / A+</b>：编辑模式调编辑器字号（浏览器记忆）；其他模式按 ±1px 调整内容字号，等比写入 style.css 缩放区（正文/标题/目录同步缩放，可在文件中手动输入任意倍率）；点 <b>↺</b> 恢复默认字号（编辑模式回 15px，预览/阅览缩放回 100%）；🌙 切换明暗主题。</li>
-    </ul>
     <h4>输出</h4>
     <ul>
-      <li>点「阅览」标签即进入成书预览；第二行工具栏会自动换成成书组：切换<b>经典书籍 / 现代简洁 / 学术 / 手机阅览</b>四套版式（手机阅览为大字号宽行距，适合在手机浏览器阅读）、点「封面与成书设置」填写书名/副标题/作者/日期并开关封面页、目录页、每章另起一页、首行缩进、标题自动编号（1、1.1…，PDF 与 HTML 均生效）。预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>（保存时自动填好「项目名-日期」文件名），<b>不要选「Microsoft Print to PDF」</b>（Win11 已知缺陷：其保存对话框文件名为空）；边距选“默认”、关闭浏览器自带页眉页脚，PDF 页面自动带输出日期，需 Chrome/Edge 131+。或直接「导出 HTML」。</li>
+      <li><b>导出 PDF</b>：点「阅览」标签进入成书预览；预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>。</li>
       <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
       <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
-      <li><b>👁 快速隐藏</b>：选中任意文件或文件夹点眼睛按钮，名称前会加上 <code>_</code> 立即退出输出（阅览/PDF/HTML/MD 均不含）；选中已隐藏项目时按钮变成取消隐藏，再点恢复，适合临时控制输出内容（若目标位置已有同名文件会中止并提示）。</li>
+      
     </ul>
     <h4>回收站与历史版本</h4>
     <ul>
       <li><b>回收站</b>：删除文件/文件夹、以及合并时被并入的文件，都会先移到项目内的 <code>.trash</code> 文件夹；点「回收站」可恢复、彻底删除单项或清空。</li>
-      <li><b>历史版本</b>：每次自动保存时若内容有变化，旧内容自动存入项目内的 <code>.history</code>，每个文件保留最近 20 版；选中文件点「历史」可查看、恢复任意旧版（恢复前当前内容也会先存一版）。项目内批量替换前同样自动留档。</li>
-      <li><code>.trash</code> 和 <code>.history</code> 在本工具中自动隐藏，不参与阅览和导出；在 Windows 资源管理器中可见，备份项目时一并复制即可。</li>
+      <li><b>历史版本</b>：每次自动保存时若内容有变化，旧内容自动存入项目内的 <code>.history</code>（按文件路径镜像存储），每个文件保留最近 40 版；选中文件点「历史」可查看、恢复任意旧版（恢复前当前内容也会先存一版）。项目内批量替换前同样自动留档。</li>
+      <li><b>重命名/移动时历史跟随</b>：重命名文件或文件夹、跨目录拖拽移动时，<code>.history</code> 下对应的旧路径历史会自动迁移到新路径——旧版本不丢失，可继续叠加新版本。从回收站恢复时若遇重名自动加「(恢复 n)」后缀，历史目录也会跟随迁移。</li>
+      <li><b>删除时历史清理</b>：移入回收站时历史保留不动（便于恢复）；只有「彻底删除单项」或「清空回收站」时，才会连同 <code>.history</code> 下对应路径一并清除——与文件本身的生命周期对齐。</li>
+      <li><code>.trash</code> 和 <code>.history</code> 在本工具中自动隐藏，不参与阅览和导出；在 Windows 资源管理器中可见，备份项目时一并复制即可。不再需要时删掉该目录即可。</li>
     </ul>
     <h4>注意</h4>
     <ul>
-      <li>「清空回收站」和「彻底删除」不可恢复；普通删除和合并都可在回收站找回。重要书稿建议定期把整个项目文件夹复制备份。</li>
+      <li>「清空回收站」和「彻底删除」会一并清除对应历史版本，不可恢复；普通删除和合并都可在回收站找回（历史也保留）。重要书稿建议定期把整个项目文件夹复制备份。</li>
     </ul>
-    <div class="author">
-      <div class="name">张亮军　无锡·海岸城</div>
-      <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
-    </div>
+    
   </div>
   <div class="btns">
     <button id="aboutOk" class="primary">知道了</button>
@@ -891,14 +905,6 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <dialog id="dlgBook">
   <h3>排版设置</h3>
-  <div class="row"><label style="width:72px">模板</label>
-    <select id="bkTheme" style="flex:1">
-      <option value="classic">经典书籍（宋体正文、居中章节、首行缩进）</option>
-      <option value="modern">现代简洁（黑体、大留白、左对齐标题）</option>
-      <option value="academic">学术（宋体小字、紧凑排版、页眉带书名/副标题）</option>
-      <option value="phone">手机阅览（大字号、宽行距，适合手机浏览器阅读）</option>
-    </select>
-  </div>
   <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" placeholder="留空则用项目文件夹名"></div>
   <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" placeholder="如：卷一 / 修订版 v2（可空）"></div>
   <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" placeholder="署名（可空）"></div>
@@ -1524,6 +1530,8 @@ async function saveStyleCss(css) {
   const w = await fh.createWritable(); await w.write(css); await w.close();
   applyUserCss(css);
   syncOpenStyleEditor(css);
+  syncPresetSel(css);
+  syncThemeSel(css);
 }
 // style.css 正在编辑时同步编辑器内容，避免旧内容回存覆盖
 function syncOpenStyleEditor(css) {
@@ -1553,6 +1561,20 @@ const STYLE_THEME_NUM_FIELDS = [
   ['--md-h1-fs', '标题一', 'px', 0.5], ['--md-h2-fs', '标题二', 'px', 0.5], ['--md-h3-fs', '标题三', 'px', 0.5],
   ['--md-h4-fs', '标题四', 'px', 0.5], ['--md-h5-fs', '标题五', 'px', 0.5], ['--md-h6-fs', '标题六', 'px', 0.5],
 ];
+// 封面数字字段（与版式 vars 同在 SEC_THEME 区；留空=不覆盖，回退到版式默认）
+const STYLE_COVER_NUM_FIELDS = [
+  ['--cover-min-h', '最小高度', 'px', 10],
+  ['--cover-pad-top', '顶部留白', 'px', 5], ['--cover-pad-bottom', '底部留白', 'px', 5],
+  ['--cover-title-fs', '标题字号', 'px', 1], ['--cover-title-lh', '标题行距', '', 0.05],
+  ['--cover-sub-fs', '副标字号', 'px', 1], ['--cover-sub-top', '副标间距', 'px', 2],
+  ['--cover-meta-fs', '元信息字号', 'px', 1], ['--cover-meta-top', '元信息间距', 'px', 4], ['--cover-meta-lh', '元信息行距', '', 0.05],
+];
+// 封面枚举字段（select 三态：默认/居中/左/右 或 居中/顶/底）
+const STYLE_COVER_ENUM_FIELDS = [
+  ['--cover-halign', '横向布局', [['居中','center'], ['左','flex-start'], ['右','flex-end']]],
+  ['--cover-valign', '纵向布局', [['居中','center'], ['顶','flex-start'], ['底','flex-end']]],
+  ['--cover-text', '文字对齐', [['居中','center'], ['左','left'], ['右','right']]],
+];
 let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
 let styleDlgCss = null;        // 内存草稿，实时预览基于它
 let styleDlgName = '自定义';   // 配色区注释里的配色名
@@ -1562,11 +1584,24 @@ let styleDlgThemeOk = false;   // 版式区是否存在
 let styleDlgAccepted = false;  // 本次打开是否点了保存（close 事件据此决定放弃还是提交）
 const isHexColor = v => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
 const hex6 = v => v.length === 4 ? '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
-// 内置配色下拉回显：配色区与某套内置预设完全一致才显示该预设，手动微调过则显示占位
+// 内置配色下拉回显：配色区与某套内置预设完全一致才显示该预设；手动微调过则命中"自定义配色"占位符
 function syncPresetSel(css) {
   const curColor = css ? getSection(css, SEC_COLOR) : null;
   const hit = curColor === null ? null : PRESETS.find(p => colorSectionCss(p).trim() === curColor);
-  $('presetSel').value = hit ? hit.key : '';
+  $('presetSel').value = hit ? hit.key : (curColor === null ? 'classic' : '');
+}
+// 成书版式下拉回显：成书版式区与某套内置版式完全一致才显示该版式；手动微调过则命中"自定义版式"占位符
+// 兼容两种合法写法：styleTemplate 写入的 TOC_BASE_CSS + themeSectionCss，与 syncStyleSections 写入的 themeSectionCss
+function syncThemeSel(css) {
+  const curTheme = css ? getSection(css, SEC_THEME) : null;
+  if (curTheme === null) { $('bookThemeSel').value = bookCfg.theme; return; }   // 无 style.css：用配置值
+  const cur = curTheme.trim();
+  let hit = null;
+  for (const k of Object.keys(BOOK_THEMES)) {
+    const std = themeSectionCss(k).trim();
+    if (std === cur || (TOC_BASE_CSS + '\n' + themeSectionCss(k)).trim() === cur) { hit = k; break; }
+  }
+  $('bookThemeSel').value = hit ? hit : '';
 }
 async function openStyleDlg() {
   if (!rootHandle) { toast('请先打开项目文件夹'); return; }
@@ -1640,9 +1675,21 @@ function buildStyleThemeFields() {
   $('stlFontHead').value = readVar('--md-font-head');
   const grid = $('stlThemeGrid');
   grid.innerHTML = '';
-  for (const [name, label, unit, step] of STYLE_THEME_NUM_FIELDS) {
+  // 数字字段（版式 vars + 封面尺寸）：留空=不覆盖、回退默认
+  const numFields = STYLE_THEME_NUM_FIELDS.concat(STYLE_COVER_NUM_FIELDS);
+  // 在封面段前插入跨列小标题
+  let insertedCoverSubh = false;
+  for (const [name, label, unit, step] of numFields) {
+    if (!insertedCoverSubh && name.startsWith('--cover-')) {
+      const subh = document.createElement('div');
+      subh.className = 'stl-subh';
+      subh.textContent = '封面';
+      grid.appendChild(subh);
+      insertedCoverSubh = true;
+    }
     const raw = readVar(name);
-    const num = raw ? (parseFloat(raw) || '') : '';
+    // --cover-min-h 可能是 'auto'：number input 无法表达，回退显示空（用户改 auto 走源码）
+    const num = (raw && raw !== 'auto') ? (parseFloat(raw) || '') : '';
     const item = document.createElement('label');
     item.className = 'stl-n-item';
     item.innerHTML = '<span>' + label + '</span>'
@@ -1650,6 +1697,21 @@ function buildStyleThemeFields() {
       + ' value="' + (num === '' ? '' : num) + '" placeholder="默认"'
       + (styleDlgThemeOk ? '' : ' disabled') + '>'
       + '<span class="stl-u">' + unit + '</span>';
+    grid.appendChild(item);
+  }
+  // 枚举字段（封面三态对齐）：默认=不覆盖
+  for (const [name, label, opts] of STYLE_COVER_ENUM_FIELDS) {
+    const cur = readVar(name);
+    const item = document.createElement('label');
+    item.className = 'stl-n-item';
+    let html = '<span>' + label + '</span>'
+      + '<select data-v="' + name + '"' + (styleDlgThemeOk ? '' : ' disabled') + '>'
+      + '<option value=""' + (!cur ? ' selected' : '') + '>默认</option>';
+    for (const [lab, val] of opts) {
+      html += '<option value="' + val + '"' + (val === cur ? ' selected' : '') + '>' + lab + '</option>';
+    }
+    html += '</select><span class="stl-u"></span>';
+    item.innerHTML = html;
     grid.appendChild(item);
   }
   $('stlFontBody').disabled = !styleDlgThemeOk;
@@ -1696,13 +1758,20 @@ function applyThemeDraft() {
   sec = setThemeVarInSec(sec, '--md-font-body', $('stlFontBody').value.trim());
   // 标题字体留空：删除覆盖以跟随正文字体
   sec = setThemeVarInSec(sec, '--md-font-head', $('stlFontHead').value.trim());
+  // 数字字段：值+单位；留空=删除覆盖（回退默认）
   for (const inp of $('stlThemeGrid').querySelectorAll('input[data-v]')) {
     sec = setThemeVarInSec(sec, inp.dataset.v, inp.value === '' ? '' : inp.value + inp.dataset.u);
+  }
+  // 枚举字段：直接取 option value；空值=默认（不覆盖）
+  for (const sel of $('stlThemeGrid').querySelectorAll('select[data-v]')) {
+    sec = setThemeVarInSec(sec, sel.dataset.v, sel.value);
   }
   styleDlgCss = upsertSection(styleDlgCss, SEC_THEME, sec);
 }
 ['stlFontBody', 'stlFontHead'].forEach(id => $(id).addEventListener('input', () => { applyThemeDraft(); styleDlgPreview(); }));
 $('stlThemeGrid').addEventListener('input', () => { applyThemeDraft(); styleDlgPreview(); });
+// select 的 change 事件单独监听，避免部分浏览器不冒泡 input 事件
+$('stlThemeGrid').addEventListener('change', e => { if (e.target.matches('select[data-v]')) { applyThemeDraft(); styleDlgPreview(); } });
 $('stlZoom').addEventListener('input', () => { $('stlZoomVal').textContent = $('stlZoom').value + ' px'; });
 $('stlZoom').addEventListener('change', () => {
   const px = parseFloat($('stlZoom').value);
@@ -1735,7 +1804,9 @@ $('dlgStyle').addEventListener('close', () => {
 });
 async function loadUserCss() {
   applyUserCss('');
-  $('presetSel').value = '';   // 先回到占位，下面按实际配色区内容回显
+  // 无 style.css / 无 rootHandle 时按经典黑回显；有 style.css 时下面按实际配色区覆盖
+  syncPresetSel(null);
+  syncThemeSel(null);
   if (!rootHandle) return;
   try {
     const fh = await rootHandle.getFileHandle('style.css');
@@ -1756,6 +1827,7 @@ async function loadUserCss() {
     if (changed) { const w = await fh.createWritable(); await w.write(css); await w.close(); }
     applyUserCss(css);
     syncPresetSel(css);
+    syncThemeSel(css);
   } catch (e) {}
 }
 async function openStyleCss() {
@@ -1809,6 +1881,16 @@ $('presetSel').onchange = async () => {
   if (!p) return;
   try {
     let css = await readStyleCssText();
+    // 当前若为自定义配色（配色区与任何内置预设都不一致），切换前提示确认
+    if (css) {
+      const cur = getSection(css, SEC_COLOR);
+      if (cur !== null && !PRESETS.find(x => colorSectionCss(x).trim() === cur)) {
+        if (!confirm('当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？')) {
+          syncPresetSel(css);   // 用户取消：恢复下拉框显示到当前实际配色（自定义占位符）
+          return;
+        }
+      }
+    }
     const created = css === null;
     if (created) css = styleTemplate(bookCfg.theme);   // 无 style.css：按当前版式生成完整模板
     css = upsertSection(css, SEC_COLOR, colorSectionCss(p));  // 只更新配色区，其余内容不动
@@ -2102,7 +2184,7 @@ ${topRight}  @bottom-left {
 function applyBookTheme() {
   document.body.dataset.bookTheme = bookCfg.theme;
   document.body.classList.toggle('book-indent', bookCfg.indent !== false);
-  $('bookThemeSel').value = bookCfg.theme;
+  syncThemeSel(null);   // 无 css 上下文时按 bookCfg.theme 回显；有项目时由 loadUserCss/syncStyleSections 用实际 css 覆盖
   // @page 页眉页脚不再动态注入：来自 style.css 页眉页脚区（内容CSS中有无 style.css 时的默认兜底）
 }
 // 初始化：把四套版式默认规则生成到 #bookThemeCss（在内容默认之后、style.css 之前）
@@ -2297,6 +2379,10 @@ async function renameNode() {
       await copyDir(n.handle, await dir.getDirectoryHandle(newName, { create: true }));
       await dir.removeEntry(n.name, { recursive: true });
     }
+    // 历史版本目录镜像随路径迁移（保留旧版本，可继续叠加新版本）
+    const newPath = parentPath(n.path) ? parentPath(n.path) + '/' + newName : newName;
+    await moveHistoryDir(n.path, newPath);
+    histBaseRename(n.path, newPath);
     selectedNode = null; current = null;
     $('editor').value = '';
     await refreshTree(); renderTree(); updateToolbar(); updateStatus();
@@ -2332,6 +2418,10 @@ async function toggleHidden() {
       await copyDir(n.handle, await dir.getDirectoryHandle(newName, { create: true }));
       await dir.removeEntry(n.name, { recursive: true });
     }
+    // 隐藏/取消隐藏只是改名（加/去 _ 前缀），历史版本随路径迁移
+    const newPath = dirPath ? dirPath + '/' + newName : newName;
+    await moveHistoryDir(n.path, newPath);
+    histBaseRename(n.path, newPath);
     selectedNode = null;
     await refreshTree();
     const fullPath = dirPath ? dirPath + '/' + newName : newName;
@@ -2372,6 +2462,10 @@ async function autoRename() {
     const w = await nh.createWritable(); await w.write(f); await w.close();
     const wasCurrent = current && current.node === n;
     await dir.removeEntry(n.name);
+    // 自动重命名只是改名，历史版本随路径迁移（保留旧名下的历史）
+    const newPath = dirPath ? dirPath + '/' + newName : newName;
+    await moveHistoryDir(n.path, newPath);
+    histBaseRename(n.path, newPath);
     selectedNode = null; if (wasCurrent) current = null;
     await refreshTree();
     const node = findNode(tree, dirPath ? dirPath + '/' + newName : newName);
@@ -2465,6 +2559,14 @@ async function executeRenumberTasks(dirHandle, tasks) {
     await moveToTarget(t, t.newName);
   }
   for (const t of failed) await moveToTarget(t, t.oldName);
+  // 同步迁移历史目录：仅对最终成功的 task（未被回滚的）按旧/新路径迁移
+  for (const t of tasks) {
+    if (failed.includes(t)) continue;
+    const oldP = t.dirPath ? t.dirPath + '/' + t.oldName : t.oldName;
+    const newP = t.dirPath ? t.dirPath + '/' + t.newName : t.newName;
+    await moveHistoryDir(oldP, newP);
+    histBaseRename(oldP, newP);
+  }
   return failed;
 }
 async function renumberAll() {
@@ -2558,10 +2660,20 @@ async function listTrash() {
   return batches;
 }
 async function trashRemoveItem(batchName, relPath) {
-  const bdir = await (await rootHandle.getDirectoryHandle('.trash')).getDirectoryHandle(batchName);
+  const trashRoot = await rootHandle.getDirectoryHandle('.trash');
+  const bdir = await trashRoot.getDirectoryHandle(batchName);
   await bdir.removeEntry(relPath, { recursive: true });
   let left = 0; for await (const _ of bdir.entries()) left++;
-  if (!left) await (await rootHandle.getDirectoryHandle('.trash')).removeEntry(batchName);
+  if (!left) await trashRoot.removeEntry(batchName);
+}
+// 彻底删除回收站项：连同 .history 下对应路径一起清（与文件生命周期对齐）
+async function trashPurgeItem(batchName, relPath) {
+  const trashRoot = await rootHandle.getDirectoryHandle('.trash');
+  const bdir = await trashRoot.getDirectoryHandle(batchName);
+  await clearHistoryForTrashItem(bdir, relPath);
+  await bdir.removeEntry(relPath, { recursive: true });
+  let left = 0; for await (const _ of bdir.entries()) left++;
+  if (!left) await trashRoot.removeEntry(batchName);
 }
 // 目标位置已存在同名时，自动加 (恢复n)
 async function uniqueRestoreName(dir, name, kind) {
@@ -2586,6 +2698,14 @@ async function restoreTrashItem(batchName, relPath, kind) {
   } else {
     const fh = await dstDir.getFileHandle(finalName, { create: true });
     const w = await fh.createWritable(); await w.write(await srcH.getFile()); await w.close();
+  }
+  // 恢复时若重名加了 (恢复n) 后缀，历史目录跟随迁移到新路径
+  const origName = parts[parts.length - 1];
+  if (finalName !== origName) {
+    const parentP = parts.slice(0, -1).join('/');
+    const newP = parentP ? parentP + '/' + finalName : finalName;
+    await moveHistoryDir(relPath, newP);
+    histBaseRename(relPath, newP);
   }
   await trashRemoveItem(batchName, relPath);
   return finalName;
@@ -2627,6 +2747,90 @@ async function backupHistory(node, oldText) {
     names.sort().reverse();   // 时间戳可字典序排序，最新在前
     for (const old of names.slice(HIST_KEEP)) { try { await d.removeEntry(old); } catch (e) {} }
   } catch (e) { /* 历史备份失败不影响正常保存 */ }
+}
+// 把 src 历史子树递归合并进 dst（版本文件名=时间戳天然不冲突；同名目录递归合并）
+async function mergeHistoryTree(src, dst) {
+  for await (const [name, h] of src.entries()) {
+    if (h.kind === 'file') {
+      try {
+        const fh = await dst.getFileHandle(name, { create: true });
+        const w = await fh.createWritable(); await w.write(await h.getFile()); await w.close();
+      } catch (e) {}
+    } else {
+      let sub;
+      try { sub = await dst.getDirectoryHandle(name); } catch (e) { sub = await dst.getDirectoryHandle(name, { create: true }); }
+      await mergeHistoryTree(h, sub);
+    }
+  }
+}
+// 重命名/移动文件或文件夹时，把 .history 下镜像的旧路径整体迁到新路径
+// 同名合并：若 .history/newPath 已存在，把旧版本合并进去（保留两段历史）
+async function moveHistoryDir(oldPath, newPath) {
+  if (!oldPath || oldPath === newPath) return;
+  let histRoot;
+  try { histRoot = await rootHandle.getDirectoryHandle('.history'); } catch (e) { return; }
+  // 旧历史目录：.history/{oldPath 各段}/...
+  let src;
+  try {
+    src = histRoot;
+    for (const seg of oldPath.split('/')) src = await src.getDirectoryHandle(seg);
+  } catch (e) { return; }   // 旧路径无历史目录，无事可做
+  // 准备目标父目录：.history/{newPath 去掉最后一段}/
+  const newParts = newPath.split('/');
+  let dstParent = histRoot;
+  for (let i = 0; i < newParts.length - 1; i++) dstParent = await dstParent.getDirectoryHandle(newParts[i], { create: true });
+  // 目标名：已存在则合并版本文件，否则创建
+  const newName = newParts[newParts.length - 1];
+  let dst;
+  try { dst = await dstParent.getDirectoryHandle(newName); }
+  catch (e) { dst = await dstParent.getDirectoryHandle(newName, { create: true }); }
+  await mergeHistoryTree(src, dst);
+  // 删除旧历史目录（含整棵子树）
+  const oldParts = oldPath.split('/');
+  let oldParent = histRoot;
+  for (let i = 0; i < oldParts.length - 1; i++) oldParent = await oldParent.getDirectoryHandle(oldParts[i]);
+  try { await oldParent.removeEntry(oldParts[oldParts.length - 1], { recursive: true }); } catch (e) {}
+}
+// 删除 .history 下镜像的某条原 path（彻底删除回收站单项时调用）
+async function removeHistoryPath(path) {
+  if (!path) return;
+  let histRoot;
+  try { histRoot = await rootHandle.getDirectoryHandle('.history'); } catch (e) { return; }
+  const parts = path.split('/');
+  let parent = histRoot;
+  for (let i = 0; i < parts.length - 1; i++) {
+    try { parent = await parent.getDirectoryHandle(parts[i]); } catch (e) { return; }
+  }
+  try { await parent.removeEntry(parts[parts.length - 1], { recursive: true }); } catch (e) {}
+}
+// 遍历 trash 内某顶级项（bdir/topName）子树，按每个叶子的完整相对路径（=原 path）清对应 .history
+// 顶级项是文件则直接清 .history/topName；是目录则递归，每个叶子按其完整 trash 相对路径清理
+async function clearHistoryForTrashItem(bdir, topName) {
+  let kind;
+  try { await bdir.getFileHandle(topName); kind = 'file'; }
+  catch (e) { try { await bdir.getDirectoryHandle(topName); kind = 'dir'; } catch (err) { return; } }
+  if (kind === 'file') { await removeHistoryPath(topName); return; }
+  const top = await bdir.getDirectoryHandle(topName);
+  const walk = async (d, prefix) => {
+    let has = false;
+    for await (const [name, h] of d.entries()) {
+      has = true;
+      const p = prefix ? prefix + '/' + name : name;
+      if (h.kind === 'file') await removeHistoryPath(p);
+      else await walk(h, p);
+    }
+    if (!has) await removeHistoryPath(prefix);   // 空目录本身：清 .history/prefix
+  };
+  await walk(top, topName);
+}
+// 内存基线索引跟随路径变化（同 path 或以 oldPath/ 开头的都迁移到 newPath）
+function histBaseRename(oldPath, newPath) {
+  const moves = [];
+  for (const [k, v] of histBase) {
+    if (k === oldPath) moves.push([k, newPath, v]);
+    else if (k.startsWith(oldPath + '/')) moves.push([k, newPath + k.slice(oldPath.length), v]);
+  }
+  for (const [oldK, newK, v] of moves) { histBase.delete(oldK); histBase.set(newK, v); }
 }
 async function listHistory(node) {
   let d;
@@ -3323,22 +3527,34 @@ function bindOlCard(card, n) {
   }
 }
 // 底层移动：把节点移入目标目录（优先原生 move，否则复制+删除），重名报错
-async function moveEntryTo(srcNode, destDirHandle) {
+async function moveEntryTo(srcNode, destDirHandle, destPath) {
   const name = srcNode.name;
   try { await destDirHandle.getFileHandle(name); throw new Error('目标已存在同名文件：' + name); }
   catch (e) { if (/同名/.test(e.message)) throw e; }
   try { await destDirHandle.getDirectoryHandle(name); throw new Error('目标已存在同名文件夹：' + name); }
   catch (e) { if (/同名/.test(e.message)) throw e; }
-  if (srcNode.handle.move) { try { await srcNode.handle.move(destDirHandle, name); return; } catch (e) {} }
-  if (srcNode.type === 'file') {
-    const nh = await destDirHandle.getFileHandle(name, { create: true });
-    const w = await nh.createWritable(); await w.write(await srcNode.handle.getFile()); await w.close();
-    const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
-    await srcDir.removeEntry(name);
-  } else {
-    await copyDir(srcNode.handle, await destDirHandle.getDirectoryHandle(name, { create: true }));
-    const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
-    await srcDir.removeEntry(name, { recursive: true });
+  // 复制+删除回退路径（原生 move 不可用时）
+  const fallbackCopy = async () => {
+    if (srcNode.type === 'file') {
+      const nh = await destDirHandle.getFileHandle(name, { create: true });
+      const w = await nh.createWritable(); await w.write(await srcNode.handle.getFile()); await w.close();
+      const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
+      await srcDir.removeEntry(name);
+    } else {
+      await copyDir(srcNode.handle, await destDirHandle.getDirectoryHandle(name, { create: true }));
+      const srcDir = await getDirHandleByPath(parentPath(srcNode.path));
+      await srcDir.removeEntry(name, { recursive: true });
+    }
+  };
+  if (srcNode.handle.move) {
+    try { await srcNode.handle.move(destDirHandle, name); }
+    catch (e) { await fallbackCopy(); }
+  } else await fallbackCopy();
+  // 跨目录移动：历史版本镜像随之迁到新路径
+  if (destPath !== undefined) {
+    const newPath = destPath ? destPath + '/' + name : name;
+    await moveHistoryDir(srcNode.path, newPath);
+    histBaseRename(srcNode.path, newPath);
   }
 }
 async function outlineDrop(src, target, pos) {
@@ -3359,7 +3575,7 @@ async function outlineDrop(src, target, pos) {
   try {
     const sameDir = srcParPath === destPath;
     if (!sameDir) {
-      await moveEntryTo(src, destParentNode ? destParentNode.handle : rootHandle);
+      await moveEntryTo(src, destParentNode ? destParentNode.handle : rootHandle, destPath);
       if (pos === 'inside') olCollapsed.delete(target.path);  // 移入后展开目标文件夹
     }
     await refreshTree();
@@ -3650,7 +3866,6 @@ function todayInput() {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function openBookDlg() {
-  $('bkTheme').value = bookCfg.theme;
   $('bkTitle').value = bookCfg.title || (rootHandle ? rootHandle.name : '');
   $('bkSub').value = bookCfg.subtitle;
   $('bkAuthor').value = bookCfg.author;
@@ -3664,7 +3879,6 @@ function openBookDlg() {
 }
 async function readBookDlg() {
   const def = rootHandle ? rootHandle.name : '';
-  bookCfg.theme = $('bkTheme').value;
   bookCfg.title = $('bkTitle').value.trim() === def.trim() ? '' : $('bkTitle').value.trim();
   bookCfg.subtitle = $('bkSub').value.trim();
   bookCfg.author = $('bkAuthor').value.trim();
@@ -3678,6 +3892,13 @@ async function readBookDlg() {
 }
 async function applyBookCfgAndRender() {
   applyBookTheme();
+  // applyBookTheme 用 null 兜底回显（bookCfg.theme），这里用实际 style.css 覆盖一次，
+  // 防止版式区被手动改过时仍显示原 bookCfg.theme 而非"自定义版式"
+  if (rootHandle) {
+    const css = await readStyleCssText();
+    syncPresetSel(css);
+    syncThemeSel(css);
+  }
   if (mode === 'read') await renderMerged();
 }
 $('btnBookCfg').onclick = openBookDlg;
@@ -3689,11 +3910,33 @@ async function syncStyleSections(updateTheme) {
   else if (updateTheme) css = upsertSection(css, SEC_THEME, themeSectionCss(bookCfg.theme));
   css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || ''));
   await saveStyleCss(css);
+  syncPresetSel(css);
+  syncThemeSel(css);
   if (created) await refreshTree();
   return created;
 }
 $('bookThemeSel').onchange = async () => {
-  bookCfg.theme = $('bookThemeSel').value;
+  const v = $('bookThemeSel').value;
+  if (!v) return;   // 选"自定义版式"占位符时不触发应用（保持现状）
+  // 当前若为自定义版式（版式区与任何内置版式都不一致），切换前提示确认
+  const css = await readStyleCssText();
+  if (css) {
+    const cur = getSection(css, SEC_THEME);
+    if (cur !== null) {
+      const c = cur.trim();
+      const hit = Object.keys(BOOK_THEMES).some(k => {
+        const std = themeSectionCss(k).trim();
+        return std === c || (TOC_BASE_CSS + '\n' + themeSectionCss(k)).trim() === c;
+      });
+      if (!hit) {
+        if (!confirm('当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？')) {
+          syncThemeSel(css);   // 用户取消：恢复下拉框显示到当前实际版式（自定义占位符）
+          return;
+        }
+      }
+    }
+  }
+  bookCfg.theme = v;
   await saveBookCfg();
   try { await syncStyleSections(true); } catch (e) { toast('写入 style.css 失败：' + e.message); }
   await applyBookCfgAndRender();
@@ -3743,8 +3986,8 @@ async function renderTrash() {
       };
       const b2 = document.createElement('button'); b2.textContent = '彻底删除'; b2.className = 'danger';
       b2.onclick = async () => {
-        if (!confirm('彻底删除「' + it.relPath + '」？此操作不可恢复')) return;
-        try { await trashRemoveItem(b.name, it.relPath); await renderTrash(); }
+        if (!confirm('彻底删除「' + it.relPath + '」？该文件/文件夹及其历史版本都将被清除，不可恢复')) return;
+        try { await trashPurgeItem(b.name, it.relPath); await renderTrash(); }
         catch (e) { toast('删除失败：' + e.message); }
       };
       row.appendChild(b1); row.appendChild(b2);
@@ -3761,6 +4004,16 @@ $('trashClose').onclick = () => $('dlgTrash').close();
 $('trashEmpty').onclick = async () => {
   if (!confirm('清空回收站？其中所有文件/文件夹将彻底删除，不可恢复')) return;
   try {
+    // 清空前遍历所有批次项，逐项清掉对应 .history（路径对齐生命周期）
+    let trashRoot;
+    try { trashRoot = await rootHandle.getDirectoryHandle('.trash'); }
+    catch (e) { toast('回收站已空'); await renderTrash(); return; }
+    for await (const [bname, bh] of trashRoot.entries()) {
+      if (bh.kind !== 'directory') continue;
+      for await (const [iname] of bh.entries()) {
+        await clearHistoryForTrashItem(bh, iname);
+      }
+    }
     await rootHandle.removeEntry('.trash', { recursive: true });
     toast('回收站已清空');
   } catch (e) { /* 目录不存在即视为已空 */ }
