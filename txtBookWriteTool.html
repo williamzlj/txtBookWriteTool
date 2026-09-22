@@ -545,20 +545,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnOpen">打开文件夹</button>
   <button id="btnReconnect" class="hidden" title="继续上次打开的文件夹">继续上次</button>
   <span class="sep"></span>
-  <button id="btnNewTxt" class="primary" disabled title="新建 .txt 文件（按 Markdown 解析），自动编号 +10">新建txt</button>
+  <button id="btnNewTxt" class="primary" disabled title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
   <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
   <button id="btnNewDir" disabled>新建文件夹</button>
   <button id="btnRename" disabled>重命名</button>
-  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字截断）">自动文件名</button>
-  <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，文字保留，无编号文件补号）">重新编号</button>
+  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16字时截断）">自动文件名</button>
+  <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，原文字保留，无编号的文件自动补编号）">重新编号</button>
   <span class="sep"></span>
-  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
+  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加下划线 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
   <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy（同名时自动依次为 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
-  <button id="btnSplit" disabled title="把选中的文件按标题级别或行首关键词拆分成多个文件：统一命名为 xxx-split-0、xxx-split-1…（编号从 0 开始，原文件移入回收站，可恢复）">拆分</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
+  <button id="btnSplit" disabled title="把选中的文件按标题级别或行首关键词拆分成多个文件：统一命名为 xxx-split-0、xxx-split-1…（编号从 0 开始，原文件移入回收站，可恢复）">拆分</button>
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
@@ -729,7 +729,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         <span class="lbl" style="font-size:12px">光标放在表格任意单元格内即可编辑</span>
       </div>
       <div id="editRow">
-       <div id="editorWrap"><textarea id="editor" spellcheck="false" disabled placeholder="请先在左侧选择文件，或点击「新建txt / 新建md」后再开始写作"></textarea></div>
+       <div id="editorWrap"><textarea id="editor" spellcheck="false" disabled placeholder="请先在左侧选择文件，或点击「新建txt」 / 「新建md」"></textarea></div>
        <div class="vdiv" id="divEdit"></div>
        <div id="livePreview" class="md-body"></div>
       </div>
@@ -3905,7 +3905,7 @@ function updateToolbar() {
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('editor').disabled = !current;   // 无当前文件时禁用编辑器，避免写了无法保存
-  $('editor').placeholder = current ? '' : '请先在左侧选择文件，或点击「新建txt / 新建md」后再开始写作';
+  $('editor').placeholder = current ? '' : '请先在左侧选择文件，或点击「新建txt」 / 「新建md」';
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
@@ -3950,8 +3950,10 @@ async function pickFolder() {
   } catch (e) { if (e.name !== 'AbortError') toast('打开失败：' + e.message); }
 }
 $('btnReconnect').onclick = async () => {
-  try { const h = await idbGet('root'); if (h) await useRoot(h); }
-  catch (e) { toast('重连失败，请重新选择文件夹'); }
+  try {
+    const h = await idbGet('root');
+    if (h) { const prev = rootHandle; await useRoot(h); if (rootHandle && rootHandle !== prev) $('btnReconnect').classList.add('hidden'); }
+  } catch (e) { toast('重连失败，请重新选择文件夹'); }
 };
 // 外部文件标签上的「打开所在文件夹」：选目录作为项目后自动定位打开该文件
 $('btnExtDir').onclick = async () => {
@@ -4590,7 +4592,7 @@ document.addEventListener('keydown', e => {
       $('btnReconnect').classList.remove('hidden');
       // 新版浏览器（Chrome/Edge 122+）持久授权：静默自动恢复，无需点击
       const perm = await saved.queryPermission({ mode: 'readwrite' });
-      if (perm === 'granted') { await useRoot(saved); return; }
+      if (perm === 'granted') { await useRoot(saved); $('btnReconnect').classList.add('hidden'); return; }
     }
   } catch (e) {}
 })();
