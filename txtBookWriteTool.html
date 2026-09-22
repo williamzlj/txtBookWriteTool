@@ -553,7 +553,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，原文字保留，无编号的文件自动补编号）">重新编号</button>
   <span class="sep"></span>
   <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加下划线 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
-  <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy（同名时自动依次为 -copy2、-copy3）">复制</button>
+  <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy1（同名时自动依次为 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
@@ -2975,9 +2975,9 @@ async function listHistory(node) {
   vers.sort((a, b) => b.name.localeCompare(a.name));
   return vers;
 }
-// 副本名称：扩展名（文件）前插入 -copy；重名时依次 -copy2、-copy3…
+// 副本名称：扩展名（文件）前插入 -copy1；重名时依次 -copy2、-copy3…
 function copyCandidateName(name, kind, i) {
-  const tag = '-copy' + (i > 1 ? i : '');
+  const tag = '-copy' + i;
   if (kind === 'file') {
     const m = name.match(/^([\s\S]*)(\.[^.]+)$/);
     return m ? m[1] + tag + m[2] : name + tag;
