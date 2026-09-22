@@ -729,7 +729,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         <span class="lbl" style="font-size:12px">光标放在表格任意单元格内即可编辑</span>
       </div>
       <div id="editRow">
-       <div id="editorWrap"><textarea id="editor" spellcheck="false" placeholder=""></textarea></div>
+       <div id="editorWrap"><textarea id="editor" spellcheck="false" disabled placeholder="请先在左侧选择文件，或点击「新建txt / 新建md」后再开始写作"></textarea></div>
        <div class="vdiv" id="divEdit"></div>
        <div id="livePreview" class="md-body"></div>
       </div>
@@ -3889,6 +3889,7 @@ function updateToolbar() {
   $('btnSplit').disabled = !(hasRoot && splitN && splitN.type === 'file' && !splitN.external);
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
+  $('editor').disabled = !current;   // 无当前文件时禁用编辑器，避免写了无法保存
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
