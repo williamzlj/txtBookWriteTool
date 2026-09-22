@@ -1196,8 +1196,22 @@ async function useRoot(handle) {
   await refreshTree();
   await loadUserCss();
   $('welcome').classList.add('hidden');
+  // 尝试恢复上次编辑的文件；找不到（被删/改名/切换目录）则清除并提示
+  let restoredName = null;
+  try {
+    const last = await idbGet('lastFile');
+    if (last) {
+      const n = findNode(tree, last);
+      if (n && n.type === 'file') {
+        await openFile(n);          // openFile 内部已 setMode
+        restoredName = n.name;
+      } else {
+        await idbSet('lastFile', null);   // 文件已不存在，清掉避免下次重复试
+      }
+    }
+  } catch (e) {}
   setMode('edit');
-  toast('已打开：' + handle.name);
+  toast(restoredName ? ('已恢复上次编辑：' + restoredName) : ('已打开：' + handle.name));
   updateToolbar();
   updateStatus();
 }
@@ -1372,6 +1386,7 @@ async function openFile(node) {
     const text = (await f.text()).replace(/^\uFEFF/, '');
     current = { node, content: text, dirty: false };
     if (!node.external) histRemember(node.path, text);   // 历史检查点内存基线（外部文件无项目 .history）
+    if (!node.external) { try { await idbSet('lastFile', node.path); } catch (e) {} }   // 记住上次编辑的文件，便于下次自动恢复
     if (!node.external) expandedAddTo(node.path);
     $('editor').value = text;
     setMode(mode);            // refresh view content
