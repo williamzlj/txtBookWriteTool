@@ -3905,6 +3905,7 @@ function updateToolbar() {
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('editor').disabled = !current;   // 无当前文件时禁用编辑器，避免写了无法保存
+  $('editor').placeholder = current ? '' : '请先在左侧选择文件，或点击「新建txt / 新建md」后再开始写作';
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
