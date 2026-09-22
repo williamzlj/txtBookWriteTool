@@ -1087,9 +1087,19 @@ let saveTimer = null, previewTimer = null;
 let livePreviewOn = true;
 
 /* ================= idb (记住上次文件夹) ================= */
+// 每个副本独立隔离：以 HTML 自身 URL 派生库名后缀，
+// 使复制到不同目录/不同名的副本各自记住各自的工作目录，互不覆盖。
+const IDB_NAME = (() => {
+  let p = '';
+  try { p = self.location && self.location.href ? self.location.href : ''; } catch (e) {}
+  if (!p) p = 'default';
+  let h = 5381;
+  for (let i = 0; i < p.length; i++) h = ((h << 5) + h + p.charCodeAt(i)) >>> 0;
+  return 'txtBookWriteTool_' + h.toString(36);
+})();
 function idbOpen() {
   return new Promise((res, rej) => {
-    const r = indexedDB.open('txtBookWriteTool', 1);
+    const r = indexedDB.open(IDB_NAME, 1);
     r.onupgradeneeded = () => r.result.createObjectStore('kv');
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
@@ -1105,7 +1115,7 @@ async function idbSet(k, v) {
 }
 function idbGet(k) {
   return new Promise((res, rej) => {
-    const r = indexedDB.open('txtBookWriteTool', 1);
+    const r = indexedDB.open(IDB_NAME, 1);
     r.onupgradeneeded = () => r.result.createObjectStore('kv');
     r.onsuccess = () => {
       const t = r.result.transaction('kv', 'readonly');
