@@ -43,6 +43,11 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
   background: var(--toolbar); border-bottom: 1px solid var(--border);
 }
 #topbar button { padding: 4px 9px; }
+#topbar #btnLang { position: relative; display: inline-flex; align-items: center; padding: 4px 2px; border-radius: 999px; overflow: hidden; }
+#topbar #btnLang::before { content: ''; position: absolute; top: 2px; bottom: 2px; left: 2px; width: 24px; border-radius: 999px; background: var(--accent); opacity: .16; transition: transform .18s; }
+#topbar #btnLang.en::before { transform: translateX(24px); }
+#topbar #btnLang .lg { position: relative; width: 24px; text-align: center; color: var(--muted); }
+#topbar #btnLang:not(.en) .lg-zh, #topbar #btnLang.en .lg-en { color: var(--accent); font-weight: 700; }
 .tb-row { display: flex; align-items: center; gap: 5px; }
 .tb-row1 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
 .tb-row1 > * { flex: none; }
@@ -609,147 +614,148 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 
 <header id="topbar">
  <div class="tb-row tb-row1">
-  <button id="btnOpen">打开文件夹</button>
-  <button id="btnReconnect" class="hidden" title="继续上次打开的文件夹">继续上次</button>
+  <button id="btnOpen" data-i18n>打开文件夹</button>
+  <button id="btnReconnect" class="hidden" data-i18n-title title="继续上次打开的文件夹">继续上次</button>
   <span class="sep"></span>
-  <button id="btnNewTxt" class="primary" disabled title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
-  <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
-  <button id="btnNewDir" disabled>新建文件夹</button>
-  <button id="btnRename" disabled>重命名</button>
-  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）">自动文件名</button>
-  <button id="btnRenumber" disabled title="统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）">重新编号</button>
+  <button id="btnNewTxt" class="primary" disabled data-i18n data-i18n-title title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
+  <button id="btnNewMd" disabled data-i18n data-i18n-title title="新建 .md 文件，自动编号 +10">新建md</button>
+  <button id="btnNewDir" disabled data-i18n>新建文件夹</button>
+  <button id="btnRename" disabled data-i18n>重命名</button>
+  <button id="btnAutoName" disabled data-i18n data-i18n-title title="按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）">自动文件名</button>
+  <button id="btnRenumber" disabled data-i18n data-i18n-title title="统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）">重新编号</button>
   <span class="sep"></span>
-  <button id="btnToggleHide" disabled title="隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
-  <button id="btnCopy" disabled title="复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）">复制</button>
-  <button id="btnDelete" disabled>删除</button>
-  <button id="btnTrash" disabled title="回收站：删除/合并的文件移到这里，可恢复">回收站</button>
-  <button id="btnMerge" disabled title="Ctrl+点击多选；内容写入第一个文件，其余删除">合并</button>
-  <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
-  <button id="btnSplit" disabled title="拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）">拆分</button>
+  <button id="btnToggleHide" disabled data-i18n data-i18n-title title="隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
+  <button id="btnCopy" disabled data-i18n data-i18n-title title="复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）">复制</button>
+  <button id="btnDelete" disabled data-i18n>删除</button>
+  <button id="btnTrash" disabled data-i18n data-i18n-title title="回收站：删除/合并的文件移到这里，可恢复">回收站</button>
+  <button id="btnMerge" class="hidden" disabled data-i18n data-i18n-title title="Ctrl+点击多选；内容写入第一个文件，其余删除">合并</button>
+  <button id="btnUnsel" class="hidden" data-i18n data-i18n-title title="清空多选（Esc 同效）">取消选择</button>
+  <button id="btnSplit" disabled data-i18n data-i18n-title title="拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）">拆分</button>
   <span class="sep"></span>
-  <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
-  <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
-  <button id="btnFontReset" title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
-  <button id="btnAbout" title="软件使用说明">说明</button>
-  <button id="btnTheme" title="切换明暗主题">🌙</button>
+  <button id="btnFontDown" data-i18n-title title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
+  <button id="btnFontUp" data-i18n-title title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
+  <button id="btnFontReset" data-i18n-title title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
+  <button id="btnAbout" data-i18n data-i18n-title title="软件使用说明">说明</button>
+  <button id="btnTheme" data-i18n-title title="切换明暗主题">🌙</button>
+  <button id="btnLang" data-i18n-title title="切换界面语言"><span class="lg lg-zh">中</span><span class="lg lg-en">EN</span></button>
  </div>
  <div class="tb-row tb-row2">
    <div class="tabs">
-     <button data-mode="edit" class="active" disabled>编辑</button>
-     <button data-mode="preview" disabled>预览</button>     
-     <button data-mode="outline" disabled>大纲</button>
-     <button data-mode="read" disabled>阅览</button>
+     <button data-mode="edit" class="active" disabled data-i18n>编辑</button>
+     <button data-mode="preview" disabled data-i18n>预览</button>     
+     <button data-mode="outline" disabled data-i18n>大纲</button>
+     <button data-mode="read" disabled data-i18n>阅览</button>
    </div>
-   <button id="btnRefresh" disabled>刷新</button>
+   <button id="btnRefresh" disabled data-i18n-title title="刷新">↻</button>
    <span class="sep"></span>
-   <button id="btnPrev" disabled title="上一个文件">◀</button>
-   <button id="btnNext" disabled title="下一个文件">▶</button>
+   <button id="btnPrev" disabled data-i18n-title title="上一个文件">◀</button>
+   <button id="btnNext" disabled data-i18n-title title="下一个文件">▶</button>
    <span class="sep"></span>
    <!-- 编辑模式：编辑工具组 -->
    <div class="mode-edit">
     <!-- 标题 H1-H6 -->
-     <button class="ic tb-h needs-file md-h" data-h="1" disabled title="一级标题（再点取消）">H1</button>
-     <button class="ic tb-h needs-file md-h" data-h="2" disabled title="二级标题（再点取消）">H2</button>
-     <button class="ic tb-h needs-file md-h" data-h="3" disabled title="三级标题（再点取消）">H3</button>
-     <button class="ic tb-h needs-file md-h" data-h="4" disabled title="四级标题（再点取消）">H4</button>
-     <button class="ic tb-h needs-file md-h" data-h="5" disabled title="五级标题（再点取消）">H5</button>
-     <button class="ic tb-h needs-file md-h" data-h="6" disabled title="六级标题（再点取消）">H6</button>
+     <button class="ic tb-h needs-file md-h" data-h="1" disabled data-i18n-title title="一级标题（再点取消）">H1</button>
+     <button class="ic tb-h needs-file md-h" data-h="2" disabled data-i18n-title title="二级标题（再点取消）">H2</button>
+     <button class="ic tb-h needs-file md-h" data-h="3" disabled data-i18n-title title="三级标题（再点取消）">H3</button>
+     <button class="ic tb-h needs-file md-h" data-h="4" disabled data-i18n-title title="四级标题（再点取消）">H4</button>
+     <button class="ic tb-h needs-file md-h" data-h="5" disabled data-i18n-title title="五级标题（再点取消）">H5</button>
+     <button class="ic tb-h needs-file md-h" data-h="6" disabled data-i18n-title title="六级标题（再点取消）">H6</button>
      <span class="sep"></span>
      <!-- 行内格式：粗体/删除线/斜体/引用/大小写 -->
-     <button id="btnMdBold" class="ic tb-glyph needs-file" disabled title="粗体（Ctrl+B）">B</button>
-     <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled title="删除线">S</button>
-     <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled title="斜体（Ctrl+I）">I</button>
+     <button id="btnMdBold" class="ic tb-glyph needs-file" disabled data-i18n-title title="粗体（Ctrl+B）">B</button>
+     <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled data-i18n-title title="删除线">S</button>
+     <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled data-i18n-title title="斜体（Ctrl+I）">I</button>
      
-     <button id="btnMdCase" class="ic tb-glyph needs-file" disabled title="英文大小写循环：首字母大写 → 全大写 → 全小写">Aa</button>
+     <button id="btnMdCase" class="ic tb-glyph needs-file" disabled data-i18n-title title="英文大小写循环：首字母大写 → 全大写 → 全小写">Aa</button>
      <span class="sep"></span>
      
      
      <!-- 列表与分隔线 -->
-     <button id="btnMdUl" class="ic needs-file" disabled title="无序列表（再点取消）">
+     <button id="btnMdUl" class="ic needs-file" disabled data-i18n-title title="无序列表（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="1.6" cy="3" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="8" r="1.05" fill="currentColor" stroke="none"/><circle cx="1.6" cy="13" r="1.05" fill="currentColor" stroke="none"/><path d="M4.5 3h10M4.5 8h10M4.5 13h10"/></svg>
      </button>
-     <button id="btnMdOl" class="ic needs-file" disabled title="有序列表（再点取消）">
+     <button id="btnMdOl" class="ic needs-file" disabled data-i18n-title title="有序列表（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7.5M7 8h7.5M7 13h7.5"/><text x="0.2" y="5" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">1</text><text x="0.2" y="10" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">2</text><text x="0.2" y="15" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">3</text></svg>
      </button>
-     <button id="btnMdTask" class="ic needs-file" disabled title="任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换">
+     <button id="btnMdTask" class="ic needs-file" disabled data-i18n-title title="任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.1" y="2.1" width="11.8" height="11.8" rx="2.2"/><polyline points="5,8.3 7.1,10.4 11,5.7"/></svg>
      </button>
      
      <span class="sep"></span>
      <!-- 本工具原有功能 -->
-     <button id="btnMdHr" class="ic needs-file" disabled title="插入分隔线">
+     <button id="btnMdHr" class="ic needs-file" disabled data-i18n-title title="插入分隔线">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8h12"/></svg>
      </button>
-     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格，用于中文排版">
+     <button id="btnFullSpace" class="ic needs-file" disabled data-i18n-title title="插入中文全角空格，用于中文排版">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
      </button>
-     <button id="btnInsertComment" class="ic needs-file" disabled title="HTML 注释：选中则包成 &lt;!--注释--&gt;，未选中则插入模板；仅写作时可见，阅览导出不显示">
+     <button id="btnInsertComment" class="ic needs-file" disabled data-i18n-title title="HTML 注释：选中则包成 &lt;!--注释--&gt;，未选中则插入模板；仅写作时可见，阅览导出不显示">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
      </button>
-     <button id="btnMdDate" class="ic needs-file" disabled title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
+     <button id="btnMdDate" class="ic needs-file" disabled data-i18n-title title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></svg>
      </button>
      <span class="sep"></span>
-     <button id="btnMdQuote" class="ic needs-file" disabled title="引用块（再点取消）">
+     <button id="btnMdQuote" class="ic needs-file" disabled data-i18n-title title="引用块（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4C2 4.8 1.4 5.8 1.4 7v3.4h3.2V7.4H3c0-1 .6-1.6 1.5-1.8L3.2 4.4z" fill="currentColor" stroke="none"/><path d="M9.4 4.4c-1.2.4-1.8 1.4-1.8 2.6v3.4h3.2V7.4H9.2c0-1 .6-1.6 1.5-1.8L9.4 4.4z" fill="currentColor" stroke="none"/></svg>
      </button>
-     <button id="btnMdCode" class="ic tb-code needs-file" disabled title="行内代码">&lt;/&gt;</button>
-     <button id="btnMdCodeBlock" class="ic needs-file" disabled title="代码块（选中多行后点击可包裹）">
+     <button id="btnMdCode" class="ic tb-code needs-file" disabled data-i18n-title title="行内代码">&lt;/&gt;</button>
+     <button id="btnMdCodeBlock" class="ic needs-file" disabled data-i18n-title title="代码块（选中多行后点击可包裹）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.2,4 1.8,8 5.2,12"/><polyline points="10.8,4 14.2,8 10.8,12"/><path d="M3 14.3h10"/></svg>
      </button>
-     <button id="btnPalette" class="ic needs-file" disabled title="调色盘：选择颜色，确认后把色值插入光标处">
+     <button id="btnPalette" class="ic needs-file" disabled data-i18n-title title="调色盘：选择颜色，确认后把色值插入光标处">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 1.7a6.3 6.3 0 1 0 0 12.6c.8 0 1.3-.7 1-1.4-.3-.8.2-1.5 1.1-1.5h1.3a3.2 3.2 0 0 0 3.2-3.2C15.5 4.8 12.1 1.7 7.9 1.7z"/><circle cx="5.3" cy="7" r="0.95" fill="currentColor" stroke="none"/><circle cx="7.9" cy="4.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="10.9" cy="5.5" r="0.95" fill="currentColor" stroke="none"/><circle cx="12.3" cy="8.4" r="0.95" fill="currentColor" stroke="none"/></svg>
      </button>
      <span class="sep"></span>
      <!-- 链接/锚点/图片/代码/表格/日期 -->
-     <button id="btnMdLink" class="ic needs-file" disabled title="插入链接（选中网址可直接包裹）">
+     <button id="btnMdLink" class="ic needs-file" disabled data-i18n-title title="插入链接（选中网址可直接包裹）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 9.2a3 3 0 0 0 4.3.4l1.9-1.9a3 3 0 0 0-4.3-4.3L7.6 4.5"/><path d="M9.2 6.8a3 3 0 0 0-4.3-.4L3 8.3a3 3 0 0 0 4.3 4.3l1.1-1.1"/></svg>
      </button>
-     <button id="btnMdAnchor" class="ic needs-file" disabled title="插入锚点（页内跳转标记 &lt;a id=&quot;name&quot;&gt;）">
+     <button id="btnMdAnchor" class="ic needs-file" disabled data-i18n-title title="插入锚点（页内跳转标记 &lt;a id=&quot;name&quot;&gt;）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="2.8" r="1.25"/><path d="M8 4.1v9.4M5.3 6.8h5.4"/><path d="M2.9 10.3a5.1 5.1 0 0 0 10.2 0"/><path d="M2.9 10.3h1.7M11.4 10.3h1.7"/></svg>
      </button>
-     <button id="btnInsertImg" class="ic needs-file" disabled title="插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right">
+     <button id="btnInsertImg" class="ic needs-file" disabled data-i18n-title title="插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="1.2"/><circle cx="5.4" cy="6.8" r="1.1"/><path d="M2.8 11.8l3.2-3.2 2.4 2.4 2.2-2.2 2.6 3"/></svg>
      </button>
      
-     <button id="btnTable" class="ic needs-file" disabled title="插入表格">
+     <button id="btnTable" class="ic needs-file" disabled data-i18n-title title="插入表格">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="2.5" width="12.4" height="11" rx="1"/><path d="M1.8 6h12.4M1.8 9.5h12.4M6 2.5v11M10 2.5v11"/></svg>
      </button>
      
      <span class="sep"></span>
      
-     <button id="btnReplace" class="ic" disabled title="查找替换：可在当前文件或整个项目中进行">
+     <button id="btnReplace" class="ic" disabled data-i18n-title title="查找替换：可在当前文件或整个项目中进行">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.8" cy="9.8" r="3"/><path d="M8 12l3.2 3.2"/><path d="M9.4 2.9h3.9m0 0-1.4-1.2m1.4 1.2-1.4 1.2"/><path d="M6.6 6.3H2.9m0 0 1.2-1.2M2.9 6.3l1.2 1.2"/></svg>
      </button>
-     <button id="btnHistory" class="ic needs-file" disabled title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">
+     <button id="btnHistory" class="ic needs-file" disabled data-i18n-title title="当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 5.2a6 6 0 1 1-.9 3.3"/><polyline points="2.3,1.8 2.7,5.1 6,4.8"/><path d="M8 5.4V8l2.2 1.4"/></svg>
      </button>
    </div>
    <!-- 非编辑模式（预览/阅览/大纲）：成书与导出组 -->
    <div class="mode-view">
       
-      <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">编辑样式</button>
-      <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容">
-        <option value="classic">经典黑</option>
-        <option value="red">典雅红</option>
-        <option value="academic">学术蓝</option>
-        <option value="green">护眼绿</option>
-        <option value="warm">暖阳橙</option>
-        <option value="purple">典雅紫</option>
-        <option value="">自定义配色</option>
+      <button id="btnCss" disabled data-i18n data-i18n-title title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">编辑样式</button>
+      <select id="presetSel" disabled data-i18n-title title="选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容">
+        <option value="classic" data-i18n>经典黑</option>
+        <option value="red" data-i18n>典雅红</option>
+        <option value="academic" data-i18n>学术蓝</option>
+        <option value="green" data-i18n>护眼绿</option>
+        <option value="warm" data-i18n>暖阳橙</option>
+        <option value="purple" data-i18n>典雅紫</option>
+        <option value="" data-i18n>自定义配色</option>
       </select>
-     <select id="bookThemeSel" title="成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
-       <option value="classic">经典书籍</option>
-       <option value="modern">现代简洁</option>
-       <option value="academic">学术</option>
-       <option value="phone">手机阅览</option>
-       <option value="">自定义版式</option>
+     <select id="bookThemeSel" data-i18n-title title="成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
+       <option value="classic" data-i18n>经典书籍</option>
+       <option value="modern" data-i18n>现代简洁</option>
+       <option value="academic" data-i18n>学术</option>
+       <option value="phone" data-i18n>手机阅览</option>
+       <option value="" data-i18n>自定义版式</option>
      </select>
      <span class="sep"></span>
-     <button id="btnBookCfg" title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
-     <button id="btnExportPdf" class="primary" disabled title="打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件">导出 PDF</button>
-     <button id="btnExportHtml" disabled title="导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件">导出 HTML</button>
-     <button id="btnExportMd" disabled title="导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件">导出 MD</button>
+     <button id="btnBookCfg" data-i18n data-i18n-title title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
+     <button id="btnExportPdf" class="primary" disabled data-i18n data-i18n-title title="打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件">导出 PDF</button>
+     <button id="btnExportHtml" disabled data-i18n data-i18n-title title="导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件">导出 HTML</button>
+     <button id="btnExportMd" disabled data-i18n data-i18n-title title="导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件">导出 MD</button>
    </div>
  </div>
 </header>
@@ -758,9 +764,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <aside id="sidebar">
     <div id="sbHead" class="hidden">
       <div id="projName"></div>
-      <button id="sideCollapseBtn" title="折叠文件目录（腾出编辑空间）" aria-label="折叠文件目录">‹</button>
+      <button id="sideCollapseBtn" data-i18n-title title="折叠文件目录（腾出编辑空间）" aria-label="折叠文件目录">‹</button>
     </div>
-    <div id="searchBar"><input id="searchInput" placeholder="搜索文件内容…" title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" title="搜索">🔍</button><button id="btnClearSearch" title="清空搜索，恢复目录显示">✕</button></div>
+    <div id="searchBar"><input id="searchInput" data-i18n-ph placeholder="搜索文件内容…" data-i18n-title title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" data-i18n-title title="搜索">🔍</button><button id="btnClearSearch" data-i18n-title title="清空搜索，恢复目录显示">✕</button></div>
     <div id="tree"></div>
     <div id="searchResults" class="hidden"></div>
   </aside>
@@ -768,10 +774,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <section id="workarea">
     <div id="welcome">
       <h1>txtBookWriteTool</h1>
-      <h3>一款用txt写作的小工具</h3>
-      <div class="tip">
+      <h3 data-i18n>一款用txt写作的小工具</h3>
+      <div class="tip" data-i18n-html>
         软件特色：单文件运行，用简单的 txt 和文件夹结构灵活管理写作内容。<br><br>
-        <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">选择写作文件夹</button>
+        <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;" data-i18n>选择写作文件夹</button>
         <br><br>
         <b>使用说明</b><br>
         <ol class="list" style="font-size:14px;text-align:left;">
@@ -788,25 +794,25 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </div>
     <div id="editView" class="hidden">
       <div id="tableBar" class="hidden">
-        <span class="lbl">表格：</span>
-        <button data-top="rowAbove">↑插入行</button>
-        <button data-top="rowBelow">↓插入行</button>
-        <button data-top="rowDel">删除行</button>
-        <button data-top="colLeft">←插入列</button>
-        <button data-top="colRight">→插入列</button>
-        <button data-top="colDel">删除列</button>
+        <span class="lbl" data-i18n>表格：</span>
+        <button data-top="rowAbove" data-i18n>↑插入行</button>
+        <button data-top="rowBelow" data-i18n>↓插入行</button>
+        <button data-top="rowDel" data-i18n>删除行</button>
+        <button data-top="colLeft" data-i18n>←插入列</button>
+        <button data-top="colRight" data-i18n>→插入列</button>
+        <button data-top="colDel" data-i18n>删除列</button>
         <span class="flex"></span>
-        <span class="lbl" style="font-size:12px">光标放在表格任意单元格内即可编辑</span>
+        <span class="lbl" style="font-size:12px" data-i18n>光标放在表格任意单元格内即可编辑</span>
       </div>
       <div id="editRow">
-       <div id="editorWrap"><textarea id="editor" spellcheck="false" disabled placeholder="请先在左侧选择文件，或点击「新建txt」 / 「新建md」"></textarea></div>
+       <div id="editorWrap"><textarea id="editor" spellcheck="false" disabled data-i18n-ph placeholder="请先在左侧选择文件，或点击「新建txt」 / 「新建md」"></textarea></div>
        <div class="vdiv" id="divEdit"></div>
        <div id="livePreview" class="md-body"></div>
       </div>
     </div>
     <div id="previewView" class="hidden"><div id="singlePreview" class="md-body"></div></div>
     <div id="readView" class="hidden">
-      <nav id="tocPanel"><div class="toc-title">目 录</div><div id="tocList"></div></nav>
+      <nav id="tocPanel"><div class="toc-title" data-i18n>目 录</div><div id="tocList" data-i18n></div></nav>
       <div class="vdiv" id="divRead"></div>
       <div id="readMain">
         <div id="mergedWrap"><div id="mergedBody" class="md-body"></div></div>
@@ -814,19 +820,19 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </div>
     <div id="outlineView" class="hidden">
       <div id="outlineBar">
-        <b>全书大纲</b>
-        <span class="ol-hint">拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑</span>
+        <b data-i18n>全书大纲</b>
+        <span class="ol-hint" data-i18n>拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑</span>
       </div>
       <div id="outlineScroll"><div id="outlineCards"></div></div>
     </div>
   </section>
-  <button id="sideExpandBtn" title="展开文件目录" aria-label="展开文件目录">›</button>
-  <button id="pvToggleBtn" class="hidden" title="隐藏右侧预览，专心编辑" aria-label="隐藏右侧预览">›</button>
-  <button id="syncScrollBtn" class="hidden" title="同步滚动：编辑与预览互相跟随" aria-label="同步滚动">⇅</button>
+  <button id="sideExpandBtn" data-i18n-title title="展开文件目录" aria-label="展开文件目录">›</button>
+  <button id="pvToggleBtn" class="hidden" data-i18n-title title="隐藏右侧预览，专心编辑" aria-label="隐藏右侧预览">›</button>
+  <button id="syncScrollBtn" class="hidden" data-i18n-title title="同步滚动：编辑与预览互相跟随" aria-label="同步滚动">⇅</button>
 </div>
 
 <footer id="statusbar">
-  <span id="stPath"></span><button id="btnExtDir" class="hidden" title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
+  <span id="stPath"></span><button id="btnExtDir" class="hidden" data-i18n-title title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
   <span class="flex"></span>
   <span id="stCount"></span>
   <span id="stSave"></span>
@@ -834,57 +840,57 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 
 <input type="file" id="imgInput" accept="image/*" multiple class="hidden">
 <dialog id="dlgTable">
-  <h3>插入表格</h3>
-  <div class="row"><label style="width:70px">行数</label><input type="number" id="tRows" value="3" min="1" max="99"></div>
-  <div class="row"><label style="width:70px">列数</label><input type="number" id="tCols" value="3" min="1" max="20"></div>
-  <div class="row"><label style="width:70px">对齐</label>
+  <h3 data-i18n>插入表格</h3>
+  <div class="row"><label style="width:70px" data-i18n-block>行数</label><input type="number" id="tRows" value="3" min="1" max="99"></div>
+  <div class="row"><label style="width:70px" data-i18n-block>列数</label><input type="number" id="tCols" value="3" min="1" max="20"></div>
+  <div class="row"><label style="width:70px" data-i18n>对齐</label>
     <select id="tAlign">
-      <option value="none">默认</option>
-      <option value="left">左对齐</option>
-      <option value="center">居中</option>
-      <option value="right">右对齐</option>
+      <option value="none" data-i18n>默认</option>
+      <option value="left" data-i18n>左对齐</option>
+      <option value="center" data-i18n>居中</option>
+      <option value="right" data-i18n>右对齐</option>
     </select>
   </div>
   <div class="btns">
-    <button id="tCancel">取消</button>
-    <button id="tOk" class="primary">插入</button>
+    <button id="tCancel" data-i18n>取消</button>
+    <button id="tOk" class="primary" data-i18n>插入</button>
   </div>
 </dialog>
 <dialog id="dlgPalette">
-  <h3>调色盘</h3>
+  <h3 data-i18n>调色盘</h3>
   <div id="palGrid"></div>
   <div class="row">
-    <input type="color" id="palCustom" value="#3b7dd8" title="自定义颜色">
+    <input type="color" id="palCustom" value="#3b7dd8" data-i18n-title title="自定义颜色">
     <span id="palHex" style="font-family:monospace">#3b7dd8</span>
   </div>
   <div class="btns">
-    <button id="palCancel">取消</button>
-    <button id="palOk" class="primary">确认插入</button>
+    <button id="palCancel" data-i18n>取消</button>
+    <button id="palOk" class="primary" data-i18n>确认插入</button>
   </div>
 </dialog>
 <dialog id="dlgReplace">
-  <h3 id="rpTitle">查找替换</h3>
+  <h3 id="rpTitle" data-i18n>查找替换</h3>
   <div class="row" style="gap:18px">
-    <label><input type="radio" name="rpScope" value="file"> 仅当前文件</label>
-    <label><input type="radio" name="rpScope" value="project"> 整个项目（全部 md/txt）</label>
+    <label data-i18n-block><input type="radio" name="rpScope" value="file"> 仅当前文件</label>
+    <label data-i18n-block><input type="radio" name="rpScope" value="project"> 整个项目（全部 md/txt）</label>
   </div>
-  <div class="row"><label style="width:64px">查找：</label><input id="rpFind" style="flex:1" placeholder="要查找的文字"></div>
-  <div class="row"><label style="width:64px">替换为：</label><input id="rpTo" style="flex:1" placeholder="替换为（留空即删除）"></div>
+  <div class="row"><label style="width:64px">查找：</label><input id="rpFind" style="flex:1" data-i18n-ph placeholder="要查找的文字"></div>
+  <div class="row"><label style="width:64px">替换为：</label><input id="rpTo" style="flex:1" data-i18n-ph placeholder="替换为（留空即删除）"></div>
   <div id="rpInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0"></div>
   <div class="btns">
-    <button id="rpCancel">取消</button>
-    <button id="rpOk" class="primary">替换</button>
+    <button id="rpCancel" data-i18n>取消</button>
+    <button id="rpOk" class="primary" data-i18n>替换</button>
   </div>
 </dialog>
 <dialog id="dlgSplit">
-  <h3>拆分文件</h3>
-  <div class="row"><label style="width:72px">文件：</label><span id="spName" style="font-size:13px;font-family:monospace"></span></div>
-  <div class="row"><label style="width:72px">方式：</label>
-    <label><input type="radio" name="spMode" value="cursor" checked> 从光标拆分</label>
-    <label><input type="radio" name="spMode" value="heading"> 按标题拆分</label>
-    <label><input type="radio" name="spMode" value="keyword"> 按关键词拆分</label>
+  <h3 data-i18n>拆分文件</h3>
+  <div class="row"><label style="width:72px" data-i18n>文件：</label><span id="spName" style="font-size:13px;font-family:monospace"></span></div>
+  <div class="row"><label style="width:72px" data-i18n>方式：</label>
+    <label data-i18n-block><input type="radio" name="spMode" value="cursor" checked> 从光标拆分</label>
+    <label data-i18n-block><input type="radio" name="spMode" value="heading"> 按标题拆分</label>
+    <label data-i18n-block><input type="radio" name="spMode" value="keyword"> 按关键词拆分</label>
   </div>
-  <div class="row" id="spHeadingRow"><label style="width:72px">标题级别：</label>
+  <div class="row" id="spHeadingRow"><label style="width:72px" data-i18n>标题级别：</label>
     <select id="spLevel">
       <option value="1">H1（#）</option>
       <option value="2" selected>H2（##）</option>
@@ -893,35 +899,35 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <option value="5">H5（#####）</option>
       <option value="6">H6（######）</option>
     </select>
-    <span style="font-size:12px;color:var(--muted)">只按该级别标题拆分，忽略其他级别</span>
+    <span style="font-size:12px;color:var(--muted)" data-i18n>只按该级别标题拆分，忽略其他级别</span>
   </div>
-  <div class="row hidden" id="spKeywordRow"><label style="width:64px">关键词：</label>
-    <input id="spKeyword" style="flex:1" placeholder="行首出现该关键词的行即拆分点">
+  <div class="row hidden" id="spKeywordRow"><label style="width:64px" data-i18n>关键词：</label>
+    <input id="spKeyword" style="flex:1" data-i18n-ph placeholder="行首出现该关键词的行即拆分点">
   </div>
-  <div class="row hidden" id="spCursorRow"><label style="width:64px">光标行：</label>
+  <div class="row hidden" id="spCursorRow"><label style="width:64px" data-i18n>光标行：</label>
     <span id="spCursorInfo" style="font-size:12.5px;color:var(--muted)"></span>
   </div>
   <div id="spInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0">​</div>
   <div class="btns">
-    <button id="spCancel">取消</button>
-    <button id="spOk" class="primary">拆分</button>
+    <button id="spCancel" data-i18n>取消</button>
+    <button id="spOk" class="primary" data-i18n>拆分</button>
   </div>
 </dialog>
 <dialog id="dlgExtChange">
-  <h3 id="extTitle">文件已被外部修改</h3>
+  <h3 id="extTitle" data-i18n>文件已被外部修改</h3>
   <div id="extMsg" style="font-size:13px;line-height:1.7;margin:2px 0 10px"></div>
   <div class="btns">
-    <button id="extKeep">保留我的</button>
-    <button id="extReload" class="primary">重新加载</button>
+    <button id="extKeep" data-i18n>保留我的</button>
+    <button id="extReload" class="primary" data-i18n>重新加载</button>
   </div>
 </dialog>
 <dialog id="dlgAbout">
-  <h3>txtBookWriteTool · 使用说明</h3>
+  <h3 data-i18n>txtBookWriteTool · 使用说明</h3>
   <div class="author">
-      <div class="name">张亮军　无锡·海岸城</div>
+      <div class="name" data-i18n>张亮军　无锡·海岸城</div>
       <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
   </div>
-  <div class="ab-body">
+  <div class="ab-body" data-i18n-html>
     <h4>这是什么</h4>
     txtBookWriteTool 是一款免费开源的本地写作工具。它以一个普通文件夹作为书稿目录，用 .txt / .md 文件按 Markdown 语法写作，最终可合并成书、导出 PDF / HTML / Markdown。
     
@@ -939,14 +945,14 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
     <h4>四种模式</h4>
     <ul>
-      <li><b>编辑</b>：左写右预览，自动保存；<b>预览</b>：单独预览当前文件。</li>
+      <li><b>编辑</b>：左写右预览，自动保存；</li><li><b>预览</b>：单独预览当前文件。</li>
       <li><b>阅览</b>：全文件夹合并成书，左侧目录先文件名、再文内标题。</li>
       <li><b>大纲</b>：卡片纵览全书，拖卡片调序/移入文件夹，编号自动重排。</li>
     </ul>
     <h4>写作辅助</h4>
     <ul>
-      <li><b>图片</b>：粘贴/拖入自动存 assets 并插入，语法 <code>![](路径 =600x400 center)</code>，宽高可只写一个；<b>表格</b>：表格内浮出工具条增删行列；<b>调色盘</b>：选色插入色值；<b>全角空格</b>：插入中文空格。</li>
-      <li><b>◀/▶</b>：按目录顺序切换文件（草稿除外）；<b>搜索</b>：全文查找，点结果跳转，Esc 或 ✕ 清空。</li>
+      <li><b>图片</b>：粘贴/拖入自动存 assets 并插入，语法 <code>![](路径 =600x400 center)</code>，宽高可只写一个；</li><li><b>表格</b>：表格内浮出工具条增删行列；</li><li><b>调色盘</b>：选色插入色值；</li><li><b>全角空格</b>：插入中文空格。</li>
+      <li><b>◀/▶</b>：按目录顺序切换文件（草稿除外）；</li><li><b>搜索</b>：全文查找，点结果跳转，Esc 或 ✕ 清空。</li>
       <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
       <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
       <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏均按组操作。</li>
@@ -969,94 +975,94 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     </ul>
   </div>
   <div class="btns">
-    <button id="aboutOk" class="primary">知道了</button>
+    <button id="aboutOk" class="primary" data-i18n>知道了</button>
   </div>
 </dialog>
 <dialog id="dlgTrash">
-  <h3>回收站</h3>
-  <div style="font-size:12.5px;color:var(--muted)">删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。</div>
+  <h3 data-i18n>回收站</h3>
+  <div style="font-size:12.5px;color:var(--muted)" data-i18n>删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。</div>
   <div id="trashList" class="recycle-list"></div>
   <div class="btns">
-    <button id="trashEmpty" class="danger">清空回收站</button>
-    <button id="trashClose" class="primary">关闭</button>
+    <button id="trashEmpty" class="danger" data-i18n>清空回收站</button>
+    <button id="trashClose" class="primary" data-i18n>关闭</button>
   </div>
 </dialog>
 <dialog id="dlgHistory">
-  <h3>历史版本 · <span id="histFile" style="font-weight:400;color:var(--muted)"></span></h3>
-  <div style="font-size:12.5px;color:var(--muted)">自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。</div>
+  <h3 data-i18n-block>历史版本 · <span id="histFile" style="font-weight:400;color:var(--muted)"></span></h3>
+  <div style="font-size:12.5px;color:var(--muted)" data-i18n>自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。</div>
   <div class="hist-wrap">
     <div id="histList"></div>
     <div style="flex:1;min-width:0">
-      <div id="histMeta">点击左侧版本查看内容</div>
+      <div id="histMeta" data-i18n>点击左侧版本查看内容</div>
       <div id="histView"></div>
-      <div style="margin-top:8px"><button id="histRestore" class="primary" disabled>恢复此版本</button></div>
+      <div style="margin-top:8px"><button id="histRestore" class="primary" disabled data-i18n>恢复此版本</button></div>
     </div>
   </div>
   <div class="btns">
-    <button id="histClearFile" class="danger">清空当前文件历史</button>
-    <button id="histClearAll" class="danger">清空全部文件历史</button>
-    <button id="histClose" class="primary">关闭</button>
+    <button id="histClearFile" class="danger" data-i18n>清空当前文件历史</button>
+    <button id="histClearAll" class="danger" data-i18n>清空全部文件历史</button>
+    <button id="histClose" class="primary" data-i18n>关闭</button>
   </div>
 </dialog>
 <dialog id="dlgBook">
-  <h3>排版设置</h3>
-  <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" placeholder="留空则用项目文件夹名"></div>
-  <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" placeholder="如：卷一 / 修订版 v2（可空）"></div>
-  <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" placeholder="署名（可空）"></div>
-  <div class="row"><label style="width:72px">成书日期</label><input type="date" id="bkDate"></div>
-  <div class="row"><label style="width:72px">成书部分</label>
-    <label><input type="checkbox" id="bkCover"> 封面页</label>
-    <label><input type="checkbox" id="bkToc"> 目录页</label>
-    <label><input type="checkbox" id="bkBreak"> 每章另起一页</label>
+  <h3 data-i18n>排版设置</h3>
+  <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" data-i18n-ph placeholder="留空则用项目文件夹名"></div>
+  <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" data-i18n-ph placeholder="如：卷一 / 修订版 v2（可空）"></div>
+  <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" data-i18n-ph placeholder="署名（可空）"></div>
+  <div class="row"><label style="width:72px" data-i18n-block>成书日期</label><input type="date" id="bkDate"></div>
+  <div class="row"><label style="width:72px" data-i18n>成书部分</label>
+    <label data-i18n-block><input type="checkbox" id="bkCover"> 封面页</label>
+    <label data-i18n-block><input type="checkbox" id="bkToc"> 目录页</label>
+    <label data-i18n-block><input type="checkbox" id="bkBreak"> 每章另起一页</label>
   </div>
-  <div class="row"><label style="width:72px">标题编号</label>
-    <label><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
+  <div class="row"><label style="width:72px" data-i18n>标题编号</label>
+    <label data-i18n-block><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
   </div>
-  <div class="row"><label style="width:72px">正文排版</label>
-    <label><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF、HTML、编辑预览统一生效）</label>
+  <div class="row"><label style="width:72px" data-i18n>正文排版</label>
+    <label data-i18n-block><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF、HTML、编辑预览统一生效）</label>
   </div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7">说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7" data-i18n>说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
   <div class="btns">
-    <button id="bkReset" type="button">恢复默认</button>
-    <button id="bkCancel">取消</button>
-    <button id="bkSave" class="primary">保存</button>
+    <button id="bkReset" type="button" data-i18n>恢复默认</button>
+    <button id="bkCancel" data-i18n>取消</button>
+    <button id="bkSave" class="primary" data-i18n>保存</button>
   </div>
 </dialog>
 <dialog id="dlgStyle">
-  <h3>样式设置（style.css）</h3>
+  <h3 data-i18n>样式设置（style.css）</h3>
   <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 6px;line-height:1.6"></div>
-  <div class="stl-h">配色</div>
+  <div class="stl-h" data-i18n>配色</div>
   <div id="stlColorGrid" class="stl-c-grid"></div>
-  <div class="stl-h" style="margin-top:12px">成书版式<button type="button" id="btnStlResetTheme" class="stl-sec-reset" title="恢复为当前内置版式默认">↺ 恢复默认</button></div>
-  <div class="row" style="margin-top:4px"><label style="width:72px;flex:none;color:var(--text)">整体缩放</label>
+  <div class="stl-h" style="margin-top:12px">成书版式<button type="button" id="btnStlResetTheme" class="stl-sec-reset" data-i18n-title title="恢复为当前内置版式默认">↺ 恢复默认</button></div>
+  <div class="row" style="margin-top:4px"><label style="width:72px;flex:none;color:var(--text)" data-i18n>整体缩放</label>
     <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
     <span id="stlZoomVal" style="width:40px;text-align:right;font-size:12px;color:var(--muted);margin-left:6px;flex:none"></span>
-    <button type="button" id="btnStlResetZoom" class="stl-sec-reset" title="恢复缩放（版式正文字号）">↺</button>
+    <button type="button" id="btnStlResetZoom" class="stl-sec-reset" data-i18n-title title="恢复缩放（版式正文字号）">↺</button>
   </div>
-  <div class="row"><label style="width:72px;flex:none">正文字体</label>
-    <select id="stlFontBody" style="flex:1;min-width:0;padding:2px 4px" title="正文字体"></select>
-    <input id="stlFontBodyCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" placeholder="字体栈，如 Georgia, SimSun, serif">
-    <button type="button" class="stl-f-reset" data-f-reset="stlFontBody" title="恢复为当前版式默认字体">↺</button>
+  <div class="row"><label style="width:72px;flex:none" data-i18n>正文字体</label>
+    <select id="stlFontBody" style="flex:1;min-width:0;padding:2px 4px" data-i18n-title title="正文字体"></select>
+    <input id="stlFontBodyCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" data-i18n-ph placeholder="字体栈，如 Georgia, SimSun, serif">
+    <button type="button" class="stl-f-reset" data-f-reset="stlFontBody" data-i18n-title title="恢复为当前版式默认字体">↺</button>
   </div>
-  <div class="row"><label style="width:72px;flex:none">标题字体</label>
-    <select id="stlFontHead" style="flex:1;min-width:0;padding:2px 4px" title="标题字体"></select>
-    <input id="stlFontHeadCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" placeholder="字体栈，如 Georgia, SimSun, serif">
-    <button type="button" class="stl-f-reset" data-f-reset="stlFontHead" title="恢复为当前版式默认字体">↺</button>
+  <div class="row"><label style="width:72px;flex:none" data-i18n>标题字体</label>
+    <select id="stlFontHead" style="flex:1;min-width:0;padding:2px 4px" data-i18n-title title="标题字体"></select>
+    <input id="stlFontHeadCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" data-i18n-ph placeholder="字体栈，如 Georgia, SimSun, serif">
+    <button type="button" class="stl-f-reset" data-f-reset="stlFontHead" data-i18n-title title="恢复为当前版式默认字体">↺</button>
   </div>
   <div id="stlThemeGrid" class="stl-n-grid"></div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px">说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px" data-i18n>说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。</div>
   <div class="btns">
-    <button id="stlCode">源码编辑</button>
-    <button id="stlCancel">取消</button>
-    <button id="stlSave" class="primary">保存</button>
+    <button id="stlCode" data-i18n>源码编辑</button>
+    <button id="stlCancel" data-i18n>取消</button>
+    <button id="stlSave" class="primary" data-i18n>保存</button>
   </div>
 </dialog>
-<button id="toTop" title="返回顶部">↑</button>
+<button id="toTop" data-i18n-title title="返回顶部">↑</button>
 <div id="toast"></div>
 <div id="dropMask">
   <div>
-    <div class="dm-main">松开以打开</div>
-    <div class="dm-sub">拖入文件夹＝作为书稿项目打开<br>拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）</div>
+    <div class="dm-main" data-i18n>松开以打开</div>
+    <div class="dm-sub" data-i18n-block>拖入文件夹＝作为书稿项目打开<br>拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）</div>
   </div>
 </div>
 <div id="errBanner"></div>
@@ -1153,11 +1159,471 @@ window.onerror = function(msg, src, line) {
   const mo = document.createElement('div');
   mo.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:2147483647!important;background:#f2f4f7!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:24px!important;box-sizing:border-box!important;font:14px/1.7 system-ui,sans-serif!important;';
   mo.innerHTML = '<div style="max-width:420px;width:100%;box-sizing:border-box;background:#fff;border:1px solid #e3e6ea;border-radius:12px;padding:28px 26px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.08)">'
-    + '<div style="font-size:17px;font-weight:600;margin-bottom:8px">暂不支持手机浏览器</div>'
+    + '<div style="font-size:17px;font-weight:600">暂不支持手机浏览器</div>'
+    + '<div style="font-size:13px;font-weight:600;color:#888;margin:2px 0 12px">Mobile browser not supported yet</div>'
     + '<div style="color:#666">这个工具目前只支持在桌面浏览器（Edge/Chrome）打开，不支持在手机浏览器打开。请将本页地址发送到电脑，在桌面浏览器中使用。</div>'
+    + '<div style="color:#999;font-size:12.5px;margin-top:10px">This tool currently works only in desktop browsers (Edge/Chrome). Please send this page address to your computer and open it there.</div>'
     + '</div>';
   (document.documentElement || document.body).appendChild(mo);
 })();
+
+/* ================= i18n 框架：界面语言 zh/en，中文原文作 key，缺翻译回落中文 ================= */
+const LANG = (function () { try { const s = localStorage.getItem('wt-lang'); if (s === 'en' || s === 'zh') return s; return (navigator.language || 'zh').toLowerCase().slice(0, 2) === 'zh' ? 'zh' : 'en'; } catch (e) { return 'zh'; } })();
+const EN = {
+  /* 工具栏按钮 */
+  '打开文件夹': 'Open Folder', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
+  '新建文件夹': 'New Folder', '重命名': 'Rename', '自动文件名': 'Auto Name', '重新编号': 'Renumber',
+  '隐藏文件': 'Hide', '复制': 'Copy', '删除': 'Delete', '回收站': 'Trash', '合并': 'Merge',
+  '取消选择': 'Deselect', '拆分': 'Split', '说明': 'Help', '编辑': 'Edit', '预览': 'Preview',
+  '大纲': 'Outline', '阅览': 'Read', '刷新': 'Refresh', '编辑样式': 'Edit Style', '排版设置': 'Book Layout',
+  '导出 PDF': 'Export PDF', '导出 HTML': 'Export HTML', '导出 MD': 'Export MD',
+  '打开所在文件夹': 'Open Containing Folder', '选择写作文件夹': 'Choose Writing Folder',
+  /* 配色/版式下拉 */
+  '经典黑': 'Classic Black', '典雅红': 'Elegant Red', '学术蓝': 'Academic Blue', '护眼绿': 'Eye-care Green',
+  '暖阳橙': 'Warm Orange', '典雅紫': 'Elegant Purple', '自定义配色': 'Custom Colors',
+  '经典书籍': 'Classic Book', '现代简洁': 'Modern', '学术': 'Academic', '手机阅览': 'Phone', '自定义版式': 'Custom Layout',
+  /* 模式工具条 / 表格栏 / 大纲 / 目录 */
+  '表格：': 'Table:', '↑插入行': '↑ Row above', '↓插入行': '↓ Row below', '删除行': 'Delete row',
+  '←插入列': '← Col left', '→插入列': '→ Col right', '删除列': 'Delete col',
+  '光标放在表格任意单元格内即可编辑': 'Click any cell in the table to edit it',
+  '目 录': 'Contents', '全书大纲': 'Book Outline',
+  '拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑': 'Drag cards to reorder chapters (renumbers 110/120… automatically); drop onto the middle of a folder card to move into it; click a file card to edit',
+  /* 通用按钮 */
+  '取消': 'Cancel', '插入': 'Insert', '替换': 'Replace', '保存': 'Save', '关闭': 'Close',
+  '确认插入': 'Insert', '恢复默认': 'Reset', '知道了': 'Got it', '保留我的': 'Keep mine', '重新加载': 'Reload',
+  /* 表格对话框 */
+  '插入表格': 'Insert Table', '行数': 'Rows', '列数': 'Columns', '对齐': 'Align',
+  '默认': 'Default', '左对齐': 'Left', '居中': 'Center', '右对齐': 'Right',
+  /* 调色盘 */
+  '调色盘': 'Color Palette',
+  /* 查找替换 */
+  '查找替换': 'Find & Replace', '仅当前文件': 'Current file only', '整个项目（全部 md/txt）': 'Whole project (all md/txt)',
+  '查找：': 'Find:', '替换为：': 'Replace with:',
+  /* 拆分 */
+  '拆分文件': 'Split File', '文件：': 'File:', '方式：': 'Mode:', '从光标拆分': 'From cursor',
+  '按标题拆分': 'By heading', '按关键词拆分': 'By keyword', '标题级别：': 'Heading level:',
+  '只按该级别标题拆分，忽略其他级别': 'Split only by headings of this level, ignore others',
+  '关键词：': 'Keyword:', '行首出现该关键词的行即拆分点': 'Lines starting with this keyword become split points',
+  '光标行：': 'Cursor line:',
+  /* 外部修改 */
+  '文件已被外部修改': 'File changed outside the editor',
+  /* 回收站 / 历史 */
+  '删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。': 'Deleted/merged files go to the .trash folder in the project first and can be restored; emptied items are gone for good.',
+  '清空回收站': 'Empty Trash',
+  '历史版本 ·': 'History ·',
+  '自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。': 'Old versions are kept automatically on change (latest 20 per file, in the .history folder of the project).',
+  '点击左侧版本查看内容': 'Click a version on the left to view it',
+  '恢复此版本': 'Restore this version',
+  '清空当前文件历史': 'Clear this file\'s history', '清空全部文件历史': 'Clear ALL history',
+  /* 排版设置 */
+  '书名': 'Book title', '副标题': 'Subtitle', '作者': 'Author', '成书日期': 'Book date', '成书部分': 'Sections',
+  '封面页': 'Cover page', '目录页': 'TOC page', '每章另起一页': 'New page per chapter',
+  '标题编号': 'Heading numbering',
+  '自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）': 'Auto numbering (1, 1.1, 1.1.1…; works in PDF & HTML)',
+  '正文排版': 'Body layout',
+  '首行缩进 2 字符（PDF、HTML、编辑预览统一生效）': 'Indent first line 2 chars (PDF, HTML & preview alike)',
+  '说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。': 'Note: the TOC is generated as "file = chapter, heading = section" without page numbers; running head and page numbers come from the template, requires Chrome/Edge 131+.',
+  /* 样式设置 */
+  '样式设置（style.css）': 'Style Settings (style.css)',
+  '配色': 'Colors', '成书版式': 'Book Layout', '整体缩放': 'Zoom', '正文字体': 'Body font', '标题字体': 'Heading font',
+  '↺ 恢复默认': '↺ Reset', '说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。': 'Note: changes preview live but are only written when you click "Save"; empty heading sizes fall back to built-in defaults; header/footer are set in "Book Layout".',
+  '源码编辑': 'Edit CSS',
+  /* 欢迎页 / 拖放 / 状态栏 */
+  '一款用txt写作的小工具': 'A small writing tool that works with plain txt files',
+  '使用说明': 'User Guide',
+  '松开以打开': 'Drop to open',
+  '拖入文件夹＝作为书稿项目打开': 'Drop a folder to open it as your book project',
+  '拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）': 'Drop .md / .txt files to open and edit directly (writes back to the files)',
+  /* 工具栏 title 提示 */
+  '继续上次打开的文件夹': 'Reopen the last folder',
+  '新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10': 'New .txt file (parsed as Markdown), auto-numbered +10',
+  '新建 .md 文件，自动编号 +10': 'New .md file, auto-numbered +10',
+  '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 display columns, ASCII counts 0.5)',
+  '统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）': 'Renumber files and numbered subfolders in this folder as 110, 120, 130… (drafts excluded, text kept, missing numbers filled)',
+  '隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏': 'Hide = prefix filename with _ (excluded from Read/PDF/export); click again to unhide',
+  '复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）': 'Copy in the same folder with -copy1 suffix (-copy2, -copy3 on conflicts)',
+  '回收站：删除/合并的文件移到这里，可恢复': 'Trash: deleted/merged files go here, restorable',
+  'Ctrl+点击多选；内容写入第一个文件，其余删除': 'Ctrl+click to multi-select; content merges into the first file, the rest are deleted',
+  '清空多选（Esc 同效）': 'Clear multi-selection (Esc works too)',
+  '拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）': 'Split by cursor/heading/keyword; first half keeps the original name, rest become base_2.md, base_3.md… (original sorts first)',
+  '减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Smaller: editor font in edit mode (browser-remembered); layout zoom in preview/read (written to style.css)',
+  '增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Larger: editor font in edit mode (browser-remembered); layout zoom in preview/read (written to style.css)',
+  '重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）': 'Reset: editor back to 15px in edit mode; layout back to 100% zoom in preview/read',
+  '软件使用说明': 'User guide',
+  '切换明暗主题': 'Toggle light/dark theme',
+  '上一个文件': 'Previous file', '下一个文件': 'Next file',
+  '一级标题（再点取消）': 'Heading 1 (click again to remove)',
+  '二级标题（再点取消）': 'Heading 2 (click again to remove)',
+  '三级标题（再点取消）': 'Heading 3 (click again to remove)',
+  '四级标题（再点取消）': 'Heading 4 (click again to remove)',
+  '五级标题（再点取消）': 'Heading 5 (click again to remove)',
+  '六级标题（再点取消）': 'Heading 6 (click again to remove)',
+  '粗体（Ctrl+B）': 'Bold (Ctrl+B)', '删除线': 'Strikethrough', '斜体（Ctrl+I）': 'Italic (Ctrl+I)',
+  '英文大小写循环：首字母大写 → 全大写 → 全小写': 'Cycle case: Capitalize → ALL CAPS → all lower',
+  '无序列表（再点取消）': 'Bullet list (click again to remove)',
+  '有序列表（再点取消）': 'Numbered list (click again to remove)',
+  '任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换': 'Task list: cycle current line between todo (- [ ]), done (- [x]) and none',
+  '插入分隔线': 'Insert horizontal rule',
+  '插入中文全角空格，用于中文排版': 'Insert a full-width space for CJK typography',
+  'HTML 注释：选中则包成 \x3C!--注释-->，未选中则插入模板；仅写作时可见，阅览导出不显示': 'HTML comment: wraps selection in \x3C!-- --> or inserts a template; visible only while editing, hidden in Read/export',
+  '插入当前日期时间（含星期），如 2026-09-19 23:45 星期六': 'Insert current date/time with weekday, e.g. 2026-09-19 23:45 Saturday',
+  '引用块（再点取消）': 'Blockquote (click again to remove)',
+  '行内代码': 'Inline code',
+  '代码块（选中多行后点击可包裹）': 'Code block (select lines first to wrap them)',
+  '调色盘：选择颜色，确认后把色值插入光标处': 'Palette: pick a color and insert the hex at the cursor',
+  '插入链接（选中网址可直接包裹）': 'Insert link (wraps a selected URL)',
+  '插入锚点（页内跳转标记 \x3Ca id="name">）': 'Insert anchor (in-page jump target \x3Ca id="name">)',
+  '插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right': 'Insert image (paste/drop works too); syntax: ![](path =600x400 center), width or height may be omitted, align center/left/right',
+  '查找替换：可在当前文件或整个项目中进行': 'Find & replace in the current file or the whole project',
+  '当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）': 'Auto-save history of the current file (latest 20 versions, preview & restore)',
+  '可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css': 'Visually set colors, fonts, sizes…; source editing inside; saved to style.css',
+  '选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容': 'Pick a built-in color scheme (replaces the color section of style.css); fine-tune via "Edit Style"',
+  '成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调': 'Book layout: replaces the layout & header/footer sections of style.css (fonts/sizes/leading/align/@page); fine-tune via "Edit Style"',
+  '填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号': 'Set title/subtitle/author/date; toggle cover, TOC, page breaks, indent, heading numbering',
+  '打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件': 'Print / Save as PDF: whole book in Read mode, current file only in Preview mode',
+  '导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件': 'Export single-file HTML (with TOC & custom styles): whole book in Read mode, current file only in Preview mode',
+  '导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件': 'Export .md: merged in TOC order in Read mode, current file only in Preview mode',
+  '折叠文件目录（腾出编辑空间）': 'Collapse file tree (more editing room)',
+  '折叠文件目录': 'Collapse file tree',
+  '在项目全部文件中搜索，Enter 搜索': 'Search across all files in the project, Enter to search',
+  '搜索': 'Search', '清空搜索，恢复目录显示': 'Clear search, show the tree again',
+  '展开文件目录': 'Expand file tree',
+  '隐藏右侧预览，专心编辑': 'Hide the preview pane to focus on editing',
+  '同步滚动：编辑与预览互相跟随': 'Sync scroll: editor and preview follow each other',
+  '选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）': 'Pick the file\'s folder as the book project (the file opens automatically)',
+  '自定义颜色': 'Custom color',
+  '返回顶部': 'Back to top', '切换界面语言': 'Toggle UI language',
+  '张亮军　无锡·海岸城': 'Zhang Liangjun · Wuxi, China',
+  /* 编辑器 / 搜索 */
+  '请先在左侧选择文件，或点击「新建txt」 / 「新建md」': 'Pick a file on the left, or click "New txt" / "New md"',
+  '搜索文件内容…': 'Search file contents…',
+  /* ── 拼接片段：日期 / 计数 ── */
+  ' 年 ': '-', ' 月 ': '-', ' 日': '', ' 星期': ' ',
+  '日': 'Sun', '一': 'Mon', '二': 'Tue', '三': 'Wed', '四': 'Thu', '五': 'Fri', '六': 'Sat',
+  ' 字': ' chars', ' 字节': ' bytes', ' 字节</div>': ' bytes</div>',
+  '第 ': 'Page ', ' 页': '', '行 ': 'Line ',
+  ' · 第 ': ' · line ', ' 行</div>': '</div>',
+  ' 篇</span></div>': ' items</span></div>',
+  ' 项': ' items', ' 项）': ' items)', ' 项到：': ' items to: ', ' 项（文件 ': ' items (',
+  ' 个）': ' items)', '（共 ': ' (', '（跳过 ': ' (skipping ',
+  ' 个文件': ' files', ' 个文件、': ' files, ', ' 个、文件夹 ': ' files, ', ' 个文件 → ': ' files → ',
+  ' 个文件？\n（移入回收站，可在「回收站」中恢复）': ' files?\n(Moved to Trash; restore from the Trash)',
+  ' 个文件移入回收站': ' files moved to Trash',
+  ' 个文件已忽略（一次打开一个）': ' files ignored (open one at a time)',
+  ' 个文件按目录顺序合并进「': ' files will be merged in TOC order into "',
+  ' 项因重名跳过': ' items skipped (duplicate names)', ' 项因重名跳过（保留原名）': ' items skipped (kept their names)',
+  ' 处': ' occurrences', ' 处「': ' occurrences of "',
+  ' 处（已存入历史版本，可在「历史」中恢复）': ' occurrences (saved to History first; restorable)',
+  ' 份': ' parts', ' 份为 ': ' parts as ', ' 份：<div class="sp-names">· ': ' parts: <div class="sp-names">· ',
+  ' 行）<br>· ': ' lines)<br>· ', ' 行，光标行起写入 ': ' lines; from the cursor line writes ',
+  ' 个拆分点，将拆为 ': ' split points, will split into ',
+  '（原文件截断为前 ': ' (original truncated to the first ',
+  '（光标行起）</div>': ' (from the cursor line)</div>',
+  '（第一个拆分块）\n': ' (first split block)\n', '（第一个拆分块）<br>': ' (first split block)<br>',
+  '，原文件保留前 ': '; the original keeps the first ', '，后续 ': '; then ',
+  '其余 ': 'the remaining ', ' 著': '', ' 著</div>': '</div>',
+  '（设置仍已暂存浏览器，关闭会丢失）': ' (settings only staged in the browser, lost on close)',
+  '（无标题）': ' (untitled)', '（可直接写回）': ' (writes back to the original)',
+  '（临时名以 .wttmp 开头，可手动改回）': ' (temp names start with .wttmp; rename them back manually)',
+  /* ── 查找替换 ── */
+  '已在 ': 'Updated ', ' 个文件中替换 ': ' files, replacing ',
+  '项目内共 ': 'Updated ', '当前文件中共 ': 'The current file contains ',
+  '当前文件没有找到「': 'Not found in the current file: "', '没有找到「': 'Not found: "', '项目内没有找到「': 'Not found anywhere in the project: "',
+  '」。\n确定全部替换为「': '".\nReplace all with "',
+  '」吗？\n（替换前内容会自动存入「历史」，可恢复）': '"?\n(The old content is saved to History first; restorable)',
+  '」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）': '"?\n(Old content of each file is saved to History first; restorable)',
+  '请输入查找内容': 'Enter text to find', '请输入关键词': 'Enter a keyword',
+  '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）': 'Scans all md/txt files in the project (excluding style.css and images; drafts included)',
+  /* ── 新建 / 打开 / 拖放 ── */
+  '已打开：': 'Opened: ', '已打开外部文件：': 'Opened external file: ',
+  '已打开文件夹，其余拖入项已忽略': 'Folder opened; other dropped items ignored',
+  '仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入': 'Only folders or .md / .txt files can be opened; drop images while editing a project file',
+  '📄 外部文件：': '📄 External file: ',
+  '[图]': '[image]',
+  '> 读取失败: ': '> Failed to read: ',
+  '已恢复上次编辑：': 'Reopened last edit: ',
+  '已创建 ': 'Created: ', '已创建 style.css 并应用配色：': 'Created style.css and applied colors: ',
+  '已在项目根目录创建 style.css': 'Created style.css in the project root',
+  '目标务必选内置「另存为 PDF」（会自动填文件名 ': 'For the printer, be sure to choose the built-in "Save as PDF" (it fills in the file name ',
+  '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）': '); do not choose "Microsoft Print to PDF" — its file name would always be empty (a known Win11 limitation)',
+  /* ── 文件操作 toasts ── */
+  '已移动 ': 'Moved ', '已移动到：': 'Moved to: ', '根目录': 'Root',
+  '已复制 ': 'Copied ', '已复制：': 'Copied: ',
+  '已将 ': '', '已移入回收站': 'Moved to Trash',
+  '已合并 ': 'Merged ', '已替换 ': 'Replaced ', '已插入 ': 'Inserted: ',
+  '已导出 ': 'Exported: ', '已拆分为 ': 'Split into ',
+  '已恢复：': 'Restored: ', '已恢复到 ': 'Restored to the version from ', ' 的版本': '',
+  '已隐藏 ': 'Hidden: ', '已隐藏，不参与输出：': 'Hidden (excluded from output): ',
+  '已取消隐藏 ': 'Unhidden: ', '已取消隐藏：': 'Unhidden: ',
+  '已刷新': 'Refreshed', '已保存': 'Saved',
+  '已重命名': 'Renamed', '已重命名：': 'Renamed: ',
+  '已重新编号，': 'Renumbered; ', '已调整顺序，': 'Order adjusted; ',
+  '顺序已调整（编号已重排）': 'Order adjusted (numbers re-sorted)',
+  '文件夹「': 'Folder "', '」已重新编号 ': '" renumbered: ',
+  '合并(': 'Merge (', '版本 ': 'Version ',
+  '已保留内容，请新建文件转存': 'Content kept; create a new file to save it',
+  '副本数量过多': 'Too many copies',
+  /* ── 删除 / 移动 / 重命名确认 ── */
+  '确定删除「': 'Delete "', '确定删除所选 ': 'Delete the selected ',
+  '」？该文件/文件夹及其历史版本都将被清除，不可恢复': '"? The file/folder and its history versions will all be removed. This cannot be undone',
+  '及其全部内容': ' and everything inside it',
+  '彻底删除': 'Delete permanently', '彻底删除「': 'Permanently delete "',
+  '？\n（移入回收站，可在「回收站」中恢复）': '?\n(Moved to Trash; restore from the Trash)',
+  '？不可恢复。': '? This cannot be undone.',
+  '清空回收站？其中所有文件/文件夹将彻底删除，不可恢复': 'Empty the Trash? Everything in it will be permanently deleted. This cannot be undone.',
+  '回收站已空': 'Trash is empty', '回收站已清空': 'Trash emptied',
+  '」，其余文件移入回收站（可恢复）。确定继续？': '"; the rest go to the Trash (restorable). Continue?',
+  '，其余文件在回收站': '; the rest are in the Trash',
+  '将把所选 ': 'The selected ',
+  '将对文件夹「': 'Will renumber the files and numbered subfolders in "',
+  '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ': '" as 110, 120, 130…\nTotal: ',
+  ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n': ' items).\nSubfolders are not renumbered recursively; unnumbered folders stay at the top untouched.\nOnly numbers change; text is kept, missing numbers are filled in.\n\nExample:\n',
+  '」内没有可编号的文件或带编号文件夹': '" has no files or numbered folders to renumber',
+  '重新编号中断：': 'Renumbering aborted: ',
+  '名称已符合格式': 'Names already match the format',
+  '不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）': 'Folders without a number always sort first and cannot take a numbered slot (drag them into another folder instead)',
+  '不能移动到自身内部': 'Cannot move into itself',
+  '没有可移动的项目（重名或已在目标位置）': 'Nothing to move (duplicates or already in place)',
+  '已在目标位置': 'Already at the destination',
+  '已存在同名': 'Name conflict: ', '已存在同名文件：': 'A file with the same name already exists: ',
+  '目标已存在同名文件：': 'A file with the same name already exists: ', '目标已存在同名文件夹：': 'A folder with the same name already exists: ',
+  '目标文件名已被占用，编号已自动顺延：\n\n': 'Some target names already exist; numbering skipped ahead automatically:\n\n',
+  '\n\n此操作直接修改文件/文件夹名，确定继续？': '\n\nThis renames the file/folder directly. Continue?',
+  '\n\n仍按以上名称创建吗？': '\n\nCreate with the name(s) above anyway?',
+  '-新文件夹': '-New Folder',
+  '文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：': 'Folder name (a number prefix like "120-Text" joins sorting; without one it always sorts before files):',
+  '新名称（文件无后缀自动补 .txt）：': 'New name (.txt is appended automatically if missing):',
+  '文件': 'file', '文件夹': 'folder',
+  '拖动文件/文件夹到这里可移动': 'Drag files/folders here to move them',
+  /* ── 错误前缀 ── */
+  '保存失败': 'Save failed', '保存失败：': 'Save failed: ',
+  '读取失败': 'Failed to read', '读取失败：': 'Failed to read: ',
+  '打开失败：': 'Failed to open: ', '创建失败：': 'Failed to create: ',
+  '删除失败：': 'Failed to delete: ', '复制失败：': 'Failed to copy: ',
+  '移动失败：': 'Failed to move: ', '重命名失败：': 'Failed to rename: ',
+  '合并失败：': 'Failed to merge: ', '拆分失败：': 'Failed to split: ', '替换失败：': 'Failed to replace: ',
+  '恢复失败：': 'Failed to restore: ', '恢复': 'Restore', '操作失败：': 'Operation failed: ',
+  '应用样式失败：': 'Failed to apply style: ', '写入 style.css 失败：': 'Failed to write style.css: ',
+  '调节字号失败：': 'Failed to change font size: ', '重置字号失败：': 'Failed to reset font size: ',
+  '重新加载失败：': 'Failed to reload: ', '重连失败，请重新选择文件夹': 'Reconnect failed; please choose the folder again',
+  ' 写入失败': ' write failed', ' 写入失败：': ' write failed: ',
+  '写入失败': 'Write failed', '写入失败：': 'Write failed: ',
+  '未获得读写权限': 'Read/write permission not granted',
+  '图片不存在: ': 'Image not found: ', '图片加载失败: ': 'Image failed to load: ',
+  '当前文件历史已清空': 'History of this file cleared', '全部文件历史已清空': 'All file history cleared',
+  '该文件没有历史版本': 'No versions for this file', '项目中没有历史版本': 'No versions in this project',
+  /* ── 外部修改 / 保存冲突 ── */
+  '外部有新版本': 'Newer version on disk', '原文件已不存在': 'The original file no longer exists',
+  '原文件已被外部删除或改名，无法保存；请新建文件后把内容转存过去': 'The original file was deleted or renamed outside the editor; cannot save. Create a new file and move the content over',
+  '文件已被外部删除或改名': 'The file was deleted or renamed outside the editor',
+  '文件刚被其它编辑器修改，保存将覆盖其改动。\n仍要保存吗？': 'The file was just changed by another editor; saving will overwrite those changes.\nSave anyway?',
+  '文件已被其它编辑器修改，保存将覆盖磁盘上的新版本。\n仍要保存吗？': 'The file was changed by another editor; saving will overwrite the newer version on disk.\nSave anyway?',
+  '已保留你的版本；之后保存时会再确认一次': 'Your version was kept; you\'ll be asked again on the next save',
+  '已加载磁盘版本': 'Disk version loaded', '未保存…': 'Unsaved…',
+  '</b>」已被其它编辑器改动。<br>选「重新加载」将放弃本页面未保存的改动、载入磁盘新版本；选「保留我的」则暂不加载，之后保存时还会再确认一次。': '</b>" was changed by another editor.<br>"Reload" discards unsaved changes on this page and loads the disk version; "Keep mine" keeps yours for now — you\'ll be asked again on save.',
+  '</b>」在磁盘上已不存在（可能被其它编辑器删除、改名或移动）。<br>窗口里的内容仍保留，但已无法保存回原位置；请在目录中新建文件后把内容转存过去。': '</b>" no longer exists on disk (deleted, renamed or moved by another editor).<br>The content stays in the window but can no longer be saved to the original path; create a new file in the tree and move the content over.',
+  '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 txtBookWriteTool.html）。': '<b style="color:#c0392b">This browser does not support File System Access.</b><br>Please open this file with Edge or Chrome (double-click txtBookWriteTool.html).',
+  /* ── 前置提示 ── */
+  '请先打开文件': 'Open a file first', '请先打开文件夹': 'Open a folder first',
+  '请先打开项目文件夹': 'Open the project folder first', '请先打开一个文件': 'Open a file first',
+  '请先选择文件': 'Select a file first', '请先选中项目内的一个文件': 'Select a file in the project first',
+  '请先在目录中选择一个文件或文件夹': 'Select a file or folder in the tree first',
+  '请先 Ctrl+点击 选择至少两个文件': 'Ctrl+click at least two files first',
+  '请先选中要转换的文字': 'Select some text first',
+  '没有可操作的文件': 'No files to work on', '没有可导出的内容': 'Nothing to export', '没有可切换的文件': 'No file to switch to',
+  '没有内容': 'Nothing to merge', '文件内容为空': 'The file is empty',
+  '选中内容中没有英文字母': 'No English letters in the selection', '第一行没有可用文字': 'No usable text on the first line',
+  '所选文件夹中没有该文件': 'The file is not in the selected folder',
+  '所选文件已不存在，请重新选择': 'The selected files no longer exist; select again',
+  '所选文件已不存在，请重新选择（Esc 或「取消选择」清空）': 'The selected files no longer exist; select again (Esc or "Deselect" clears)',
+  '作用于当前文件：': 'Applies to: ',
+  /* ── 编辑器功能 ── */
+  '请输入链接地址：': 'Enter the link URL:', '链接文字': 'Link text',
+  '请输入锚点名称（英文、数字、下划线或短横）：': 'Anchor name (letters, digits, _ or -):', '锚点名称无效': 'Invalid anchor name',
+  '光标需放在表格内': 'Place the cursor inside a table',
+  '至少保留表头与分隔行': 'Keep at least the header and separator rows', '至少保留一列': 'Keep at least one column',
+  '光标在第一行，无法拆分': 'Cursor is on the first line; cannot split',
+  '光标在最后一行，无法拆分': 'Cursor is on the last line; cannot split',
+  '未找到拆分点': 'No split points found', '只有一个拆分块，无需拆分': 'Only one chunk; nothing to split',
+  '粗体': 'Bold', '斜体': 'Italic', '代码': 'Code', '注释': 'Comment',
+  '同步滚动：开（点击关闭）': 'Sync scroll: on (click to turn off)', '同步滚动：关（点击开启）': 'Sync scroll: off (click to turn on)',
+  '显示右侧 Markdown 预览': 'Show the Markdown preview on the right',
+  /* ── 树 / 大纲 / 阅览 ── */
+  '未命名作品': 'Untitled', '成书': 'Untitled Book',
+  '<div class="toc-h">目 录</div>': '<div class="toc-h">Contents</div>',
+  '<nav class="toc book-toc"><div class="toc-h">目 录</div>': '<nav class="toc book-toc"><div class="toc-h">Contents</div>',
+  '<span class="dtag">不输出</span>': '<span class="dtag">excluded</span>',
+  '<span style="color:#b0741a">[草稿] </span>': '<span style="color:#b0741a">[Draft] </span>',
+  '草稿': 'Draft',
+  '<div class="ol-empty">文件夹为空</div>': '<div class="ol-empty">Folder is empty</div>',
+  'Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动': 'Ctrl+click to multi-select/deselect (for merge/move/delete/copy/hide; Esc or "Deselect" clears); drag moves the whole group',
+  'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n': 'style.css stylesheet: controls heading/body styles; not used in Read/export (edit via "Edit Style" on the toolbar)\n',
+  ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n': ' book settings: stores title/author/date/template…; not used in Read/export (edit via "Cover & Book Settings" on the toolbar)\n',
+  '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n': 'Draft/asset: editable and searchable but excluded from Read/export (remove the leading _ to restore)\n',
+  '隐藏：名称前加 _，不参与阅览/PDF/导出': 'Hide: prefix the name with _ (excluded from Read/PDF/export)',
+  '取消隐藏': 'Unhide', '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）': 'Unhide: remove the leading _ (restore Read/PDF/export)',
+  /* ── 回收站 / 历史对话框内 ── */
+  '<div class="trash-empty">回收站为空</div>': '<div class="trash-empty">Trash is empty</div>',
+  '<div class="trash-empty">读取中…</div>': '<div class="trash-empty">Loading…</div>',
+  '<div class="trash-empty">读取失败：': '<div class="trash-empty">Failed to load: ',
+  '<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>': '<div class="trash-empty">No versions yet<br>Old versions appear here automatically after you edit and save</div>',
+  '<div style="color:var(--muted)">未选择文件</div>': '<div style="color:var(--muted)">No file selected</div>',
+  '<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>': '<div style="color:var(--muted)">No .md / .txt files in this folder</div>',
+  '<div style="color:var(--muted)">正在合并…</div>': '<div style="color:var(--muted)">Merging…</div>',
+  '<div class="s-empty">没有找到包含「': '<div class="s-empty">Nothing contains "',
+  '」的内容</div>': '"</div>',
+  '清空「': 'Clear "', '」的全部历史版本': '" — all its history versions',
+  '清空本项目【所有文件】的历史版本？.history 目录将整个删除，不可恢复。': 'Clear history of ALL files in this project? The whole .history folder will be deleted. This cannot be undone.',
+  /* ── 样式设置 ── */
+  '当前配色：': 'Current colors: ', ' · 调整实时预览，保存后写入 style.css': ' · changes preview live and are written to style.css on save',
+  '自定义': 'Custom', '自定义…': 'Customize…', '默': 'D', '原值': 'orig',
+  '默认（': 'default (', '默认（跟随主题色）': 'default (theme accent)',
+  '跟随正文字体': 'Same as body font',
+  '标题一': 'Heading 1', '标题二': 'Heading 2', '标题三': 'Heading 3', '标题四': 'Heading 4', '标题五': 'Heading 5', '标题六': 'Heading 6',
+  '标题字号': 'Heading size', '标题行距': 'Heading leading', '正文字号': 'Body size', '行距': 'Line height',
+  '条目字号': 'Entry size', '条目行距': 'Entry leading', '副标字号': 'Subtitle size', '副标间距': 'Subtitle spacing',
+  '元信息字号': 'Meta size', '元信息行距': 'Meta leading', '元信息间距': 'Meta spacing',
+  '顶部留白': 'Top padding', '底部留白': 'Bottom padding', '最小高度': 'Min height',
+  '文字对齐': 'Text align', '横向布局': 'Horizontal', '纵向布局': 'Vertical',
+  '左': 'Left', '右': 'Right', '顶': 'Top', '底': 'Bottom',
+  '正文': 'Body', '强调': 'Accent', '次要文字': 'Muted text', '主题色': 'Theme accent', '超链接': 'Hyperlink',
+  '待办框': 'Todo box', '已完成框': 'Done box', '引用底': 'Quote bg', '代码底': 'Code bg',
+  '表头底': 'Table header bg', '斑马纹': 'Zebra stripes', '分隔线': 'Divider',
+  '宋体（衬线）': 'SimSun (serif)', '微软雅黑': 'Microsoft YaHei', '楷体': 'KaiTi', '仿宋': 'FangSong',
+  '黑体': 'SimHei', '等线': 'DengXian', '苹方（macOS）': 'PingFang (macOS)',
+  '思源宋体': 'Source Han Serif', '思源黑体': 'Source Han Sans', '霞鹜文楷': 'LXGW WenKai',
+  '鸿蒙黑体': 'HarmonyOS Sans', '西文衬线 Georgia': 'Georgia (Western serif)', '西文无衬线 Segoe UI': 'Segoe UI (Western sans)',
+  '恢复为「': 'Reset to "', '」': '" ', '封面': 'Cover ', '目录': 'Contents ', '」版式默认': '" layout defaults',
+  '配色「': 'Color scheme "', '」已写入配色区（点“样式”可微调）': '" written to the color section (fine-tune via "Edit Style")',
+  '成书设置已保存': 'Book settings saved',
+  '有尚未保存的调整，确定放弃并进入源码编辑吗？': 'There are unsaved adjustments; discard them and open the CSS source editor?',
+  '项目中还没有 style.css，当前为默认样式预览；': 'No style.css in this project yet; showing a default-style preview. ',
+  '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。': 'This style.css has no color section yet: pick a built-in color scheme once on the toolbar to enable the palette; layout and zoom are unaffected.',
+  '当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？': 'The color section of style.css has been customized; switching to a built-in scheme will overwrite it. Continue?',
+  '当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？': 'The layout section of style.css has been customized; switching to a built-in layout will overwrite it. Continue?',
+  '封面<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ 恢复默认</button>': 'Cover<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ Reset</button>',
+  '目录<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ 恢复默认</button>': 'Contents<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ Reset</button>',
+  ' (恢复': ' (restored', ' (恢复)': ' (restored)',
+  /* ── 拆分对话框 ── */
+  '找到 ': 'Found ', '将拆为 2 份：<div class="sp-names">· ': 'Will split into 2 parts: <div class="sp-names">· ',
+  '恢复到 ': 'Restore the version from ',
+  ' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。': '? The current content will be kept as a new version first — you can still go back.',
+  /* ── 静态标记补漏 ── */
+  'txtBookWriteTool · 使用说明': 'txtBookWriteTool · User Guide',
+  '恢复为当前内置版式默认': 'Restore built-in layout defaults',
+  '恢复缩放（版式正文字号）': 'Restore zoom (layout body font size)',
+  '恢复为当前版式默认字体': 'Restore layout default font',
+  '要查找的文字': 'Text to find',
+  '替换为（留空即删除）': 'Replace with (empty = delete)',
+  '留空则用项目文件夹名': 'Empty = use project folder name',
+  '如：卷一 / 修订版 v2（可空）': 'e.g. Volume 1 / Rev.2 (optional)',
+  '署名（可空）': 'Author name (optional)',
+  '字体栈，如 Georgia, SimSun, serif': 'Font stack, e.g. Georgia, SimSun, serif'
+};
+
+/* 英文版长文整块替换（key 为容器 data-i18n-html；中文改动时需同步更新对应块） */
+const EN_HTML = {
+  welcomeTip: '<code style="display:none">i18n-welcome</code>Highlights: single-file app that manages your writing with plain txt files and folders.<br><br>\
+        <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">Choose Writing Folder</button>\
+        <br><br>\
+        <b>User Guide</b><br>\
+        <ol class="list" style="font-size:14px;text-align:left;">\
+        <li>Please use <b>Edge</b> or <b>Chrome</b>; other browsers may be supported later</li>\
+        <li>Pick a <b>local folder</b> as the book directory; <b>.txt/.md</b> files in it are managed as a tree<br> </li>\
+        <li>"Edit" mode: Markdown editing with live preview;<br>"Outline" mode: drag to reorder;<br>"Read" mode: everything <b>merged into one book</b><br> </li>\
+        <li>Filenames starting with <b>_</b> (e.g. _idea.txt) are drafts, excluded from Read and PDF export<br> </li>\
+        <li>Drag a <b>folder</b> or <b>.txt/.md file</b> into the window to open it;</li>\
+        \
+        </ol>\
+        <br>\
+        <h4>Author: Zhang Liangjun (Wuxi, China) &nbsp;&nbsp;&nbsp;Updated: Sep 23, 2026</h4>',
+  aboutBody: '<h4>What is this</h4>\
+    txtBookWriteTool is a free, open-source local writing tool that consists of a single HTML file. It uses a plain folder as the book directory and .txt / .md files written in Markdown; you can merge every txt/md into a book and export PDF / HTML / Markdown.\
+    \
+    <h4>Numbering &amp; sorting</h4>\
+    <ul>\
+      <li><b>3-digit file numbers</b> (e.g. <code>110.txt</code>): new files auto-increment by 10.</li>\
+      <li><b>Folders can be numbered</b> too, sorted together with files; unnumbered folders sort first.</li>\
+      <li><b>Auto renumber</b>: renumbers the whole folder in one pass, text preserved.</li>\
+      <li><b>Auto naming</b>: <code>110.txt</code> → <code>110-first line.txt</code> (cut at 16 columns).</li>\
+    </ul>\
+    <h4>Drafts / material</h4>\
+    <ul>\
+      <li>Names starting with <code>_</code> (also <code>[草稿]</code>, <code>draft-</code>) count as drafts: editable and searchable, but excluded from Read/export;</li>\
+      <li>Use the hide-files button to toggle quickly.</li>\
+    </ul>\
+    <h4>Four modes</h4>\
+    <ul>\
+      <li><b>Edit</b>: write left, preview right, auto-save; </li><li><b>Preview</b>: preview the current file alone.</li>\
+      <li><b>Read</b>: the whole folder merged into one book; the TOC lists files first, then in-file headings.</li>\
+      <li><b>Outline</b>: cards for the whole book; drag to reorder or move into folders, numbers rearranged automatically.</li>\
+    </ul>\
+    <h4>Writing aids</h4>\
+    <ul>\
+      <li><b>Images</b>: paste/drop auto-saves to assets and inserts; syntax <code>![](path =600x400 center)</code>, width or height may be omitted; </li><li><b>Tables</b>: floating toolbar adds/removes rows &amp; columns;</li><li> <b>Palette</b>: pick a color and insert it; </li><li><b>Full-width space</b>: inserts a CJK space.</li>\
+      <li><b>◀/▶</b>: switch files in TOC order (drafts skipped); </li><li><b>Search</b>: full-text search, click a result to jump, Esc or ✕ clears.</li>\
+      <li><b>Replace</b>: single file or whole project md/txt (drafts need confirmation); a history version is archived before replacing.</li>\
+      <li><b>Comments</b>: <code>&lt;!--comments--&gt;</code> visible only while editing, hidden in Read/PDF/HTML export (kept in MD export).</li>\
+      <li><b>Merge</b>: Ctrl+click to select multiple files; content goes into the first, the rest are deleted; after multi-select, drag/delete/copy/hide work on the whole group.</li>\
+      <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original sorts first); taken names auto-skip with a confirmation; the tree supports drag-moving, drop on the project name = move to root.</li>\
+    </ul>\
+    <h4>Output</h4>\
+    <ul>\
+      <li><b>Export PDF</b>: click export in Read/Preview, choose "Save as PDF" in the print dialog.</li>\
+      <li><b>Export MD</b>: downloads one merged Markdown (dated name); convert to PDF in Typora.</li>\
+      <li><b>Export HTML</b>: single file with left TOC and custom styles (dated name), double-click to read in a browser.</li>\
+    </ul>\
+    <h4>Trash &amp; history</h4>\
+    <ul>\
+      <li>Deleted/merged files go to <code>.trash</code> in the project, restorable or clearable;</li>\
+      <li>Auto-save keeps old content in <code>.history</code> (mirrored by path), 20 versions per file, view &amp; restore;</li>\
+      <li>Rename/move carries history along; restored name conflicts get a "(restore n)" suffix; bulk replace archives first.</li>\
+      <li>Moving to trash keeps history; only deleting for good / emptying trash clears history too—ordinary deletion is recoverable.</li>\
+      <li><code>.trash</code>/<code>.history</code> folders are hidden inside the tool.</li>\
+      <li>Back up the whole project folder regularly.</li>\
+    </ul>'
+};
+if (LANG === 'en') {
+  const wt = document.querySelector('#welcome .tip');
+  if (wt) wt.innerHTML = EN_HTML.welcomeTip;
+  const ab = document.querySelector('#dlgAbout .ab-body');
+  if (ab) ab.innerHTML = EN_HTML.aboutBody;
+}
+
+/* 中文原文查英文翻译；zh 模式或缺翻译时原样返回 */
+const E = s => LANG === 'en' ? (Object.prototype.hasOwnProperty.call(EN, s) ? EN[s] : s) : s;
+
+/* 静态 DOM 翻译：data-i18n(自身文本) / data-i18n-title(title) / data-i18n-ph(placeholder)
+   / data-i18n-block(逐文本节点，富文本容器) / data-i18n-html(innerHTML 为 key，富文本整段) */
+function applyI18n(root) {
+  root = root || document;
+  let el, k, t;
+  root.querySelectorAll('[data-i18n]').forEach(el => {
+    k = el.textContent.trim(); if (!k) return;
+    t = E(k); if (t !== k) el.textContent = t;
+  });
+  root.querySelectorAll('[data-i18n-block]').forEach(el => {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+    let n; while ((n = w.nextNode())) nodes.push(n);
+    nodes.forEach(n => {
+      k = n.nodeValue.trim(); if (!k) return;
+      t = E(k); if (t !== k) n.nodeValue = n.nodeValue.replace(k, t);
+    });
+  });
+  root.querySelectorAll('[data-i18n-html]').forEach(el => {
+    k = el.innerHTML.trim(); if (!k) return;
+    t = E(k); if (t !== k) el.innerHTML = t;
+  });
+  root.querySelectorAll('[data-i18n-title]').forEach(el => {
+    k = el.getAttribute('title'); if (!k) return;
+    t = E(k); if (t !== k) el.setAttribute('title', t);
+  });
+  root.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    k = el.getAttribute('placeholder'); if (!k) return;
+    t = E(k); if (t !== k) el.setAttribute('placeholder', t);
+  });
+}
+applyI18n();
 
 /* ================= state ================= */
 const $ = id => document.getElementById(id);
@@ -1211,6 +1677,18 @@ function idbGet(k) {
     r.onerror = () => rej(r.error);
   });
 }
+
+/* 语言持久化：以 IndexedDB（按副本隔离）为准，localStorage 仅作启动缓存防闪烁；首次把自动选择的语言固化进 IDB */
+(async () => {
+  try {
+    const v = await idbGet('lang');
+    if (v === 'en' || v === 'zh') {
+      if (v !== LANG) { try { localStorage.setItem('wt-lang', v); } catch (e) {} location.reload(); }
+    } else {
+      await idbSet('lang', LANG);
+    }
+  } catch (e) {}
+})();
 
 /* ================= utils ================= */
 const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1267,7 +1745,7 @@ async function useRoot(handle) {
   try { perm = await handle.queryPermission({ mode: 'readwrite' }); } catch (e) {}
   if (perm !== 'granted') {
     perm = await handle.requestPermission({ mode: 'readwrite' });
-    if (perm !== 'granted') { toast('未获得读写权限'); return; }
+    if (perm !== 'granted') { toast(E('未获得读写权限')); return; }
   }
   rootHandle = handle;
   await idbSet('root', handle);
@@ -1303,7 +1781,7 @@ async function useRoot(handle) {
     }
   } catch (e) {}
   setMode('edit');
-  toast(restoredName ? ('已恢复上次编辑：' + restoredName) : ('已打开：' + handle.name));
+  toast(restoredName ? (E('已恢复上次编辑：') + restoredName) : (E('已打开：') + handle.name));
   updateToolbar();
   updateStatus();
 }
@@ -1385,12 +1863,12 @@ function renderTree() {
     if (node.type === 'dir') ico = expanded.has(node.path) ? '📂' : '📁';
     else if (multiSel.includes(node.path)) ico = '✓';
     else ico = '📄';
-    row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (mutedOut ? '<span class="dtag">不输出</span>' : '');
+    row.innerHTML = '<span class="ico">' + ico + '</span><span class="nm">' + esc(node.name) + '</span>' + (mutedOut ? E('<span class="dtag">不输出</span>') : '');
     row.title = (node.aux ? (node.name === 'style.css'
-        ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
-        : node.name + ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n')
-      : node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
-      + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动' : '拖动文件/文件夹到这里可移动');
+        ? E('style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n')
+        : node.name + E(' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n'))
+      : node.draft ? E('草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n') : '')
+      + (node.type === 'file' ? E('Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动') : E('拖动文件/文件夹到这里可移动'));
     row.draggable = true;
     row.ondragstart = e => {
       dragPaths = multiSel.includes(node.path) && multiSel.length > 1 ? multiSel.slice() : [node.path];
@@ -1449,13 +1927,13 @@ function syncTreeSelected() {
 async function moveNode(src, destDirNode) {
   const destPath = destDirNode ? destDirNode.path : '';
   if (src.type === 'dir' && (destPath === src.path || destPath.startsWith(src.path + '/'))) {
-    toast('不能移动到自身内部'); return;
+    toast(E('不能移动到自身内部')); return;
   }
-  if (destPath === parentPath(src.path)) { toast('已在目标位置'); return; }
+  if (destPath === parentPath(src.path)) { toast(E('已在目标位置')); return; }
   try {
     await flushSave();
     const destDir = destDirNode ? destDirNode.handle : rootHandle;
-    try { await destDir.getFileHandle(src.name); toast('目标已存在同名文件：' + src.name); return; } catch (e) {}
+    try { await destDir.getFileHandle(src.name); toast(E('目标已存在同名文件：') + src.name); return; } catch (e) {}
     const oldCur = current ? current.node.path : null;
     await moveEntry(src, destDir);
     multiSel = []; selectedNode = null; current = null;
@@ -1469,8 +1947,8 @@ async function moveNode(src, destDirNode) {
     }
     if (newPath) { const node = findNode(tree, newPath); if (node) { selectedNode = node; await openFile(node); } }
     renderTree(); updateToolbar();
-    toast('已移动到：' + (destPath || '根目录'));
-  } catch (e) { toast('移动失败：' + e.message); }
+    toast(E('已移动到：') + (destPath || E('根目录')));
+  } catch (e) { toast(E('移动失败：') + e.message); }
 }
 // 物理移动：file 用 handle.move（不支持则复制+删除），dir 递归复制+删除
 async function moveEntry(src, destDir) {
@@ -1519,7 +1997,7 @@ async function moveNodes(nodes, destDirNode) {
       ok++;
     } catch (e) { skip++; }
   }
-  if (!ok) { toast('没有可移动的项目（重名或已在目标位置）'); return; }
+  if (!ok) { toast(E('没有可移动的项目（重名或已在目标位置）')); return; }
   multiSel = [];
   expanded.add(destPath);
   await refreshTree();
@@ -1532,7 +2010,7 @@ async function moveNodes(nodes, destDirNode) {
     }
   }
   renderTree(); updateToolbar();
-  toast('已移动 ' + ok + ' 项到：' + (destPath || '根目录') + (skip ? '（跳过 ' + skip + ' 项）' : ''));
+  toast(E('已移动 ') + ok + E(' 项到：') + (destPath || E('根目录')) + (skip ? E('（跳过 ') + skip + E(' 项）') : ''));
 }
 
 /* ================= file open / save ================= */
@@ -1551,7 +2029,7 @@ async function openFile(node) {
     syncTreeSelected();       // 大纲卡片/搜索结果跳转时同步目录树高亮
     updateStatus(); updateToolbar();
     schedulePreview();
-  } catch (e) { toast('读取失败：' + e.message); }
+  } catch (e) { toast(E('读取失败：') + e.message); }
 }
 function expandedAddTo(path) {
   const parts = path.split('/'); parts.pop();
@@ -1565,32 +2043,32 @@ async function saveCurrent() {
   if (!current) return;
   if (extWatch.prompting) return;   // 外部改动弹窗未决，不自动落盘
   if (extWatch.kind === 'gone') {
-    toast('原文件已被外部删除或改名，无法保存；请新建文件后把内容转存过去');
+    toast(E('原文件已被外部删除或改名，无法保存；请新建文件后把内容转存过去'));
     return;
   }
   try {
     // 保存前核对磁盘版本，stale 直接确认
     let overwriteOk = true;
     if (extWatch.stale) {
-      overwriteOk = confirm('文件已被其它编辑器修改，保存将覆盖磁盘上的新版本。\n仍要保存吗？');
+      overwriteOk = confirm(E('文件已被其它编辑器修改，保存将覆盖磁盘上的新版本。\n仍要保存吗？'));
     } else if (extWatch.node) {
       try {
         const f0 = await current.node.handle.getFile();
         if (f0.lastModified !== extWatch.lastModified || f0.size !== extWatch.size) {
           const dt = (await f0.text()).replace(/^\uFEFF/, '');
-          if (dt !== current.content) overwriteOk = confirm('文件刚被其它编辑器修改，保存将覆盖其改动。\n仍要保存吗？');
+          if (dt !== current.content) overwriteOk = confirm(E('文件刚被其它编辑器修改，保存将覆盖其改动。\n仍要保存吗？'));
         }
       } catch (e) {}
     }
     if (!overwriteOk) {
-      $('stSave').textContent = '未保存…'; $('stSave').className = 'dirty';
+      $('stSave').textContent = E('未保存…'); $('stSave').className = 'dirty';
       return;
     }
     extWatch.saving = true;
     const w = await current.node.handle.createWritable();
     await w.write(current.content); await w.close();
     current.dirty = false;
-    $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+    $('stSave').textContent = E('已保存'); $('stSave').className = 'saved';
     if (current.node.name === 'style.css' && !parentPath(current.node.path)) applyUserCss(current.content);
     // 历史按 5 分钟节拍判断是否写检查点，与保存解耦
     // 外部拖入的文件不写项目 .history
@@ -1599,14 +2077,14 @@ async function saveCurrent() {
     extWatch.saving = false;
   } catch (e) {
     extWatch.saving = false;
-    $('stSave').textContent = '保存失败'; $('stSave').className = 'dirty';
-    toast('保存失败：' + e.message);
+    $('stSave').textContent = E('保存失败'); $('stSave').className = 'dirty';
+    toast(E('保存失败：') + e.message);
   }
 }
 function markDirty() {
   if (!current) return;
   current.content = $('editor').value; current.dirty = true;
-  $('stSave').textContent = '未保存…'; $('stSave').className = 'dirty';
+  $('stSave').textContent = E('未保存…'); $('stSave').className = 'dirty';
   updateStatus();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveCurrent, 900);
@@ -1673,12 +2151,12 @@ function openExtDlg(kind) {
   extWatch.prompting = true;
   const safeName = current ? current.node.name.replace(/&/g,'&amp;').replace(/</g,'&lt;') : '';
   if (kind === 'gone') {
-    $('extTitle').textContent = '文件已被外部删除或改名';
-    $('extMsg').innerHTML = '「<b>' + safeName + '</b>」在磁盘上已不存在（可能被其它编辑器删除、改名或移动）。<br>窗口里的内容仍保留，但已无法保存回原位置；请在目录中新建文件后把内容转存过去。';
+    $('extTitle').textContent = E('文件已被外部删除或改名');
+    $('extMsg').innerHTML = '「<b>' + safeName + E('</b>」在磁盘上已不存在（可能被其它编辑器删除、改名或移动）。<br>窗口里的内容仍保留，但已无法保存回原位置；请在目录中新建文件后把内容转存过去。');
     $('extReload').classList.add('hidden');
   } else {
-    $('extTitle').textContent = '文件已被外部修改';
-    $('extMsg').innerHTML = '「<b>' + safeName + '</b>」已被其它编辑器改动。<br>选「重新加载」将放弃本页面未保存的改动、载入磁盘新版本；选「保留我的」则暂不加载，之后保存时还会再确认一次。';
+    $('extTitle').textContent = E('文件已被外部修改');
+    $('extMsg').innerHTML = '「<b>' + safeName + E('</b>」已被其它编辑器改动。<br>选「重新加载」将放弃本页面未保存的改动、载入磁盘新版本；选「保留我的」则暂不加载，之后保存时还会再确认一次。');
     $('extReload').classList.remove('hidden');
   }
   $('dlgExtChange').showModal();
@@ -1691,17 +2169,17 @@ async function extReloadFromDisk() {
     current.content = text; current.dirty = false;
     extWatch.lastModified = f.lastModified; extWatch.size = f.size;
     extWatch.stale = false; extWatch.kind = '';
-    $('stSave').textContent = '已加载磁盘版本'; $('stSave').className = 'saved';
+    $('stSave').textContent = E('已加载磁盘版本'); $('stSave').className = 'saved';
     setMode(mode); schedulePreview();
-  } catch (e) { toast('重新加载失败：' + e.message); }
+  } catch (e) { toast(E('重新加载失败：') + e.message); }
 }
 function updateStatus() {
   const ext = !!(current && current.node.external);
   $('stPath').textContent = current
-    ? (ext ? '📄 外部文件：' + current.node.name : current.node.path)
+    ? (ext ? E('📄 外部文件：') + current.node.name : current.node.path)
     : (rootHandle ? rootHandle.name : '');
   $('btnExtDir').classList.toggle('hidden', !ext);
-  $('stCount').textContent = current ? countChars(current.content) + ' 字' : '';
+  $('stCount').textContent = current ? countChars(current.content) + E(' 字') : '';
 }
 
 /* ================= preview & images ================= */
@@ -1881,8 +2359,8 @@ async function fixImages(container, baseDirPath) {
     try {
       const url = await resolveImg(src, baseDirPath);
       if (url) { imgCache.set(key, url); img.src = url; }
-      else { img.className = 'img-missing'; img.alt = '图片不存在: ' + src; img.removeAttribute('src'); }
-    } catch (e) { img.className = 'img-missing'; img.alt = '图片加载失败: ' + src; img.removeAttribute('src'); }
+      else { img.className = 'img-missing'; img.alt = E('图片不存在: ') + src; img.removeAttribute('src'); }
+    } catch (e) { img.className = 'img-missing'; img.alt = E('图片加载失败: ') + src; img.removeAttribute('src'); }
   }
 }
 async function resolveImg(src, baseDirPath) {
@@ -2046,19 +2524,19 @@ const STYLE_SPEC = {
   fonts: {
     presetCommon: [
       // [字体栈, 中文友好名]
-      ['Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif', '宋体（衬线）'],
-      ['"Microsoft YaHei", "PingFang SC", system-ui, sans-serif', '微软雅黑'],
-      ['KaiTi, STKaiti, serif', '楷体'],
-      ['FangSong, STFangsong, serif', '仿宋'],
-      ['SimHei, "Heiti SC", sans-serif', '黑体'],
-      ['DengXian, "Segoe UI", sans-serif', '等线'],
-      ['"PingFang SC", "Microsoft YaHei", sans-serif', '苹方（macOS）'],
-      ['"Noto Serif SC", "Source Han Serif SC", Georgia, SimSun, serif', '思源宋体'],
-      ['"Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif', '思源黑体'],
-      ['"LXGW WenKai", "LXGW WenKai Screen", KaiTi, serif', '霞鹜文楷'],
-      ['"HarmonyOS Sans SC", "Microsoft YaHei", sans-serif', '鸿蒙黑体'],
-      ['Georgia, "Times New Roman", serif', '西文衬线 Georgia'],
-      ['"Segoe UI", system-ui, Arial, sans-serif', '西文无衬线 Segoe UI'],
+      ['Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif', E('宋体（衬线）')],
+      ['"Microsoft YaHei", "PingFang SC", system-ui, sans-serif', E('微软雅黑')],
+      ['KaiTi, STKaiti, serif', E('楷体')],
+      ['FangSong, STFangsong, serif', E('仿宋')],
+      ['SimHei, "Heiti SC", sans-serif', E('黑体')],
+      ['DengXian, "Segoe UI", sans-serif', E('等线')],
+      ['"PingFang SC", "Microsoft YaHei", sans-serif', E('苹方（macOS）')],
+      ['"Noto Serif SC", "Source Han Serif SC", Georgia, SimSun, serif', E('思源宋体')],
+      ['"Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif', E('思源黑体')],
+      ['"LXGW WenKai", "LXGW WenKai Screen", KaiTi, serif', E('霞鹜文楷')],
+      ['"HarmonyOS Sans SC", "Microsoft YaHei", sans-serif', E('鸿蒙黑体')],
+      ['Georgia, "Times New Roman", serif', E('西文衬线 Georgia')],
+      ['"Segoe UI", system-ui, Arial, sans-serif', E('西文无衬线 Segoe UI')],
     ],
     followValue: '',           // 标题字体"跟随正文字体"的 option value
     customMarker: '__custom__', // "自定义…"选项的 value
@@ -2068,24 +2546,24 @@ const STYLE_SPEC = {
   color: {
     // [字段key, 中文标签, CSS变量名]
     fields: [
-      ['body', '正文', '--md-body-color'],
-      ['strong', '强调', '--md-strong-color'],
-      ['muted', '次要文字', '--md-muted-color'],
-      ['accent', '主题色', '--md-accent'],
-      ['panel', '表头底', '--md-panel'],
-      ['quote', '引用底', '--md-quote-bg'],
-      ['code', '代码底', '--md-code-bg'],
-      ['border', '分隔线', '--md-border'],
-      ['stripe', '斑马纹', '--md-stripe'],
-      ['h0', '标题一', '--md-h1-color'],
-      ['h1', '标题二', '--md-h2-color'],
-      ['h2', '标题三', '--md-h3-color'],
-      ['h3', '标题四', '--md-h4-color'],
-      ['h4', '标题五', '--md-h5-color'],
-      ['h5', '标题六', '--md-h6-color'],
-      ['link', '超链接', '--md-link-color'],
-      ['tdone', '已完成框', '--md-task-done-color'],
-      ['ttodo', '待办框', '--md-task-todo-color'],
+      ['body', E('正文'), '--md-body-color'],
+      ['strong', E('强调'), '--md-strong-color'],
+      ['muted', E('次要文字'), '--md-muted-color'],
+      ['accent', E('主题色'), '--md-accent'],
+      ['panel', E('表头底'), '--md-panel'],
+      ['quote', E('引用底'), '--md-quote-bg'],
+      ['code', E('代码底'), '--md-code-bg'],
+      ['border', E('分隔线'), '--md-border'],
+      ['stripe', E('斑马纹'), '--md-stripe'],
+      ['h0', E('标题一'), '--md-h1-color'],
+      ['h1', E('标题二'), '--md-h2-color'],
+      ['h2', E('标题三'), '--md-h3-color'],
+      ['h3', E('标题四'), '--md-h4-color'],
+      ['h4', E('标题五'), '--md-h5-color'],
+      ['h5', E('标题六'), '--md-h6-color'],
+      ['link', E('超链接'), '--md-link-color'],
+      ['tdone', E('已完成框'), '--md-task-done-color'],
+      ['ttodo', E('待办框'), '--md-task-todo-color'],
     ],
     // 跟随色：默认值从哪个变量解析（自身未声明时）
     followerDefaults: { link: '--md-link-color', tdone: '--md-task-done-color', ttodo: '--md-task-todo-color' },
@@ -2097,14 +2575,14 @@ const STYLE_SPEC = {
     fontHeadVar: '--md-font-head',
     // [CSS变量名, 中文标签, 单位, step]
     numFields: [
-      ['--md-fs', '正文字号', 'px', 0.5],
-      ['--md-lh', '行距', '', 0.05],
-      ['--md-h1-fs', '标题一', 'px', 0.5],
-      ['--md-h2-fs', '标题二', 'px', 0.5],
-      ['--md-h3-fs', '标题三', 'px', 0.5],
-      ['--md-h4-fs', '标题四', 'px', 0.5],
-      ['--md-h5-fs', '标题五', 'px', 0.5],
-      ['--md-h6-fs', '标题六', 'px', 0.5],
+      ['--md-fs', E('正文字号'), 'px', 0.5],
+      ['--md-lh', E('行距'), '', 0.05],
+      ['--md-h1-fs', E('标题一'), 'px', 0.5],
+      ['--md-h2-fs', E('标题二'), 'px', 0.5],
+      ['--md-h3-fs', E('标题三'), 'px', 0.5],
+      ['--md-h4-fs', E('标题四'), 'px', 0.5],
+      ['--md-h5-fs', E('标题五'), 'px', 0.5],
+      ['--md-h6-fs', E('标题六'), 'px', 0.5],
     ],
   },
 
@@ -2112,31 +2590,31 @@ const STYLE_SPEC = {
   cover: {
     // [CSS变量名, 中文标签, 单位, step]
     numFields: [
-      ['--cover-min-h', '最小高度', 'px', 10],
-      ['--cover-pad-top', '顶部留白', 'px', 5],
-      ['--cover-pad-bottom', '底部留白', 'px', 5],
-      ['--cover-title-fs', '标题字号', 'px', 1],
-      ['--cover-title-lh', '标题行距', '', 0.05],
-      ['--cover-sub-fs', '副标字号', 'px', 1],
-      ['--cover-sub-top', '副标间距', 'px', 2],
-      ['--cover-meta-fs', '元信息字号', 'px', 1],
-      ['--cover-meta-top', '元信息间距', 'px', 4],
-      ['--cover-meta-lh', '元信息行距', '', 0.05],
+      ['--cover-min-h', E('最小高度'), 'px', 10],
+      ['--cover-pad-top', E('顶部留白'), 'px', 5],
+      ['--cover-pad-bottom', E('底部留白'), 'px', 5],
+      ['--cover-title-fs', E('标题字号'), 'px', 1],
+      ['--cover-title-lh', E('标题行距'), '', 0.05],
+      ['--cover-sub-fs', E('副标字号'), 'px', 1],
+      ['--cover-sub-top', E('副标间距'), 'px', 2],
+      ['--cover-meta-fs', E('元信息字号'), 'px', 1],
+      ['--cover-meta-top', E('元信息间距'), 'px', 4],
+      ['--cover-meta-lh', E('元信息行距'), '', 0.05],
     ],
     // 枚举 select：[CSS变量名, 中文标签, [[显示名, value], ...]]
     enumFields: [
-      ['--cover-halign', '横向布局', [['居中', 'center'], ['左', 'flex-start'], ['右', 'flex-end']]],
-      ['--cover-valign', '纵向布局', [['居中', 'center'], ['顶', 'flex-start'], ['底', 'flex-end']]],
-      ['--cover-text', '文字对齐', [['居中', 'center'], ['左', 'left'], ['右', 'right']]],
+      ['--cover-halign', E('横向布局'), [[E('居中'), 'center'], [E('左'), 'flex-start'], [E('右'), 'flex-end']]],
+      ['--cover-valign', E('纵向布局'), [[E('居中'), 'center'], [E('顶'), 'flex-start'], [E('底'), 'flex-end']]],
+      ['--cover-text', E('文字对齐'), [[E('居中'), 'center'], [E('左'), 'left'], [E('右'), 'right']]],
     ],
   },
 
   // ---------- 目录 ----------
   toc: {
     numFields: [
-      ['--toc-h-fs', '标题字号', 'px', 1],
-      ['--toc-a-fs', '条目字号', 'px', 1],
-      ['--toc-a-lh', '条目行距', '', 0.05],
+      ['--toc-h-fs', E('标题字号'), 'px', 1],
+      ['--toc-a-fs', E('条目字号'), 'px', 1],
+      ['--toc-a-lh', E('条目行距'), '', 0.05],
     ],
   },
 };
@@ -2150,7 +2628,7 @@ const STYLE_COVER_ENUM_FIELDS = STYLE_SPEC.cover.enumFields;
 const STYLE_TOC_NUM_FIELDS = STYLE_SPEC.toc.numFields;
 let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
 let styleDlgCss = null;        // 内存草稿，实时预览基于它
-let styleDlgName = '自定义';   // 配色区注释里的配色名
+let styleDlgName = E('自定义');   // 配色区注释里的配色名
 let styleDlgOrig = {};         // 打开时解析到的各颜色变量原值（text 兜底 / 空值还原）
 let styleDlgColorOk = false;   // 配色区是否存在（纯自定义文件时色板禁用）
 let styleDlgBasePreset = null; // 打开时配色区精确命中的内置预设（恢复默认的基础）；未命中=null=经典黑
@@ -2181,7 +2659,7 @@ function syncThemeSel(css) {
   $('bookThemeSel').value = hit ? hit : '';
 }
 async function openStyleDlg() {
-  if (!rootHandle) { toast('请先打开项目文件夹'); return; }
+  if (!rootHandle) { toast(E('请先打开项目文件夹')); return; }
   await flushSave();   // style.css 正在编辑器里且未落盘时先保存，避免对话框读到旧内容
   const disk = await readStyleCssText();
   styleDlgSavedCss = disk;
@@ -2190,9 +2668,9 @@ async function openStyleDlg() {
   buildStyleColorGrid();
   buildStyleThemeFields();
   refreshStyleZoomFromDraft();
-  $('stlMsg').textContent = (disk === null ? '项目中还没有 style.css，当前为默认样式预览；' : '')
-    + (styleDlgColorOk ? '当前配色：' + styleDlgName + ' · 调整实时预览，保存后写入 style.css'
-      : '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。');
+  $('stlMsg').textContent = (disk === null ? E('项目中还没有 style.css，当前为默认样式预览；') : '')
+    + (styleDlgColorOk ? E('当前配色：') + styleDlgName + E(' · 调整实时预览，保存后写入 style.css')
+      : E('该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。'));
   $('dlgStyle').showModal();
   applyUserCss(styleDlgCss);   // 无文件时也能预览模板
 }
@@ -2240,13 +2718,13 @@ function buildStyleColorGrid() {
   grid.innerHTML = '';
   if (styleDlgColorOk) {
     const nm = /\/\*\s*配色：(.+?)（/.exec(sec);
-    styleDlgName = nm ? nm[1].trim() : '自定义';
+    styleDlgName = nm ? nm[1].trim() : E('自定义');
     styleDlgBasePreset = PRESETS.find(p => colorSectionCss(p).trim() === sec.trim()) || null;
     for (const [key, , varName] of STYLE_COLOR_FIELDS) {
       const m = new RegExp(varName.replace(/[-]/g, '\\$&') + '\\s*:\\s*([^;]+);').exec(sec);
       styleDlgOrig[key] = m ? m[1].trim() : null;
     }
-  } else { styleDlgName = '自定义'; styleDlgBasePreset = null; }
+  } else { styleDlgName = E('自定义'); styleDlgBasePreset = null; }
   for (const [key, label] of STYLE_COLOR_FIELDS) {
     let v = styleDlgOrig[key];
     let state = 'custom';   // default=跟随默认（不落盘）；custom=已覆盖
@@ -2258,18 +2736,18 @@ function buildStyleColorGrid() {
     const item = document.createElement('div');
     item.className = 'stl-c-item';
     const defTitle = STYLE_COLOR_DEFAULT_VARS[key]
-      ? '默认（跟随主题色）'
-      : '默认（' + (styleDlgBasePreset ? styleDlgBasePreset.name : '经典黑') + '）';
+      ? E('默认（跟随主题色）')
+      : E('默认（') + (styleDlgBasePreset ? styleDlgBasePreset.name : E('经典黑')) + '）';
     const resetBtn = state === 'default'
-      ? '<button type="button" class="stl-c-reset is-default" data-k="' + key + '" title="' + defTitle + '">默</button>'
-      : '<button type="button" class="stl-c-reset" data-k="' + key + '" title="恢复默认">↺</button>';
+      ? '<button type="button" class="stl-c-reset is-default" data-k="' + key + '" title="' + defTitle + '">' + E('默') + '</button>'
+      : '<button type="button" class="stl-c-reset" data-k="' + key + '" title="' + E('恢复默认') + '">↺</button>';
     let inner;
     if (isHexColor(v)) {
       inner = '<input type="color" data-k="' + key + '" data-state="' + state + '" value="' + hex6(v) + '" title="' + label + '">'
         + resetBtn
         + '<span class="stl-c-lab">' + label + '</span>';
     } else {
-      inner = '<input type="text" data-k="' + key + '" data-state="' + state + '" value="' + esc(v || '') + '" placeholder="' + (v ? '原值' : '默认') + '" title="' + label + '">'
+      inner = '<input type="text" data-k="' + key + '" data-state="' + state + '" value="' + esc(v || '') + '" placeholder="' + (v ? E('原值') : E('默认')) + '" title="' + label + '">'
         + resetBtn
         + '<span class="stl-c-lab">' + label + '</span>';
     }
@@ -2315,8 +2793,8 @@ function buildStyleThemeFields() {
       const o = document.createElement('option'); o.value = v; o.textContent = l; sel.appendChild(o);
     }
   };
-  fillSel('stlFontBody', [...fonts.presetCommon, [fonts.followValue, '跟随正文字体'], [fonts.customMarker, '自定义…']]);
-  fillSel('stlFontHead', [[fonts.followValue, '跟随正文字体'], ...fonts.presetCommon, [fonts.customMarker, '自定义…']]);
+  fillSel('stlFontBody', [...fonts.presetCommon, [fonts.followValue, E('跟随正文字体')], [fonts.customMarker, E('自定义…')]]);
+  fillSel('stlFontHead', [[fonts.followValue, E('跟随正文字体')], ...fonts.presetCommon, [fonts.customMarker, E('自定义…')]]);
 
   const readVar = name => {
     if (!sec) return '';
@@ -2335,14 +2813,14 @@ function buildStyleThemeFields() {
     if (!insertedCoverSubh && name.startsWith('--cover-')) {
       const subh = document.createElement('div');
       subh.className = 'stl-subh';
-      subh.innerHTML = '封面<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ 恢复默认</button>';
+      subh.innerHTML = E('封面<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ 恢复默认</button>');
       grid.appendChild(subh);
       insertedCoverSubh = true;
     }
     if (!insertedTocSubh && name.startsWith('--toc-')) {
       const subh = document.createElement('div');
       subh.className = 'stl-subh';
-      subh.innerHTML = '目录<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ 恢复默认</button>';
+      subh.innerHTML = E('目录<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ 恢复默认</button>');
       grid.appendChild(subh);
       insertedTocSubh = true;
     }
@@ -2353,10 +2831,10 @@ function buildStyleThemeFields() {
     item.className = 'stl-n-item';
     item.innerHTML = '<span>' + label + '</span>'
       + '<input type="number" data-v="' + name + '" data-u="' + unit + '" step="' + step + '" min="0"'
-      + ' value="' + (num === '' ? '' : num) + '" placeholder="默认"'
+      + ' value="' + (num === '' ? '' : num) + '" placeholder="' + E('默认') + '"'
       + (styleDlgThemeOk ? '' : ' disabled') + '>'
       + '<span class="stl-u">' + unit + '</span>'
-      + '<button type="button" class="stl-f-reset" data-v="' + name + '" title="恢复默认">↺</button>';
+      + '<button type="button" class="stl-f-reset" data-v="' + name + '" title="' + E('恢复默认') + '">↺</button>';
     grid.appendChild(item);
   }
   // 枚举字段（封面三态对齐）：默认=不覆盖
@@ -2366,12 +2844,12 @@ function buildStyleThemeFields() {
     item.className = 'stl-n-item';
     let html = '<span>' + label + '</span>'
       + '<select data-v="' + name + '"' + (styleDlgThemeOk ? '' : ' disabled') + '>'
-      + '<option value=""' + (!cur ? ' selected' : '') + '>默认</option>';
+      + '<option value=""' + (!cur ? ' selected' : '') + '>' + E('默认') + '</option>';
     for (const [lab, val] of opts) {
       html += '<option value="' + val + '"' + (val === cur ? ' selected' : '') + '>' + lab + '</option>';
     }
     html += '</select><span class="stl-u"></span>'
-      + '<button type="button" class="stl-f-reset" data-v="' + name + '" title="恢复默认">↺</button>';
+      + '<button type="button" class="stl-f-reset" data-v="' + name + '" title="' + E('恢复默认') + '">↺</button>';
     item.innerHTML = html;
     grid.appendChild(item);
   }
@@ -2382,10 +2860,10 @@ function buildStyleThemeFields() {
   // 无版式区时恢复默认按钮禁用，提示写明版式名
   const tn = BOOK_THEMES[styleDlgBaseTheme].name;
   $('btnStlResetTheme').disabled = !styleDlgThemeOk;
-  $('btnStlResetTheme').title = '恢复为「' + tn + '」版式默认';
+  $('btnStlResetTheme').title = E('恢复为「') + tn + E('」版式默认');
   grid.querySelectorAll('button.stl-sec-reset').forEach(b => {
     b.disabled = !styleDlgThemeOk;
-    b.title = '恢复为「' + tn + '」' + (b.dataset.secReset === 'cover' ? '封面' : '目录') + '默认';
+    b.title = E('恢复为「') + tn + E('」') + (b.dataset.secReset === 'cover' ? E('封面') : E('目录')) + E('默认');
   });
 }
 // 版式区设置/删除变量；无声明时插到首个 } 前
@@ -2500,7 +2978,7 @@ $('stlColorGrid').addEventListener('input', e => {
   if (changed) {
     changed.dataset.state = 'custom';
     const btn = $('stlColorGrid').querySelector('button.stl-c-reset[data-k="' + changed.dataset.k + '"]');
-    if (btn) { btn.textContent = '↺'; btn.title = '恢复默认'; btn.classList.remove('is-default'); }
+    if (btn) { btn.textContent = '↺'; btn.title = E('恢复默认'); btn.classList.remove('is-default'); }
   }
   styleDlgCss = upsertSection(styleDlgCss, SEC_COLOR, colorSectionCss(collectStyleColors()));
   styleDlgPreview();
@@ -2518,10 +2996,10 @@ $('stlColorGrid').addEventListener('click', e => {
     : styleFieldDefaultRaw(key, styleDlgBasePreset);
   if (defRaw) inp.value = defRaw;
   inp.dataset.state = 'default';
-  btn.textContent = '默';
+  btn.textContent = E('默');
   btn.title = STYLE_COLOR_DEFAULT_VARS[key]
-    ? '默认（跟随主题色）'
-    : '默认（' + (styleDlgBasePreset ? styleDlgBasePreset.name : '经典黑') + '）';
+    ? E('默认（跟随主题色）')
+    : E('默认（') + (styleDlgBasePreset ? styleDlgBasePreset.name : E('经典黑')) + '）';
   btn.classList.add('is-default');
   styleDlgCss = upsertSection(styleDlgCss, SEC_COLOR, colorSectionCss(collectStyleColors()));
   styleDlgPreview();
@@ -2611,12 +3089,12 @@ $('stlSave').onclick = async () => {
     await refreshTree();
     styleDlgAccepted = true;
     $('dlgStyle').close();
-  } catch (e) { toast('写入 style.css 失败：' + e.message); }
+  } catch (e) { toast(E('写入 style.css 失败：') + e.message); }
 };
 $('stlCancel').onclick = () => $('dlgStyle').close();   // close 事件负责放弃
 // 源码编辑：有未保存调整时先确认放弃
 $('stlCode').onclick = () => {
-  if (styleDlgCss !== styleDlgSavedCss && !confirm('有尚未保存的调整，确定放弃并进入源码编辑吗？')) return;
+  if (styleDlgCss !== styleDlgSavedCss && !confirm(E('有尚未保存的调整，确定放弃并进入源码编辑吗？'))) return;
   styleDlgAccepted = false;
   $('dlgStyle').close();
   openStyleCss();
@@ -2649,8 +3127,8 @@ async function openStyleCss() {
       fh = await rootHandle.getFileHandle('style.css', { create: true });
       const w = await fh.createWritable(); await w.write(styleTemplate(bookCfg.theme)); await w.close();
       await refreshTree();
-      toast('已在项目根目录创建 style.css');
-    } catch (e2) { toast('创建失败：' + e2.message); return; }
+      toast(E('已在项目根目录创建 style.css'));
+    } catch (e2) { toast(E('创建失败：') + e2.message); return; }
   }
   let node = findNode(tree, 'style.css');
   if (!node) node = { name: 'style.css', path: 'style.css', handle: fh };   // tree 未刷新时用句柄兜底
@@ -2695,7 +3173,7 @@ $('presetSel').onchange = async () => {
     if (css) {
       const cur = getSection(css, SEC_COLOR);
       if (cur !== null && !PRESETS.find(x => colorSectionCss(x).trim() === cur)) {
-        if (!confirm('当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？')) {
+        if (!confirm(E('当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？'))) {
           syncPresetSel(css);   // 用户取消：恢复下拉框显示到当前实际配色（自定义占位符）
           return;
         }
@@ -2709,8 +3187,8 @@ $('presetSel').onchange = async () => {
     if (mode === 'read') await renderMerged();
     else if (mode === 'preview') renderSinglePreview();
     else renderLivePreview();
-    toast(created ? '已创建 style.css 并应用配色：' + p.name : '配色「' + p.name + '」已写入配色区（点“样式”可微调）');
-  } catch (e) { $('presetSel').value = ''; toast('应用样式失败：' + e.message); }
+    toast(created ? E('已创建 style.css 并应用配色：') + p.name : E('配色「') + p.name + E('」已写入配色区（点“样式”可微调）'));
+  } catch (e) { $('presetSel').value = ''; toast(E('应用样式失败：') + e.message); }
 };
 
 /* ================= merged (read) view ================= */
@@ -2730,9 +3208,9 @@ function collectFiles(nodes, out = [], includeDraft = false) {
 async function renderMerged() {
   await flushSave();
   const body = $('mergedBody'); const toc = $('tocList');
-  body.innerHTML = '<div style="color:var(--muted)">正在合并…</div>'; toc.innerHTML = '';
+  body.innerHTML = E('<div style="color:var(--muted)">正在合并…</div>'); toc.innerHTML = '';
   const files = collectFiles(tree);
-  if (!files.length) { body.innerHTML = '<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>'; return; }
+  if (!files.length) { body.innerHTML = E('<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>'); return; }
   body.innerHTML = '';
   // 项目文件夹名作为作品标题，居中显示
   const bt = document.createElement('div');
@@ -2746,7 +3224,7 @@ async function renderMerged() {
   for (const f of files) {
     let text;
     try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
-    catch (e) { text = '> 读取失败: ' + e.message; }
+    catch (e) { text = E('> 读取失败: ') + e.message; }
     if (idx > 0) {
       const hr = document.createElement('hr'); hr.className = 'file-boundary';
       hr.innerHTML = '<span>' + esc(f.path) + '</span>';
@@ -2777,7 +3255,7 @@ async function renderMerged() {
     }
   }
   for (const h of headingEls) {
-    tocItems.push({ level: Math.min(+h.tagName[1], 4), text: h.textContent.trim() || '（无标题）', id: h.id });
+    tocItems.push({ level: Math.min(+h.tagName[1], 4), text: h.textContent.trim() || E('（无标题）'), id: h.id });
   }
   // build toc
   for (const t of tocItems) {
@@ -2829,18 +3307,18 @@ async function saveBookCfg() {
     }
     const w = await fh.createWritable(); await w.write(json); await w.close();
   } catch (e) {
-    console.error(BOOK_CFG_NAME + ' 写入失败', e);
-    toast(BOOK_CFG_NAME + ' 写入失败：' + e.message + '（设置仍已暂存浏览器，关闭会丢失）');
+    console.error(BOOK_CFG_NAME + E(' 写入失败'), e);
+    toast(BOOK_CFG_NAME + E(' 写入失败：') + e.message + E('（设置仍已暂存浏览器，关闭会丢失）'));
   }
 }
 function bookDate() {
   const d = new Date();
-  const fmt = (y, m, day) => y + ' 年 ' + m + ' 月 ' + day + ' 日';
+  const fmt = (y, m, day) => y + E(' 年 ') + m + E(' 月 ') + day + E(' 日');
   if (!bookCfg.date) return fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
   const mt = bookCfg.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   return mt ? fmt(+mt[1], +mt[2], +mt[3]) : bookCfg.date;
 }
-function bookTitle() { return (bookCfg.title || '').trim() || (rootHandle ? rootHandle.name : '未命名作品'); }
+function bookTitle() { return (bookCfg.title || '').trim() || (rootHandle ? rootHandle.name : E('未命名作品')); }
 function cssStr(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' '); }
 // 封面 + 目录（屏幕阅览与打印共用）
 function renderBookFront(body, tocItems) {
@@ -2855,7 +3333,7 @@ function renderBookFront(body, tocItems) {
     let html = '<div class="bc-title">' + esc(bookTitle()) + '</div>';
     if (bookCfg.subtitle.trim()) html += '<div class="bc-sub">' + esc(bookCfg.subtitle.trim()) + '</div>';
     const metaParts = [];
-    if (bookCfg.author.trim()) metaParts.push(esc(bookCfg.author.trim()) + ' 著');
+    if (bookCfg.author.trim()) metaParts.push(esc(bookCfg.author.trim()) + E(' 著'));
     metaParts.push(esc(bookDate()));
     html += '<div class="bc-meta">' + metaParts.join('<br>') + '</div>';
     c.innerHTML = html;
@@ -2864,7 +3342,7 @@ function renderBookFront(body, tocItems) {
   if (bookCfg.toc && tocItems.length) {
     const n = document.createElement('nav');
     n.className = 'book-toc';
-    let html = '<div class="toc-h">目 录</div>';
+    let html = E('<div class="toc-h">目 录</div>');
     for (const t of tocItems) {
       const lv = Math.min(t.level, 4);
       html += '<a class="tl' + lv + '" href="#' + t.id + '">' + esc(t.text) + '</a>';
@@ -2937,7 +3415,7 @@ ${topRight}  @bottom-left {
     color: #444;
   }
   @bottom-center {
-    content: "第 " counter(page) " 页";
+    content: "${E('第 ')}" counter(page) "${E(' 页')}";
     font: 9pt SimSun, serif;
     color: #444;
   }
@@ -3037,14 +3515,14 @@ async function exportMerged(single) {
   let clone;
   if (single) {
     // 单文件导出：仅当前文件（预览模式）
-    if (!current) { toast('请先选择文件'); return; }
+    if (!current) { toast(E('请先选择文件')); return; }
     clone = document.createElement('div');
     clone.innerHTML = mdToHtml(current.content);
     let hn = 0;
     for (const h of clone.querySelectorAll('h1,h2,h3,h4')) h.id = 'h-e-' + (hn++);
     await fixImages(clone, parentPath(current.node.path));
   } else {
-    if (!tree.length) { toast('没有内容'); return; }
+    if (!tree.length) { toast(E('没有内容')); return; }
     await renderMerged();  // 确保目录/图片已加载
     clone = $('mergedBody').cloneNode(true);
     // 整体导出：去分隔线，删除正文内嵌扉页
@@ -3058,7 +3536,7 @@ async function exportMerged(single) {
     const metaEl = document.createElement('div');
     metaEl.className = 'exp-meta';
     let metaHtml = '';
-    if (bookCfg.author.trim()) metaHtml += '<div class="exp-author">' + esc(bookCfg.author.trim()) + ' 著</div>';
+    if (bookCfg.author.trim()) metaHtml += '<div class="exp-author">' + esc(bookCfg.author.trim()) + E(' 著</div>');
     metaHtml += '<div class="exp-date">' + esc(bookDate()) + '</div>';
     metaEl.innerHTML = metaHtml;
     btEl.after(metaEl);
@@ -3075,7 +3553,7 @@ async function exportMerged(single) {
     if (h.id) heads.push({ level: +h.tagName[1], text: h.textContent.trim(), id: h.id });
   }
   const tocHtml = heads.length
-    ? '<nav class="toc book-toc"><div class="toc-h">目 录</div>' +
+    ? E('<nav class="toc book-toc"><div class="toc-h">目 录</div>') +
       heads.map(t => '<a class="tl' + t.level + '" href="#' + t.id + '">' + esc(t.text) + '</a>').join('') +
       '</nav>'
     : '';
@@ -3110,7 +3588,7 @@ async function exportMerged(single) {
   a.download = exportBase + '-' + date + '.html';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  toast('已导出 ' + a.download);
+  toast(E('已导出 ') + a.download);
 }
 
 async function exportMd(single) {
@@ -3118,12 +3596,12 @@ async function exportMd(single) {
   await flushSave();
   let text, exportBase;
   if (single) {
-    if (!current) { toast('请先选择文件'); return; }
+    if (!current) { toast(E('请先选择文件')); return; }
     text = current.content.replace(/^\uFEFF/, '').trim();
     exportBase = current.node.name.replace(/\.(md|markdown|txt)$/i, '');
   } else {
     const files = collectFiles(tree);
-    if (!files.length) { toast('没有可导出的内容'); return; }
+    if (!files.length) { toast(E('没有可导出的内容')); return; }
     const parts = [];
     for (const f of files) {
       const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
@@ -3140,7 +3618,7 @@ async function exportMd(single) {
   a.download = exportBase + '-' + date + '.md';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  toast('已导出 ' + a.download);
+  toast(E('已导出 ') + a.download);
 }
 
 /* ================= new / rename / delete ================= */
@@ -3178,26 +3656,26 @@ async function newFile(ext) {
     if (node) { selectedNode = node; await openFile(node); }
     setMode('edit'); $('editor').focus();
     renderTree(); updateToolbar();
-    toast('已创建 ' + full);
-  } catch (e) { toast('创建失败：' + e.message); }
+    toast(E('已创建 ') + full);
+  } catch (e) { toast(E('创建失败：') + e.message); }
 }
 async function newDir() {
   if (!rootHandle) return;
   const { handle: dir } = await targetDir();
   const suggest = await maxNumInDir(dir);
-  const def = (suggest ? suggest + 10 : 110) + '-新文件夹';
-  const name = prompt('文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：', def);
+  const def = (suggest ? suggest + 10 : 110) + E('-新文件夹');
+  const name = prompt(E('文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：'), def);
   if (!name) return;
   try {
     await dir.getDirectoryHandle(name, { create: true });
     await refreshTree();
-    toast('已创建 ' + name);
-  } catch (e) { toast('创建失败：' + e.message); }
+    toast(E('已创建 ') + name);
+  } catch (e) { toast(E('创建失败：') + e.message); }
 }
 async function renameNode() {
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
-  let newName = sanitizeFileName(prompt('新名称（文件无后缀自动补 .txt）：', n.name) || '');
+  let newName = sanitizeFileName(prompt(E('新名称（文件无后缀自动补 .txt）：'), n.name) || '');
   if (!newName || newName === n.name) return;
   if (n.type === 'file' && !/\.\w+$/.test(newName)) newName += '.txt';
   // 改名当前文件：先落盘，稍后打开新文件
@@ -3228,15 +3706,15 @@ async function renameNode() {
       if (wasOpen) { current = null; $('editor').value = ''; }
     }
     updateToolbar(); updateStatus();
-    toast('已重命名');
-  } catch (e) { toast('重命名失败：' + e.message); }
+    toast(E('已重命名'));
+  } catch (e) { toast(E('重命名失败：') + e.message); }
 }
 // 切换输出状态：加/去 _
 async function toggleHidden() {
   // 多选组隐藏/取消：以选中项状态为准，组内已符合的跳过
   if (multiSel.length >= 2) {
     const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
-    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
+    if (batch.length < 2) { toast(E('所选文件已不存在，请重新选择')); return; }
     const hide = !(selectedNode || batch[0]).name.startsWith('_');
     await flushSave();
     let ok = 0, skip = 0;
@@ -3261,7 +3739,7 @@ async function toggleHidden() {
           ok++;
         } catch (e) { skip++; }
       }
-      if (!ok) { toast('没有可操作的文件'); return; }
+      if (!ok) { toast(E('没有可操作的文件')); return; }
       selectedNode = null;
       await refreshTree();
       if (current) {
@@ -3275,8 +3753,8 @@ async function toggleHidden() {
       renderTree(); updateToolbar();
       if (mode === 'read') await renderMerged();
       else if (mode === 'outline') renderOutline();
-      toast((hide ? '已隐藏 ' : '已取消隐藏 ') + ok + ' 个文件' + (skip ? '（跳过 ' + skip + ' 个）' : ''));
-    } catch (e) { toast('操作失败：' + e.message); }
+      toast((hide ? E('已隐藏 ') : E('已取消隐藏 ')) + ok + E(' 个文件') + (skip ? E('（跳过 ') + skip + E(' 个）') : ''));
+    } catch (e) { toast(E('操作失败：') + e.message); }
     return;
   }
   const n = selectedNode || (current ? current.node : null);
@@ -3292,7 +3770,7 @@ async function toggleHidden() {
     try {
       if (n.type === 'file') await dir.getFileHandle(newName);
       else await dir.getDirectoryHandle(newName);
-      toast('已存在同名' + (n.type === 'file' ? '文件' : '文件夹') + '：' + newName);
+      toast(E('已存在同名') + (n.type === 'file' ? E('文件') : E('文件夹')) + '：' + newName);
       return;
     } catch (e) { if (e.name !== 'NotFoundError') throw e; }
     const wasCurrent = current && current.node === n;
@@ -3318,22 +3796,22 @@ async function toggleHidden() {
     renderTree(); updateToolbar();
     if (mode === 'read') await renderMerged();
     else if (mode === 'outline') renderOutline();
-    toast(hide ? '已隐藏，不参与输出：' + newName : '已取消隐藏：' + newName);
-  } catch (e) { toast('操作失败：' + e.message); }
+    toast(hide ? E('已隐藏，不参与输出：') + newName : E('已取消隐藏：') + newName);
+  } catch (e) { toast(E('操作失败：') + e.message); }
 }
 async function autoRename() {
   const n = (selectedNode && selectedNode.type === 'file') ? selectedNode : (current ? current.node : null);
-  if (!n) { toast('请先选择文件'); return; }
+  if (!n) { toast(E('请先选择文件')); return; }
   await flushSave();
   let text;
   try { text = (await (await n.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
-  catch (e) { toast('读取失败'); return; }
+  catch (e) { toast(E('读取失败')); return; }
   const first = (text.split('\n').find(l => l.trim()) || '').trim();
-  if (!first) { toast('文件内容为空'); return; }
+  if (!first) { toast(E('文件内容为空')); return; }
   // 按显示宽度截断：16 中文字宽，半角算 0.5
   let title = clipByWidth(first.replace(/^#+\s*/, '').replace(/[*_`~[\]()#>!]/g, '').trim(), 16);
   title = sanitizeFileName(title);
-  if (!title) { toast('第一行没有可用文字'); return; }
+  if (!title) { toast(E('第一行没有可用文字')); return; }
   const ext = (n.name.match(/\.\w+$/) || ['.txt'])[0];
   // 保留草稿前缀，只替换数字编号部分
   const dm = n.name.match(/^(_|\[草稿\]|draft-)/i);
@@ -3341,11 +3819,11 @@ async function autoRename() {
   const rest = n.name.slice(draftPrefix.length);
   const pm = rest.match(/^(\d+)(?:-[^.]*)?/);
   const newName = draftPrefix + (pm ? pm[1] + '-' + title : title) + ext;
-  if (newName === n.name) { toast('名称已符合格式'); return; }
+  if (newName === n.name) { toast(E('名称已符合格式')); return; }
   const dirPath = parentPath(n.path);
   try {
     const dir = await getDirHandleByPath(dirPath);
-    try { await dir.getFileHandle(newName); toast('已存在同名文件：' + newName); return; } catch (e) {}
+    try { await dir.getFileHandle(newName); toast(E('已存在同名文件：') + newName); return; } catch (e) {}
     const f = await n.handle.getFile();
     const nh = await dir.getFileHandle(newName, { create: true });
     const w = await nh.createWritable(); await w.write(f); await w.close();
@@ -3360,8 +3838,8 @@ async function autoRename() {
     const node = findNode(tree, dirPath ? dirPath + '/' + newName : newName);
     if (node) { selectedNode = node; await openFile(node); }
     renderTree(); updateToolbar();
-    toast('已重命名：' + newName);
-  } catch (e) { toast('重命名失败：' + e.message); }
+    toast(E('已重命名：') + newName);
+  } catch (e) { toast(E('重命名失败：') + e.message); }
 }
 // 扫描文件夹，按 preferredOrder 排序生成重编号任务
 async function buildRenumberTasks(dirHandle, dirPath, preferredOrder) {
@@ -3461,7 +3939,7 @@ async function executeRenumberTasks(dirHandle, tasks) {
 async function renumberAll() {
   if (!rootHandle) return;
   const sel = selectedNode || (current ? current.node : null);
-  if (!sel) { toast('请先在目录中选择一个文件或文件夹'); return; }
+  if (!sel) { toast(E('请先在目录中选择一个文件或文件夹')); return; }
   await flushSave();
   let dirHandle, dirPath, dirLabel;
   if (sel.type === 'dir') { dirHandle = sel.handle; dirPath = sel.path; dirLabel = sel.name; }
@@ -3471,9 +3949,9 @@ async function renumberAll() {
     dirLabel = dirPath || rootHandle.name;
   }
   const tasks = await buildRenumberTasks(dirHandle, dirPath);
-  if (!tasks.length) { toast('文件夹「' + dirLabel + '」内没有可编号的文件或带编号文件夹'); return; }
+  if (!tasks.length) { toast(E('文件夹「') + dirLabel + E('」内没有可编号的文件或带编号文件夹')); return; }
   const examples = tasks.slice(0, 4).map(t => '  ' + t.oldName + '  →  ' + t.newName).join('\n');
-  if (!confirm('将对文件夹「' + dirLabel + '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ' + tasks.length + ' 项（文件 ' + tasks.filter(t => t.kind === 'file').length + ' 个、文件夹 ' + tasks.filter(t => t.kind === 'dir').length + ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n' + examples + '\n\n此操作直接修改文件/文件夹名，确定继续？')) return;
+  if (!confirm(E('将对文件夹「') + dirLabel + E('」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ') + tasks.length + E(' 项（文件 ') + tasks.filter(t => t.kind === 'file').length + E(' 个、文件夹 ') + tasks.filter(t => t.kind === 'dir').length + E(' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n') + examples + E('\n\n此操作直接修改文件/文件夹名，确定继续？'))) return;
   const curPath = current ? current.node.path : null;
   try {
     const failed = await executeRenumberTasks(dirHandle, tasks);
@@ -3489,9 +3967,9 @@ async function renumberAll() {
       }
     }
     renderTree(); updateToolbar();
-    toast(failed.length ? '已重新编号，' + failed.length + ' 项因重名跳过（保留原名）' : '文件夹「' + dirLabel + '」已重新编号 ' + tasks.length + ' 项');
+    toast(failed.length ? E('已重新编号，') + failed.length + E(' 项因重名跳过（保留原名）') : E('文件夹「') + dirLabel + E('」已重新编号 ') + tasks.length + E(' 项'));
   } catch (e) {
-    toast('重新编号中断：' + e.message + '（临时名以 .wttmp 开头，可手动改回）');
+    toast(E('重新编号中断：') + e.message + E('（临时名以 .wttmp 开头，可手动改回）'));
     await refreshTree(); renderTree(); updateToolbar();
   }
 }
@@ -3582,8 +4060,8 @@ async function uniqueRestoreName(dir, name, kind) {
   if (!await exists(name)) return name;
   let stem = name, suf = '';
   if (kind === 'file') { const m = name.match(/^([\s\S]*)(\.[^.]+)$/); if (m) { stem = m[1]; suf = m[2]; } }
-  for (let i = 1; i < 1000; i++) { const cand = stem + ' (恢复' + i + ')' + suf; if (!await exists(cand)) return cand; }
-  return stem + ' (恢复)' + suf;
+  for (let i = 1; i < 1000; i++) { const cand = stem + E(' (恢复') + i + ')' + suf; if (!await exists(cand)) return cand; }
+  return stem + E(' (恢复)') + suf;
 }
 async function restoreTrashItem(batchName, relPath, kind) {
   const bdir = await (await rootHandle.getDirectoryHandle('.trash')).getDirectoryHandle(batchName);
@@ -3796,7 +4274,7 @@ async function entryExists(dir, name, kind) {
 async function copySelected() {
   if (multiSel.length >= 2) {
     const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
-    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
+    if (batch.length < 2) { toast(E('所选文件已不存在，请重新选择')); return; }
     await flushSave();
     let ok = 0;
     const dirCache = {};
@@ -3818,8 +4296,8 @@ async function copySelected() {
         } catch (e) {}
       }
       await refreshTree(); renderTree(); updateToolbar();
-      toast('已复制 ' + ok + ' 项' + (ok < batch.length ? '（跳过 ' + (batch.length - ok) + ' 项）' : ''));
-    } catch (e) { toast('复制失败：' + e.message); }
+      toast(E('已复制 ') + ok + E(' 项') + (ok < batch.length ? E('（跳过 ') + (batch.length - ok) + E(' 项）') : ''));
+    } catch (e) { toast(E('复制失败：') + e.message); }
     return;
   }
   const n = selectedNode || (current ? current.node : null);
@@ -3831,7 +4309,7 @@ async function copySelected() {
     const cand = copyCandidateName(n.name, n.type, i);
     if (!await entryExists(dir, cand, n.type)) { newName = cand; break; }
   }
-  if (!newName) { toast('副本数量过多'); return; }
+  if (!newName) { toast(E('副本数量过多')); return; }
   try {
     if (n.type === 'file') {
       const f = await n.handle.getFile();
@@ -3845,15 +4323,15 @@ async function copySelected() {
     const node = findNode(tree, np);
     if (node) { selectedNode = node; syncTreeSelected(); }
     updateToolbar();
-    toast('已复制：' + newName);
-  } catch (e) { toast('复制失败：' + e.message); }
+    toast(E('已复制：') + newName);
+  } catch (e) { toast(E('复制失败：') + e.message); }
 }
 async function deleteNode() {
   // 多选组删除（multiSel 只含文件）
   if (multiSel.length >= 2) {
     const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
-    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
-    if (!confirm('确定删除所选 ' + batch.length + ' 个文件？\n（移入回收站，可在「回收站」中恢复）')) return;
+    if (batch.length < 2) { toast(E('所选文件已不存在，请重新选择')); return; }
+    if (!confirm(E('确定删除所选 ') + batch.length + E(' 个文件？\n（移入回收站，可在「回收站」中恢复）'))) return;
     try {
       await flushSave();
       const batchId = ts();
@@ -3865,13 +4343,13 @@ async function deleteNode() {
       }
       multiSel = []; selectedNode = null;
       await refreshTree(); renderTree(); updateToolbar(); updateStatus();
-      toast('已将 ' + batch.length + ' 个文件移入回收站');
-    } catch (e) { toast('删除失败：' + e.message); }
+      toast(E('已将 ') + batch.length + E(' 个文件移入回收站'));
+    } catch (e) { toast(E('删除失败：') + e.message); }
     return;
   }
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
-  if (!confirm('确定删除「' + n.name + '」' + (n.type === 'dir' ? '及其全部内容' : '') + '？\n（移入回收站，可在「回收站」中恢复）')) return;
+  if (!confirm(E('确定删除「') + n.name + '」' + (n.type === 'dir' ? E('及其全部内容') : '') + E('？\n（移入回收站，可在「回收站」中恢复）'))) return;
   try {
     await trashMove(n.handle, n.path, n.type);
     if (current && (current.node === n || current.node.path.startsWith(n.path + '/'))) {
@@ -3879,8 +4357,8 @@ async function deleteNode() {
     }
     selectedNode = null;
     await refreshTree(); renderTree(); updateToolbar(); updateStatus();
-    toast('已移入回收站');
-  } catch (e) { toast('删除失败：' + e.message); }
+    toast(E('已移入回收站'));
+  } catch (e) { toast(E('删除失败：') + e.message); }
 }
 function findNode(nodes, path) {
   for (const n of nodes) {
@@ -3890,12 +4368,12 @@ function findNode(nodes, path) {
   return null;
 }
 async function mergeSelected() {
-  if (multiSel.length < 2) { toast('请先 Ctrl+点击 选择至少两个文件'); return; }
+  if (multiSel.length < 2) { toast(E('请先 Ctrl+点击 选择至少两个文件')); return; }
   // multiSel 存路径，已删除/移动的自动剔除
   const files = multiSel.map(p => findNode(tree, p)).filter(Boolean);
-  if (files.length < 2) { toast('所选文件已不存在，请重新选择（Esc 或「取消选择」清空）'); return; }
+  if (files.length < 2) { toast(E('所选文件已不存在，请重新选择（Esc 或「取消选择」清空）')); return; }
   const first = files[0];
-  if (!confirm('将把所选 ' + files.length + ' 个文件按目录顺序合并进「' + first.name + '」，其余文件移入回收站（可恢复）。确定继续？')) return;
+  if (!confirm(E('将把所选 ') + files.length + E(' 个文件按目录顺序合并进「') + first.name + E('」，其余文件移入回收站（可恢复）。确定继续？'))) return;
   try {
     await flushSave();
     // 合并写入首文件；旧内容留历史，其余进回收站
@@ -3917,8 +4395,8 @@ async function mergeSelected() {
     const node = findNode(tree, first.path);
     if (node) { selectedNode = node; await openFile(node); }
     renderTree(); updateToolbar();
-    toast('已合并 ' + files.length + ' 个文件 → ' + first.name + '，其余文件在回收站');
-  } catch (e) { toast('合并失败：' + e.message); }
+    toast(E('已合并 ') + files.length + E(' 个文件 → ') + first.name + E('，其余文件在回收站'));
+  } catch (e) { toast(E('合并失败：') + e.message); }
 }
 
 /* split：按标题级别/关键词/光标拆分 */
@@ -3968,34 +4446,34 @@ function splitParams() {
 }
 function updateSplitInfo() {
   const p = splitParams();
-  if (p.mode === 'keyword' && !p.kw) { $('spInfo').textContent = '请输入关键词'; return; }
+  if (p.mode === 'keyword' && !p.kw) { $('spInfo').textContent = E('请输入关键词'); return; }
   if (p.mode === 'cursor') {
     const lines = spText.split('\n');
-    $('spCursorInfo').textContent = `第 ${spCursorLine + 1} / ${lines.length} 行`;
-    if (spCursorLine <= 0) { $('spInfo').textContent = '光标在第一行，无法拆分'; return; }
-    if (spCursorLine >= lines.length) { $('spInfo').textContent = '光标在最后一行，无法拆分'; return; }
+    $('spCursorInfo').textContent = E('行 ') + (spCursorLine + 1) + ' / ' + lines.length;
+    if (spCursorLine <= 0) { $('spInfo').textContent = E('光标在第一行，无法拆分'); return; }
+    if (spCursorLine >= lines.length) { $('spInfo').textContent = E('光标在最后一行，无法拆分'); return; }
     const { base, ext, startNum } = splitNameInfo(spTarget.name);
-    $('spInfo').innerHTML = `将拆为 2 份：<div class="sp-names">· ${esc(spTarget.name)}（原文件截断为前 ${spCursorLine} 行）<br>· ${esc(base + '_' + startNum + ext)}（光标行起）</div>`;
+    $('spInfo').innerHTML = `${E('将拆为 2 份：<div class="sp-names">· ')}${esc(spTarget.name)}${E('（原文件截断为前 ')}${spCursorLine}${E(' 行）<br>· ')}${esc(base + '_' + startNum + ext)}${E('（光标行起）</div>')}`;
     return;
   }
   const parts = splitParts(spText, p.mode, p.level, p.kw);
-  if (parts.length < 2) { $('spInfo').textContent = parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'; return; }
+  if (parts.length < 2) { $('spInfo').textContent = parts.length ? E('只有一个拆分块，无需拆分') : E('未找到拆分点'); return; }
   const { base, ext, startNum } = splitNameInfo(spTarget.name);
   const names = [];
   for (let k = 0; k < parts.length - 1 && names.length < 3; k++) names.push(base + '_' + (startNum + k) + ext);
-  $('spInfo').innerHTML = '找到 ' + (parts.length - 1) + ' 个拆分点，将拆为 ' + parts.length + ' 份：<div class="sp-names">· '
-    + esc(spTarget.name) + '（第一个拆分块）<br>'
+  $('spInfo').innerHTML = E('找到 ') + (parts.length - 1) + E(' 个拆分点，将拆为 ') + parts.length + E(' 份：<div class="sp-names">· ')
+    + esc(spTarget.name) + E('（第一个拆分块）<br>')
     + names.map(n => '· ' + esc(n)).join('<br>')
     + (parts.length > 4 ? '<br>…' : '') + '</div>';
 }
 async function openSplit() {
   const n = selectedNode || (current ? current.node : null);
-  if (!rootHandle) { toast('请先打开文件夹'); return; }
-  if (!n || n.type !== 'file' || n.external) { toast('请先选中项目内的一个文件'); return; }
+  if (!rootHandle) { toast(E('请先打开文件夹')); return; }
+  if (!n || n.type !== 'file' || n.external) { toast(E('请先选中项目内的一个文件')); return; }
   await flushSave();
   clearTimeout(saveTimer);
   let text;
-  try { text = await (await n.handle.getFile()).text(); } catch (e) { toast('读取失败：' + e.message); return; }
+  try { text = await (await n.handle.getFile()).text(); } catch (e) { toast(E('读取失败：') + e.message); return; }
   spTarget = n; spText = text.replace(/^\uFEFF/, '');
   // 光标所在行：编辑器当前 selectionStart 之前有几个 \n 就是第几行（从 0 起）
   const ed = $('editor');
@@ -4024,9 +4502,9 @@ $('spOk').onclick = async () => {
   const node = spTarget;
   if (!node) return;
   const p = splitParams();
-  if (p.mode === 'keyword' && !p.kw) { toast('请输入关键词'); return; }
+  if (p.mode === 'keyword' && !p.kw) { toast(E('请输入关键词')); return; }
   const parts = splitParts(spText, p.mode, p.level, p.kw, spCursorLine);
-  if (parts.length < 2) { toast(parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'); return; }
+  if (parts.length < 2) { toast(parts.length ? E('只有一个拆分块，无需拆分') : E('未找到拆分点')); return; }
   const { base, ext, startNum } = splitNameInfo(node.name);
   try {
     const dir0 = await getDirHandleByPath(parentPath(node.path));
@@ -4045,7 +4523,7 @@ $('spOk').onclick = async () => {
     if (start > startNum) {   // 仅因冲突顺延时才确认，正常续号不弹窗
       const names = [];
       for (let k = 1; k < total; k++) names.push(base + '_' + (start + k - 1) + ext);
-      if (!confirm('目标文件名已被占用，编号已自动顺延：\n\n' + node.name + '（第一个拆分块）\n' + names.join('\n') + '\n\n仍按以上名称创建吗？')) return;
+      if (!confirm(E('目标文件名已被占用，编号已自动顺延：\n\n') + node.name + E('（第一个拆分块）\n') + names.join('\n') + E('\n\n仍按以上名称创建吗？'))) return;
     }
     await backupHistory(node, spText);
     // 原文件就地覆盖为 parts[0]（光标前 / 第一个拆分块）
@@ -4064,16 +4542,16 @@ $('spOk').onclick = async () => {
       await openFile(node);   // 刷新编辑器（原文件内容已截断/重写）
     } else { renderTree(); updateToolbar(); }
     const suffix = p.mode === 'cursor'
-      ? `，原文件保留前 ${spCursorLine} 行，光标行起写入 ${base}_${start}${ext}`
-      : `，后续 ${parts.length - 1} 份为 ${base}_${start}${ext} ~ ${base}_${start + parts.length - 2}${ext}`;
-    toast(`已拆分为 ${parts.length} 份${suffix}`);
-  } catch (e) { toast('拆分失败：' + e.message); }
+      ? `${E('，原文件保留前 ')}${spCursorLine}${E(' 行，光标行起写入 ')}${base}_${start}${ext}`
+      : `${E('，后续 ')}${parts.length - 1}${E(' 份为 ')}${base}_${start}${ext} ~ ${base}_${start + parts.length - 2}${ext}`;
+    toast(`${E('已拆分为 ')}${parts.length}${E(' 份')}${suffix}`);
+  } catch (e) { toast(E('拆分失败：') + e.message); }
 };
 
 /* ================= images: paste / drop / pick ================= */
 const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/bmp': 'bmp' };
 async function saveAsset(blob, name) {
-  if (!current) { toast('请先打开一个文件'); return null; }
+  if (!current) { toast(E('请先打开一个文件')); return null; }
   const dir = await getDirHandleByPath(parentPath(current.node.path));
   const assets = await dir.getDirectoryHandle('assets', { create: true });
   const fh = await assets.getFileHandle(name, { create: true });
@@ -4118,7 +4596,7 @@ function insertComment() {
   const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
   const pre = '<!--', post = '-->';
-  const inner = ed.value.slice(s, e) || '注释';
+  const inner = ed.value.slice(s, e) || E('注释');
   editReplace(ed, s, e, pre + inner + post);
   ed.setSelectionRange(s + pre.length, s + pre.length + inner.length);
 }
@@ -4151,7 +4629,7 @@ async function openExternalFile(fh) {
   mode = 'edit';
   $('welcome').classList.add('hidden');
   await openFile(node);
-  toast('已打开外部文件：' + fh.name + '（可直接写回）');
+  toast(E('已打开外部文件：') + fh.name + E('（可直接写回）'));
 }
 // 拖入文本：项目内定位，否则按外部打开
 async function openDroppedFile(fh) {
@@ -4197,13 +4675,13 @@ if (DROP_FS_SUPPORTED) {
     const texts = handles.filter(h => h.kind === 'file' && TEXT_FILE_RE.test(h.name));
     if (dirs.length) {
       await useRoot(dirs[0]);
-      if (dirs.length > 1 || texts.length) toast('已打开文件夹，其余拖入项已忽略');
+      if (dirs.length > 1 || texts.length) toast(E('已打开文件夹，其余拖入项已忽略'));
       return;
     }
     if (texts.length) {
-      if (!(await ensureWritablePermission(texts[0]))) { toast('未获得读写权限'); return; }
+      if (!(await ensureWritablePermission(texts[0]))) { toast(E('未获得读写权限')); return; }
       await openDroppedFile(texts[0]);
-      if (texts.length > 1) toast('其余 ' + (texts.length - 1) + ' 个文件已忽略（一次打开一个）');
+      if (texts.length > 1) toast(E('其余 ') + (texts.length - 1) + E(' 个文件已忽略（一次打开一个）'));
       return;
     }
     // 图片保持原有插入逻辑（仅项目内文件）
@@ -4212,7 +4690,7 @@ if (DROP_FS_SUPPORTED) {
       for (const h of handles) { try { files.push(await h.getFile()); } catch (err) {} }
       if (files.length) await insertImages(files);
     } else {
-      toast('仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入');
+      toast(E('仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入'));
     }
   });
 }
@@ -4297,7 +4775,7 @@ function replaceBlock(a, b, newLines) {
 }
 function tableOp(op) {
   const blk = getTableBlock();
-  if (!blk) { toast('光标需放在表格内'); return; }
+  if (!blk) { toast(E('光标需放在表格内')); return; }
   const { lines, a, b, li } = blk;
   const ed = $('editor');
   const blkLines = lines.slice(a, b + 1);
@@ -4321,7 +4799,7 @@ function tableOp(op) {
     if (sepIdx >= 0) { if (op === 'rowAbove' && at <= sepIdx) at = sepIdx; if (op === 'rowBelow' && at <= sepIdx) at = sepIdx + 1; }
     out = [...blkLines.slice(0, at), row, ...blkLines.slice(at)];
   } else if (op === 'rowDel') {
-    if (b - a < 1 || (sepIdx >= 0 && blkLines.length <= 2)) { toast('至少保留表头与分隔行'); return; }
+    if (b - a < 1 || (sepIdx >= 0 && blkLines.length <= 2)) { toast(E('至少保留表头与分隔行')); return; }
     out = blkLines.filter((_, i) => i !== li - a);
   } else if (op === 'colLeft' || op === 'colRight') {
     const at = op === 'colLeft' ? col : col + 1;
@@ -4334,7 +4812,7 @@ function tableOp(op) {
       return lead + ' ' + cells.join(' | ') + ' ' + trail;
     });
   } else if (op === 'colDel') {
-    if (colCount <= 1) { toast('至少保留一列'); return; }
+    if (colCount <= 1) { toast(E('至少保留一列')); return; }
     out = blkLines.map(l => {
       const cells = splitRow(l);
       cells.splice(Math.min(col, cells.length - 1), 1);
@@ -4359,8 +4837,8 @@ $('editor').addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); if (current) { clearTimeout(saveTimer); saveCurrent(); } return; }
   if (e.key === 'Tab') { e.preventDefault(); insertAtCursor('  '); return; }
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) { listContinue(e); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', '粗体'); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapInline('*', '斜体'); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', E('粗体')); return; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapInline('*', E('斜体')); return; }
 });
 // 行内包裹：有选区包选区，无选区插占位符
 function wrapInline(marker, ph) {
@@ -4485,10 +4963,10 @@ function toggleTask() {
 function changeCaseCycle() {
   const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
-  if (s === e) { toast('请先选中要转换的文字'); return; }
+  if (s === e) { toast(E('请先选中要转换的文字')); return; }
   const sel = ed.value.slice(s, e);
   const letters = sel.match(/[a-zA-Z]/g);
-  if (!letters) { toast('选中内容中没有英文字母'); return; }
+  if (!letters) { toast(E('选中内容中没有英文字母')); return; }
   const allUpper = letters.every(c => c === c.toUpperCase());
   const allLower = letters.every(c => c === c.toLowerCase());
   let out;
@@ -4515,21 +4993,21 @@ function insertLink() {
   let url = '';
   if (/^https?:\/\/\S+$/i.test(sel.trim())) url = sel.trim();
   else {
-    url = prompt('请输入链接地址：', 'https://');
+    url = prompt(E('请输入链接地址：'), 'https://');
     if (url === null) return;
     url = url.trim();
     if (!url) return;
   }
-  const text = /^https?:\/\//i.test(url) && sel.trim() === url ? '链接文字' : (sel || '链接文字');
+  const text = /^https?:\/\//i.test(url) && sel.trim() === url ? E('链接文字') : (sel || E('链接文字'));
   editReplace(ed, s, e, '[' + text + '](' + url + ')');
   ed.setSelectionRange(s + 1, s + 1 + text.length);
 }
 // 锚点：插入 <a id="name"></a>
 function insertAnchor() {
-  const raw = prompt('请输入锚点名称（英文、数字、下划线或短横）：', 'anchor');
+  const raw = prompt(E('请输入锚点名称（英文、数字、下划线或短横）：'), 'anchor');
   if (raw === null) return;
   const name = raw.trim().replace(/[^\w-]/g, '');
-  if (!name) { toast('锚点名称无效'); return; }
+  if (!name) { toast(E('锚点名称无效')); return; }
   insertAtCursor('<a id="' + name + '"></a>');
 }
 // 代码块：多行整体包裹，无选区插空块放光标
@@ -4548,8 +5026,8 @@ function insertCodeBlock() {
 // 当前日期时间 YYYY-MM-DD HH:mm 星期X
 function insertDatetime() {
   const d = new Date(), p = x => String(x).padStart(2, '0');
-  const wk = ['日','一','二','三','四','五','六'][d.getDay()];
-  insertAtCursor(d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ' 星期' + wk);
+  const wk = [E('日'),E('一'),E('二'),E('三'),E('四'),E('五'),E('六')][d.getDay()];
+  insertAtCursor(d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + E(' 星期') + wk);
 }
 function listContinue(e) {
   const { ed, val, pos } = caretLineInfo();
@@ -4587,7 +5065,7 @@ function olExtractInfo(name, text) {
   const ex = lines.slice(tIdx >= 0 ? tIdx + 1 : 0)
     .filter(l => !/^```/.test(l))
     .slice(0, 2).join(' / ')
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '[图]').replace(/[*_`~#>|\[\]]/g, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, E('[图]')).replace(/[*_`~#>|\[\]]/g, '')
     .slice(0, 80);
   return { title: title.slice(0, 40) || name, ex, count: countChars(text) };
 }
@@ -4602,7 +5080,7 @@ function countDirMd(node) {
 async function renderOutline() {
   const box = $('outlineCards');
   box.innerHTML = '';
-  if (!tree.length) { box.innerHTML = '<div class="ol-empty">文件夹为空</div>'; return; }
+  if (!tree.length) { box.innerHTML = E('<div class="ol-empty">文件夹为空</div>'); return; }
   const pending = [];
   const walk = (nodes, depth) => {
     for (const n of nodes) {
@@ -4619,7 +5097,7 @@ async function renderOutline() {
           + '<span class="ol-ico">' + (folded ? '📁' : '📂') + '</span>'
           + '<span class="ol-title">' + esc(n.name.replace(/^\d+-/, '')) + '</span>'
           + (num !== null ? '<span class="ol-num">' + num + '</span>' : '')
-          + '<span class="ol-meta">' + countDirMd(n) + ' 篇</span></div>';
+          + '<span class="ol-meta">' + countDirMd(n) + E(' 篇</span></div>');
         box.appendChild(card);
         bindOlCard(card, n);
         card.querySelector('.ol-fold').onclick = ev => {
@@ -4632,7 +5110,7 @@ async function renderOutline() {
         card.innerHTML = '<div class="ol-row1"><span class="ol-fold"></span><span class="ol-ico">📄</span>'
           + '<span class="ol-title">…</span>'
           + (num !== null ? '<span class="ol-num">' + num + '</span>' : '')
-          + '<span class="ol-meta">' + (n.draft ? '草稿' : '<span class="ol-cnt"></span>') + '</span></div>'
+          + '<span class="ol-meta">' + (n.draft ? E('草稿') : '<span class="ol-cnt"></span>') + '</span></div>'
           + '<div class="ol-ex ol-ex-txt"></div>';
         box.appendChild(card);
         bindOlCard(card, n);
@@ -4648,7 +5126,7 @@ async function renderOutline() {
     card.querySelector('.ol-title').textContent = info.title;
     card.querySelector('.ol-ex-txt').textContent = info.ex;
     const c = card.querySelector('.ol-cnt');
-    if (c) c.textContent = info.count + ' 字';
+    if (c) c.textContent = info.count + E(' 字');
   }
 }
 function clearOlHints() {
@@ -4704,9 +5182,9 @@ function bindOlCard(card, n) {
 // 移入目标目录（优先 move），重名报错
 async function moveEntryTo(srcNode, destDirHandle, destPath) {
   const name = srcNode.name;
-  try { await destDirHandle.getFileHandle(name); throw new Error('目标已存在同名文件：' + name); }
+  try { await destDirHandle.getFileHandle(name); throw new Error(E('目标已存在同名文件：') + name); }
   catch (e) { if (/同名/.test(e.message)) throw e; }
-  try { await destDirHandle.getDirectoryHandle(name); throw new Error('目标已存在同名文件夹：' + name); }
+  try { await destDirHandle.getDirectoryHandle(name); throw new Error(E('目标已存在同名文件夹：') + name); }
   catch (e) { if (/同名/.test(e.message)) throw e; }
   // 复制+删除回退路径（原生 move 不可用时）
   const fallbackCopy = async () => {
@@ -4734,13 +5212,13 @@ async function moveEntryTo(srcNode, destDirHandle, destPath) {
 }
 async function outlineDrop(src, target, pos) {
   if (src.type === 'dir' && numOf(src.name) === null && pos !== 'inside') {
-    toast('不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）'); return;
+    toast(E('不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）')); return;
   }
   const destParentNode = pos === 'inside' ? target
     : (parentPath(target.path) ? findNode(tree, parentPath(target.path)) : null);
   const destPath = destParentNode ? destParentNode.path : '';
   if (src.type === 'dir' && destPath && (destPath === src.path || destPath.startsWith(src.path + '/'))) {
-    toast('不能移动到自身内部'); return;
+    toast(E('不能移动到自身内部')); return;
   }
   const srcParPath = parentPath(src.path);
   if (destPath === srcParPath && pos !== 'inside') {
@@ -4784,9 +5262,9 @@ async function outlineDrop(src, target, pos) {
     renderTree(); updateToolbar();
     if (mode === 'outline') renderOutline();
     const nFail = failedDest.length + failedSrc.length;
-    toast(nFail ? '已调整顺序，' + nFail + ' 项因重名跳过' : '顺序已调整（编号已重排）');
+    toast(nFail ? E('已调整顺序，') + nFail + E(' 项因重名跳过') : E('顺序已调整（编号已重排）'));
   } catch (e) {
-    toast('移动失败：' + e.message);
+    toast(E('移动失败：') + e.message);
     await refreshTree();
     if (mode === 'outline') renderOutline();
   }
@@ -4823,7 +5301,7 @@ function setMode(m) {
   updateToTopVis();
 }
 function renderSinglePreview() {
-  if (!current) { $('singlePreview').innerHTML = '<div style="color:var(--muted)">未选择文件</div>'; return; }
+  if (!current) { $('singlePreview').innerHTML = E('<div style="color:var(--muted)">未选择文件</div>'); return; }
   $('singlePreview').innerHTML = '<div class="pv-inner">' + mdToHtml(current.content) + '</div>';
   fixImages($('singlePreview'), parentPath(current.node.path));
 }
@@ -4833,15 +5311,16 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode
 function updateToolbar() {
   const hasRoot = !!rootHandle;
   const hasSel = hasRoot && (selectedNode || current);
-  $('btnMerge').disabled = !(hasRoot && multiSel.length >= 2);
-  $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
+  $('btnMerge').classList.toggle('hidden', multiSel.length < 2);
+  $('btnMerge').disabled = !hasRoot;
+  $('btnMerge').textContent = E('合并(') + multiSel.length + ')';
   const splitN = selectedNode || (current ? current.node : null);
   $('btnSplit').disabled = !(hasRoot && splitN && splitN.type === 'file' && !splitN.external);
   $('btnSplit').classList.toggle('hidden', multiSel.length >= 2);   // 多选无拆分场景，隐藏腾空间
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('editor').disabled = !current;   // 无当前文件时禁用编辑器，避免写了无法保存
-  $('editor').placeholder = current ? '' : '请先在左侧选择文件，或点击「新建txt」 / 「新建md」';
+  $('editor').placeholder = current ? '' : E('请先在左侧选择文件，或点击「新建txt」 / 「新建md」');
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('syncScrollBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
@@ -4855,8 +5334,8 @@ function updateToolbar() {
   $('btnDelete').disabled = !hasSel;
   // 多选组时按钮显示数量
   const bn = multiSel.length >= 2 ? '(' + multiSel.length + ')' : '';
-  $('btnCopy').textContent = '复制' + bn;
-  $('btnDelete').textContent = '删除' + bn;
+  $('btnCopy').textContent = E('复制') + bn;
+  $('btnDelete').textContent = E('删除') + bn;
   $('btnTrash').disabled = !hasRoot;
   $('btnExportMd').disabled = !hasRoot;
   $('btnCss').disabled = !hasRoot;
@@ -4866,10 +5345,10 @@ function updateToolbar() {
   const tbHide = $('btnToggleHide');
   tbHide.disabled = !selN;
   const bn2 = multiSel.length >= 2 ? '(' + multiSel.length + ')' : '';
-  tbHide.textContent = selN && selN.name.startsWith('_') ? '取消隐藏' + bn2 : '隐藏文件' + bn2;
+  tbHide.textContent = selN && selN.name.startsWith('_') ? E('取消隐藏') + bn2 : E('隐藏文件') + bn2;
   tbHide.title = selN && selN.name.startsWith('_')
-    ? '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）'
-    : '隐藏：名称前加 _，不参与阅览/PDF/导出';
+    ? E('取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）')
+    : E('隐藏：名称前加 _，不参与阅览/PDF/导出');
   // 成书组（非编辑模式可见）
   $('bookThemeSel').disabled = !hasRoot;
   $('btnBookCfg').disabled = !hasRoot;
@@ -4889,13 +5368,13 @@ async function pickFolder() {
   try {
     const h = await showDirectoryPicker({ mode: 'readwrite' });
     await useRoot(h);
-  } catch (e) { if (e.name !== 'AbortError') toast('打开失败：' + e.message); }
+  } catch (e) { if (e.name !== 'AbortError') toast(E('打开失败：') + e.message); }
 }
 $('btnReconnect').onclick = async () => {
   try {
     const h = await idbGet('root');
     if (h) { const prev = rootHandle; await useRoot(h); if (rootHandle && rootHandle !== prev) $('btnReconnect').classList.add('hidden'); }
-  } catch (e) { toast('重连失败，请重新选择文件夹'); }
+  } catch (e) { toast(E('重连失败，请重新选择文件夹')); }
 };
 // 外部标签「打开所在文件夹」：选目录后定位
 $('btnExtDir').onclick = async () => {
@@ -4910,8 +5389,8 @@ $('btnExtDir').onclick = async () => {
       const node = findNode(tree, parts.join('/'));
       if (node) { selectedNode = node; await openFile(node); renderTree(); return; }
     }
-    toast('所选文件夹中没有该文件');
-  } catch (e) { if (e.name !== 'AbortError') toast('打开失败：' + e.message); }
+    toast(E('所选文件夹中没有该文件'));
+  } catch (e) { if (e.name !== 'AbortError') toast(E('打开失败：') + e.message); }
 };
 $('btnNewTxt').onclick = () => newFile('txt');
 $('btnNewMd').onclick = () => newFile('md');
@@ -4925,12 +5404,12 @@ $('btnUnsel').onclick = () => { multiSel = []; renderTree(); updateToolbar(); };
 $('btnAutoName').onclick = autoRename;
 $('btnRenumber').onclick = renumberAll;
 $('btnCss').onclick = openStyleDlg;
-$('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') await renderMerged(); if (mode === 'outline') renderOutline(); toast('已刷新'); };
+$('btnRefresh').onclick = async () => { await refreshTree(); if (mode === 'read') await renderMerged(); if (mode === 'outline') renderOutline(); toast(E('已刷新')); };
 // 上一个 / 下一个文件
 async function navFile(dir) {
   if (!rootHandle) return;
   const files = collectFiles(tree);
-  if (!files.length) { toast('没有可切换的文件'); return; }
+  if (!files.length) { toast(E('没有可切换的文件')); return; }
   let idx = current ? files.findIndex(f => f.path === current.node.path) : -1;
   if (idx < 0) idx = 0;
   else idx = (idx + dir + files.length) % files.length;
@@ -4944,10 +5423,10 @@ $('btnPrev').onclick = () => navFile(-1);
 $('btnNext').onclick = () => navFile(1);
 $('btnFullSpace').onclick = () => { insertAtCursor('　'); };
 // Markdown 格式工具组
-$('btnMdBold').onclick = () => wrapInline('**', '粗体');
-$('btnMdDel').onclick = () => wrapInline('~~', '删除线');
-$('btnMdItalic').onclick = () => wrapInline('*', '斜体');
-$('btnMdCode').onclick = () => wrapInline('`', '代码');
+$('btnMdBold').onclick = () => wrapInline('**', E('粗体'));
+$('btnMdDel').onclick = () => wrapInline('~~', E('删除线'));
+$('btnMdItalic').onclick = () => wrapInline('*', E('斜体'));
+$('btnMdCode').onclick = () => wrapInline('`', E('代码'));
 $('btnMdQuote').onclick = () => toggleBlock('quote');
 $('btnMdUl').onclick = () => toggleBlock('ul');
 $('btnMdOl').onclick = () => toggleBlock('ol');
@@ -4985,7 +5464,7 @@ async function zoomContent(dir) {
     fs = Math.min(26, Math.max(13, fs + dir));
     css = upsertSection(css, SEC_ZOOM, ':root { --md-zoom: ' + (fs / mdFs).toFixed(3) + '; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
     await saveStyleCss(css);
-  } catch (e) { toast('调节字号失败：' + e.message); }
+  } catch (e) { toast(E('调节字号失败：') + e.message); }
 }
 $('btnFontUp').onclick = () => {
   if (mode === 'edit') { fsEditor = Math.min(28, fsEditor + 1); applyFs(); } else zoomContent(1);
@@ -5002,7 +5481,7 @@ $('btnFontReset').onclick = async () => {
     if (css === null) css = styleTemplate(bookCfg.theme);
     css = upsertSection(css, SEC_ZOOM, ':root { --md-zoom: 1; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */');
     await saveStyleCss(css);
-  } catch (e) { toast('重置字号失败：' + e.message); }
+  } catch (e) { toast(E('重置字号失败：') + e.message); }
 };
 // 隐藏/显示文件目录（边缘页签触发，记忆）
 function applySideHidden() {
@@ -5025,7 +5504,7 @@ function applyPvHidden() {
   $('main').classList.toggle('pv-collapsed', hid);
   const b = $('pvToggleBtn');
   b.textContent = hid ? '‹' : '›';
-  b.title = hid ? '显示右侧 Markdown 预览' : '隐藏右侧预览，专心编辑';
+  b.title = hid ? E('显示右侧 Markdown 预览') : E('隐藏右侧预览，专心编辑');
   b.setAttribute('aria-label', b.title);
   if (!hid && mode === 'edit') renderLivePreview();
 }
@@ -5038,7 +5517,7 @@ applyPvHidden();
 // 同步滚动开关（⇅ 按钮，仅编辑模式且预览可见时显示）
 function applySyncScrollBtn() {
   $('syncScrollBtn').classList.toggle('on', syncScrollOn);
-  $('syncScrollBtn').title = syncScrollOn ? '同步滚动：开（点击关闭）' : '同步滚动：关（点击开启）';
+  $('syncScrollBtn').title = syncScrollOn ? E('同步滚动：开（点击关闭）') : E('同步滚动：关（点击开启）');
 }
 $('syncScrollBtn').onclick = () => {
   syncScrollOn = !syncScrollOn;
@@ -5061,7 +5540,7 @@ async function renderSinglePrint() {
   for (const h of heads) {
     const a = document.createElement('a');
     a.className = 'l' + Math.min(+h.tagName[1], 4);
-    a.textContent = h.textContent.trim() || '（无标题）';
+    a.textContent = h.textContent.trim() || E('（无标题）');
     a.href = '#' + h.id;
     a.onclick = e => { e.preventDefault(); document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     toc.appendChild(a);
@@ -5069,7 +5548,7 @@ async function renderSinglePrint() {
 }
 $('btnExportPdf').onclick = async () => {
   const single = mode === 'preview';
-  if (single && !current) { toast('请先选择文件'); return; }
+  if (single && !current) { toast(E('请先选择文件')); return; }
   if (single) { await flushSave(); await renderSinglePrint(); }
   else { if (mode !== 'read') setMode('read'); else renderMerged(); }
   // 打印默认文件名：预览=当前文件名，其余=项目名
@@ -5077,11 +5556,11 @@ $('btnExportPdf').onclick = async () => {
   const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const rawName = single
     ? current.node.name.replace(/\.(md|markdown|txt)$/i, '')
-    : (bookCfg.title || (rootHandle ? rootHandle.name : '') || '成书');
+    : (bookCfg.title || (rootHandle ? rootHandle.name : '') || E('成书'));
   const safeName = rawName.replace(/[\\/:*?"<>|]/g, '');
   const prevTitle = document.title;
   document.title = safeName + '-' + dateStr;
-  toast('目标务必选内置「另存为 PDF」（会自动填文件名 ' + safeName + '-' + dateStr + '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）', 6000);
+  toast(E('目标务必选内置「另存为 PDF」（会自动填文件名 ') + safeName + '-' + dateStr + E('）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）'), 6000);
   const restore = () => { document.title = prevTitle; window.removeEventListener('afterprint', restore); };
   window.addEventListener('afterprint', restore);
   setTimeout(() => window.print(), 500);
@@ -5158,7 +5637,7 @@ $('bookThemeSel').onchange = async () => {
         return std === c || (TOC_BASE_CSS + '\n' + themeSectionCss(k)).trim() === c;
       });
       if (!hit) {
-        if (!confirm('当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？')) {
+        if (!confirm(E('当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？'))) {
           syncThemeSel(css);   // 用户取消：恢复下拉框显示到当前实际版式（自定义占位符）
           return;
         }
@@ -5167,7 +5646,7 @@ $('bookThemeSel').onchange = async () => {
   }
   bookCfg.theme = v;
   await saveBookCfg();
-  try { await syncStyleSections(true); } catch (e) { toast('写入 style.css 失败：' + e.message); }
+  try { await syncStyleSections(true); } catch (e) { toast(E('写入 style.css 失败：') + e.message); }
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
@@ -5184,7 +5663,7 @@ $('bkSave').onclick = async () => {
   try { await syncStyleSections(false); } catch (e) {}   // 书名/副标题/日期进 @page 页眉页脚；版式区不动
   await refreshTree();
   await applyBookCfgAndRender();
-  toast('成书设置已保存');
+  toast(E('成书设置已保存'));
 };
 $('btnExportMd').onclick = () => exportMd(mode === 'preview');
 $('btnTheme').onclick = () => {
@@ -5192,6 +5671,13 @@ $('btnTheme').onclick = () => {
   document.documentElement.dataset.theme = cur;
   $('btnTheme').textContent = cur === 'dark' ? '☀️' : '🌙';
   localStorage.setItem('wt-theme', cur);
+};
+if (LANG === 'en') $('btnLang').classList.add('en');
+$('btnLang').onclick = async () => {
+  const v = LANG === 'en' ? 'zh' : 'en';
+  try { localStorage.setItem('wt-lang', v); } catch (e) {}
+  try { await idbSet('lang', v); } catch (e) {}
+  location.reload();
 };
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
@@ -5201,31 +5687,31 @@ async function renderTrash() {
   const box = $('trashList');
   let batches;
   try { batches = await listTrash(); }
-  catch (e) { box.innerHTML = '<div class="trash-empty">读取失败：' + esc(e.message) + '</div>'; return; }
-  if (!batches.length) { box.innerHTML = '<div class="trash-empty">回收站为空</div>'; return; }
+  catch (e) { box.innerHTML = E('<div class="trash-empty">读取失败：') + esc(e.message) + '</div>'; return; }
+  if (!batches.length) { box.innerHTML = E('<div class="trash-empty">回收站为空</div>'); return; }
   box.innerHTML = '';
   for (const b of batches) {
     const h = document.createElement('div');
     h.className = 'trash-batch';
-    h.textContent = batchLabel(b.name) + '　（' + b.items.length + ' 项）';
+    h.textContent = batchLabel(b.name) + '　（' + b.items.length + E(' 项）');
     box.appendChild(h);
     for (const it of b.items) {
       const disp = it.kind === 'file' ? it.relPath.replace(/\.tbwt$/i, '') : it.relPath;
       const row = document.createElement('div'); row.className = 'trash-item';
       row.innerHTML = '<span>' + (it.kind === 'dir' ? '📁' : '📄') + '</span><span class="p" title="' + esc(disp) + '">' + esc(disp) + '</span>';
-      const b1 = document.createElement('button'); b1.textContent = '恢复';
+      const b1 = document.createElement('button'); b1.textContent = E('恢复');
       b1.onclick = async () => {
         try {
           const fn = await restoreTrashItem(b.name, it.relPath, it.kind);
           await refreshTree(); renderTree(); updateToolbar();
-          toast('已恢复：' + fn); await renderTrash();
-        } catch (e) { toast('恢复失败：' + e.message); }
+          toast(E('已恢复：') + fn); await renderTrash();
+        } catch (e) { toast(E('恢复失败：') + e.message); }
       };
-      const b2 = document.createElement('button'); b2.textContent = '彻底删除'; b2.className = 'danger';
+      const b2 = document.createElement('button'); b2.textContent = E('彻底删除'); b2.className = 'danger';
       b2.onclick = async () => {
-        if (!confirm('彻底删除「' + disp + '」？该文件/文件夹及其历史版本都将被清除，不可恢复')) return;
+        if (!confirm(E('彻底删除「') + disp + E('」？该文件/文件夹及其历史版本都将被清除，不可恢复'))) return;
         try { await trashPurgeItem(b.name, it.relPath); await renderTrash(); }
-        catch (e) { toast('删除失败：' + e.message); }
+        catch (e) { toast(E('删除失败：') + e.message); }
       };
       row.appendChild(b1); row.appendChild(b2);
       box.appendChild(row);
@@ -5233,18 +5719,18 @@ async function renderTrash() {
   }
 }
 $('btnTrash').onclick = async () => {
-  $('trashList').innerHTML = '<div class="trash-empty">读取中…</div>';
+  $('trashList').innerHTML = E('<div class="trash-empty">读取中…</div>');
   $('dlgTrash').showModal();
   await renderTrash();
 };
 $('trashClose').onclick = () => $('dlgTrash').close();
 $('trashEmpty').onclick = async () => {
-  if (!confirm('清空回收站？其中所有文件/文件夹将彻底删除，不可恢复')) return;
+  if (!confirm(E('清空回收站？其中所有文件/文件夹将彻底删除，不可恢复'))) return;
   try {
     // 清空前逐项清 .history（路径对齐生命周期）
     let trashRoot;
     try { trashRoot = await rootHandle.getDirectoryHandle('.trash'); }
-    catch (e) { toast('回收站已空'); await renderTrash(); return; }
+    catch (e) { toast(E('回收站已空')); await renderTrash(); return; }
     for await (const [bname, bh] of trashRoot.entries()) {
       if (bh.kind !== 'directory') continue;
       for await (const [iname] of bh.entries()) {
@@ -5252,7 +5738,7 @@ $('trashEmpty').onclick = async () => {
       }
     }
     await rootHandle.removeEntry('.trash', { recursive: true });
-    toast('回收站已清空');
+    toast(E('回收站已清空'));
   } catch (e) { /* 目录不存在即视为已空 */ }
   await renderTrash();
 };
@@ -5265,14 +5751,14 @@ async function refreshHistList(selectIdx) {
   histSel = -1;
   box.innerHTML = '';
   if (!histVers.length) {
-    box.innerHTML = '<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>';
-    $('histView').textContent = ''; $('histMeta').textContent = '点击左侧版本查看内容';
+    box.innerHTML = E('<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>');
+    $('histView').textContent = ''; $('histMeta').textContent = E('点击左侧版本查看内容');
     $('histRestore').disabled = true;
     return;
   }
   histVers.forEach((v, i) => {
     const row = document.createElement('div'); row.className = 'hist-ver';
-    row.innerHTML = '版本 ' + (histVers.length - i) + '<div class="t">' + v.time + ' · ' + v.size + ' 字节</div>';
+    row.innerHTML = E('版本 ') + (histVers.length - i) + '<div class="t">' + v.time + ' · ' + v.size + E(' 字节</div>');
     row.onclick = () => showHistVer(i, row);
     box.appendChild(row);
   });
@@ -5284,15 +5770,15 @@ async function showHistVer(i, rowEl) {
   if (rowEl) rowEl.classList.add('on');
   histSel = i;
   const v = histVers[i];
-  $('histMeta').textContent = v.time + ' · ' + v.size + ' 字节';
+  $('histMeta').textContent = v.time + ' · ' + v.size + E(' 字节');
   try {
     $('histView').textContent = await (await v.handle.getFile()).text();
     $('histRestore').disabled = false;
-  } catch (e) { $('histView').textContent = '读取失败：' + e.message; $('histRestore').disabled = true; }
+  } catch (e) { $('histView').textContent = E('读取失败：') + e.message; $('histRestore').disabled = true; }
 }
 $('btnHistory').onclick = async () => {
   histNode = current ? current.node : (selectedNode && selectedNode.type === 'file' ? selectedNode : null);
-  if (!histNode) { toast('请先打开一个文件'); return; }
+  if (!histNode) { toast(E('请先打开一个文件')); return; }
   $('histFile').textContent = histNode.path;
   $('dlgHistory').showModal();
   await refreshHistList(0);
@@ -5301,21 +5787,21 @@ $('histClose').onclick = () => $('dlgHistory').close();
 $('histClearFile').onclick = async () => {
   if (!histNode) return;
   const n = histVers.length;
-  if (!confirm('清空「' + histNode.path + '」的全部历史版本' + (n ? '（共 ' + n + ' 个）' : '') + '？不可恢复。')) return;
+  if (!confirm(E('清空「') + histNode.path + E('」的全部历史版本') + (n ? E('（共 ') + n + E(' 个）') : '') + E('？不可恢复。'))) return;
   const ok = await clearHistoryForNode(histNode);
-  toast(ok ? '当前文件历史已清空' : '该文件没有历史版本');
+  toast(ok ? E('当前文件历史已清空') : E('该文件没有历史版本'));
   await refreshHistList(0);
 };
 $('histClearAll').onclick = async () => {
-  if (!confirm('清空本项目【所有文件】的历史版本？.history 目录将整个删除，不可恢复。')) return;
+  if (!confirm(E('清空本项目【所有文件】的历史版本？.history 目录将整个删除，不可恢复。'))) return;
   const ok = await clearAllHistory();
-  toast(ok ? '全部文件历史已清空' : '项目中没有历史版本');
+  toast(ok ? E('全部文件历史已清空') : E('项目中没有历史版本'));
   await refreshHistList(0);
 };
 $('histRestore').onclick = async () => {
   const v = histVers[histSel];
   if (!v) return;
-  if (!confirm('恢复到 ' + v.time + ' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。')) return;
+  if (!confirm(E('恢复到 ') + v.time + E(' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。'))) return;
   try {
     const text = await (await v.handle.getFile()).text();
     try {
@@ -5327,12 +5813,12 @@ $('histRestore').onclick = async () => {
     if (current && current.node.path === histNode.path) {
       current.content = text; current.dirty = false;
       $('editor').value = text;
-      $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+      $('stSave').textContent = E('已保存'); $('stSave').className = 'saved';
       schedulePreview(); updateStatus();
     }
-    toast('已恢复到 ' + v.time + ' 的版本');
+    toast(E('已恢复到 ') + v.time + E(' 的版本'));
     await refreshHistList(histSel + 1);
-  } catch (e) { toast('恢复失败：' + e.message); }
+  } catch (e) { toast(E('恢复失败：') + e.message); }
 };
 if (localStorage.getItem('wt-theme') === 'dark') {
   document.documentElement.dataset.theme = 'dark';
@@ -5346,14 +5832,14 @@ $('dlgExtChange').addEventListener('close', () => {
   // 按 Esc 或关闭按钮等价于「保留我的」
   extWatch.prompting = false;
   if (extWatch.stale && current) {
-    $('stSave').textContent = extWatch.kind === 'gone' ? '原文件已不存在' : '外部有新版本';
+    $('stSave').textContent = extWatch.kind === 'gone' ? E('原文件已不存在') : E('外部有新版本');
     $('stSave').className = 'dirty';
   }
 });
 $('extKeep').onclick = () => {
   // 保留本页面内容：stale 保持，等保存时再确认覆盖
   $('dlgExtChange').close();
-  toast(extWatch.kind === 'gone' ? '已保留内容，请新建文件转存' : '已保留你的版本；之后保存时会再确认一次');
+  toast(extWatch.kind === 'gone' ? E('已保留内容，请新建文件转存') : E('已保留你的版本；之后保存时会再确认一次'));
 };
 $('extReload').onclick = async () => {
   $('dlgExtChange').close();
@@ -5438,13 +5924,13 @@ async function doSearch() {
   const re = new RegExp(escapeReg(q), 'gi');
   box.innerHTML = results.length
     ? results.map(r =>
-        '<div class="s-item"><div class="s-file">' + (r.node.draft ? '<span style="color:#b0741a">[草稿] </span>' : '') + esc(r.node.name) + ' · 第 ' + r.line + ' 行</div>' +
+        '<div class="s-item"><div class="s-file">' + (r.node.draft ? E('<span style="color:#b0741a">[草稿] </span>') : '') + esc(r.node.name) + E(' · 第 ') + r.line + E(' 行</div>') +
         '<div class="s-line">' + esc(r.text).replace(re, m => '<mark>' + m + '</mark>') + '</div></div>').join('')
-    : '<div class="s-empty">没有找到包含「' + esc(q) + '」的内容</div>';
+    : E('<div class="s-empty">没有找到包含「') + esc(q) + E('」的内容</div>');
   box.classList.remove('hidden');
   $('tree').classList.add('hidden');
   box.querySelectorAll('.s-item').forEach((el, i) => { el.onclick = () => gotoSearchResult(results[i]); });
-  if (!results.length) toast('没有找到「' + q + '」');
+  if (!results.length) toast(E('没有找到「') + q + '」');
 }
 function clearSearch() {
   $('searchInput').value = '';
@@ -5486,10 +5972,10 @@ function renderPalette() {
     el.onclick = () => { palSel = el.dataset.c; renderPalette(); };
   });
 }
-$('btnPalette').onclick = () => { if (!current) { toast('请先打开文件'); return; } renderPalette(); $('dlgPalette').showModal(); };
+$('btnPalette').onclick = () => { if (!current) { toast(E('请先打开文件')); return; } renderPalette(); $('dlgPalette').showModal(); };
 $('palCancel').onclick = () => $('dlgPalette').close();
 $('palCustom').oninput = e => { palSel = e.target.value; renderPalette(); };
-$('palOk').onclick = () => { $('dlgPalette').close(); insertAtCursor(palSel); toast('已插入 ' + palSel); };
+$('palOk').onclick = () => { $('dlgPalette').close(); insertAtCursor(palSel); toast(E('已插入 ') + palSel); };
 
 function countOcc(hay, needle) {
   if (!needle) return 0;
@@ -5502,30 +5988,30 @@ function openReplace() {
   const scope = current ? 'file' : 'project';
   document.querySelector('input[name="rpScope"][value="' + scope + '"]').checked = true;
   $('rpInfo').textContent = scope === 'file'
-    ? '作用于当前文件：' + (current ? current.node.name : '')
-    : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）';
+    ? E('作用于当前文件：') + (current ? current.node.name : '')
+    : E('将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）');
   $('dlgReplace').showModal();
 }
 document.querySelectorAll('input[name="rpScope"]').forEach(r => r.onchange = () => {
   const m = document.querySelector('input[name="rpScope"]:checked').value;
   $('rpInfo').textContent = m === 'file'
-    ? '作用于当前文件：' + (current ? current.node.name : '')
-    : '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）';
+    ? E('作用于当前文件：') + (current ? current.node.name : '')
+    : E('将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）');
 });
 $('btnReplace').onclick = openReplace;
 $('rpCancel').onclick = () => $('dlgReplace').close();
 $('rpOk').onclick = async () => {
   const find = $('rpFind').value;
-  if (!find) { toast('请输入查找内容'); return; }
+  if (!find) { toast(E('请输入查找内容')); return; }
   const rpMode = document.querySelector('input[name="rpScope"]:checked').value;
   const to = $('rpTo').value;
-  if (rpMode === 'file' && !current) { toast('请先打开文件'); return; }
+  if (rpMode === 'file' && !current) { toast(E('请先打开文件')); return; }
   try {
     if (rpMode === 'file') {
       await flushSave();
       const n = countOcc(current.content, find);
-      if (!n) { toast('当前文件没有找到「' + find + '」'); return; }
-      if (!confirm('当前文件中共 ' + n + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？\n（替换前内容会自动存入「历史」，可恢复）')) return;
+      if (!n) { toast(E('当前文件没有找到「') + find + '」'); return; }
+      if (!confirm(E('当前文件中共 ') + n + E(' 处「') + find + E('」。\n确定全部替换为「') + to + E('」吗？\n（替换前内容会自动存入「历史」，可恢复）'))) return;
       await backupHistory(current.node, current.content);  // 替换前留存旧版本
       const ed = $('editor');
       const pos = ed.selectionStart;
@@ -5543,12 +6029,12 @@ $('rpOk').onclick = async () => {
         current.dirty = false;
         clearTimeout(saveTimer);
         histSynced(current.node.path, newText);  // 显式备份已存旧版，基线推进到替换后内容
-        $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+        $('stSave').textContent = E('已保存'); $('stSave').className = 'saved';
       } catch (e) { markDirty(); }
       ed.setSelectionRange(Math.min(pos, ed.value.length), Math.min(pos, ed.value.length));
       schedulePreview(); updateStatus();
       $('dlgReplace').close();
-      toast('已替换 ' + n + ' 处（已存入历史版本，可在「历史」中恢复）');
+      toast(E('已替换 ') + n + E(' 处（已存入历史版本，可在「历史」中恢复）'));
     } else {
       await flushSave();
       const changed = [];
@@ -5559,8 +6045,8 @@ $('rpOk').onclick = async () => {
         const n = countOcc(text, find);
         if (n) { total += n; changed.push({ node: f, from: text }); }
       }
-      if (!total) { toast('项目内没有找到「' + find + '」'); return; }
-      if (!confirm('项目内共 ' + changed.length + ' 个文件、' + total + ' 处「' + find + '」。\n确定全部替换为「' + to + '」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）')) return;
+      if (!total) { toast(E('项目内没有找到「') + find + '」'); return; }
+      if (!confirm(E('项目内共 ') + changed.length + E(' 个文件、') + total + E(' 处「') + find + E('」。\n确定全部替换为「') + to + E('」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）'))) return;
       for (const c of changed) {
         await backupHistory(c.node, c.from);
         const newText = c.from.split(find).join(to);
@@ -5575,12 +6061,12 @@ $('rpOk').onclick = async () => {
         current.dirty = false;
         $('editor').value = current.content;
         schedulePreview(); updateStatus();
-        $('stSave').textContent = '已保存'; $('stSave').className = 'saved';
+        $('stSave').textContent = E('已保存'); $('stSave').className = 'saved';
       }
       $('dlgReplace').close();
-      toast('已在 ' + changed.length + ' 个文件中替换 ' + total + ' 处');
+      toast(E('已在 ') + changed.length + E(' 个文件中替换 ') + total + E(' 处'));
     }
-  } catch (e) { toast('替换失败：' + e.message); }
+  } catch (e) { toast(E('替换失败：') + e.message); }
 };
 /* ================= back to top ================= */
 let topTarget = null;
@@ -5610,7 +6096,7 @@ document.addEventListener('keydown', e => {
   applyBookTheme();
   if (!window.showDirectoryPicker) {
     $('welcome').querySelector('.tip').innerHTML =
-      '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 txtBookWriteTool.html）。';
+      E('<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 txtBookWriteTool.html）。');
     return;
   }
   try {
