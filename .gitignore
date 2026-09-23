@@ -1,0 +1,4 @@
+# agent 项目记忆/配置文件，禁止入库
+handoff.txt
+handoff.md
+.trae/
