@@ -647,8 +647,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnMdDel" class="ic tb-glyph tb-s needs-file" disabled title="删除线">S</button>
      <button id="btnMdItalic" class="ic tb-glyph tb-i needs-file" disabled title="斜体（Ctrl+I）">I</button>
      
-     <button id="btnMdUpper" class="ic tb-glyph needs-file" disabled title="选中的英文字母转大写">A</button>
-     <button id="btnMdLower" class="ic tb-glyph needs-file" disabled title="选中的英文字母转小写">a</button>
+     <button id="btnMdCase" class="ic tb-glyph needs-file" disabled title="英文大小写循环：首字母大写 → 全大写 → 全小写">Aa</button>
      <span class="sep"></span>
      
      
@@ -1040,44 +1039,12 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <button type="button" id="btnStlResetZoom" class="stl-sec-reset" title="恢复缩放（版式正文字号）">↺</button>
   </div>
   <div class="row"><label style="width:72px;flex:none">正文字体</label>
-    <select id="stlFontBody" style="flex:1;min-width:0;padding:2px 4px" title="正文字体">
-      <option value='Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif'>宋体（衬线）</option>
-      <option value='"Microsoft YaHei", "PingFang SC", system-ui, sans-serif'>微软雅黑</option>
-      <option value='KaiTi, STKaiti, serif'>楷体</option>
-      <option value='FangSong, STFangsong, serif'>仿宋</option>
-      <option value='SimHei, "Heiti SC", sans-serif'>黑体</option>
-      <option value='DengXian, "Segoe UI", sans-serif'>等线</option>
-      <option value='"PingFang SC", "Microsoft YaHei", sans-serif'>苹方（macOS）</option>
-      <option value='"Noto Serif SC", "Source Han Serif SC", Georgia, SimSun, serif'>思源宋体</option>
-      <option value='"Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif'>思源黑体</option>
-      <option value='"LXGW WenKai", "LXGW WenKai Screen", KaiTi, serif'>霞鹜文楷</option>
-      <option value='"HarmonyOS Sans SC", "Microsoft YaHei", sans-serif'>鸿蒙黑体</option>
-      <option value='Georgia, "Times New Roman", serif'>西文衬线 Georgia</option>
-      <option value='"Segoe UI", system-ui, Arial, sans-serif'>西文无衬线 Segoe UI</option>
-      <option value="">跟随正文字体</option>
-      <option value="__custom__">自定义…</option>
-    </select>
+    <select id="stlFontBody" style="flex:1;min-width:0;padding:2px 4px" title="正文字体"></select>
     <input id="stlFontBodyCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" placeholder="字体栈，如 Georgia, SimSun, serif">
     <button type="button" class="stl-f-reset" data-f-reset="stlFontBody" title="恢复为当前版式默认字体">↺</button>
   </div>
   <div class="row"><label style="width:72px;flex:none">标题字体</label>
-    <select id="stlFontHead" style="flex:1;min-width:0;padding:2px 4px" title="标题字体">
-      <option value="">跟随正文字体</option>
-      <option value='Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif'>宋体（衬线）</option>
-      <option value='"Microsoft YaHei", "PingFang SC", system-ui, sans-serif'>微软雅黑</option>
-      <option value='KaiTi, STKaiti, serif'>楷体</option>
-      <option value='FangSong, STFangsong, serif'>仿宋</option>
-      <option value='SimHei, "Heiti SC", sans-serif'>黑体</option>
-      <option value='DengXian, "Segoe UI", sans-serif'>等线</option>
-      <option value='"PingFang SC", "Microsoft YaHei", sans-serif'>苹方（macOS）</option>
-      <option value='"Noto Serif SC", "Source Han Serif SC", Georgia, SimSun, serif'>思源宋体</option>
-      <option value='"Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif'>思源黑体</option>
-      <option value='"LXGW WenKai", "LXGW WenKai Screen", KaiTi, serif'>霞鹜文楷</option>
-      <option value='"HarmonyOS Sans SC", "Microsoft YaHei", sans-serif'>鸿蒙黑体</option>
-      <option value='Georgia, "Times New Roman", serif'>西文衬线 Georgia</option>
-      <option value='"Segoe UI", system-ui, Arial, sans-serif'>西文无衬线 Segoe UI</option>
-      <option value="__custom__">自定义…</option>
-    </select>
+    <select id="stlFontHead" style="flex:1;min-width:0;padding:2px 4px" title="标题字体"></select>
     <input id="stlFontHeadCustom" type="text" style="flex:1;min-width:0;display:none;margin-left:-1px" placeholder="字体栈，如 Georgia, SimSun, serif">
     <button type="button" class="stl-f-reset" data-f-reset="stlFontHead" title="恢复为当前版式默认字体">↺</button>
   </div>
@@ -1841,40 +1808,119 @@ function applyUserCss(cssText) {
 配色区 15 色 + 成书版式区 + 缩放区。
 编辑只改内存草稿实时预览，保存才写盘，取消/Esc 还原。 */
 // [key, 标签, CSS变量名]；h0-h5 对应 h 数组下标
-const STYLE_COLOR_FIELDS = [
-  ['body', '正文', '--md-body-color'], ['strong', '强调', '--md-strong-color'], ['muted', '次要文字', '--md-muted-color'],
-  ['accent', '主题色', '--md-accent'], ['panel', '表头底', '--md-panel'], ['quote', '引用底', '--md-quote-bg'],
-  ['code', '代码底', '--md-code-bg'], ['border', '分隔线', '--md-border'], ['stripe', '斑马纹', '--md-stripe'],
-  ['h0', '标题一', '--md-h1-color'], ['h1', '标题二', '--md-h2-color'], ['h2', '标题三', '--md-h3-color'],
-  ['h3', '标题四', '--md-h4-color'], ['h4', '标题五', '--md-h5-color'], ['h5', '标题六', '--md-h6-color'],
-  ['link', '超链接', '--md-link-color'], ['tdone', '已完成框', '--md-task-done-color'], ['ttodo', '待办框', '--md-task-todo-color'],
-];
-// 未声明时预填默认色，未改动不写配色区
-const STYLE_COLOR_DEFAULT_VARS = { link: '--md-link-color', tdone: '--md-task-done-color', ttodo: '--md-task-todo-color' };
-// 成书版式字段 [变量名, 标签, 单位, step]
-const STYLE_THEME_NUM_FIELDS = [
-  ['--md-fs', '正文字号', 'px', 0.5], ['--md-lh', '行距', '', 0.05],
-  ['--md-h1-fs', '标题一', 'px', 0.5], ['--md-h2-fs', '标题二', 'px', 0.5], ['--md-h3-fs', '标题三', 'px', 0.5],
-  ['--md-h4-fs', '标题四', 'px', 0.5], ['--md-h5-fs', '标题五', 'px', 0.5], ['--md-h6-fs', '标题六', 'px', 0.5],
-];
-// 封面数字字段；留空=不覆盖、回退版式默认
-const STYLE_COVER_NUM_FIELDS = [
-  ['--cover-min-h', '最小高度', 'px', 10],
-  ['--cover-pad-top', '顶部留白', 'px', 5], ['--cover-pad-bottom', '底部留白', 'px', 5],
-  ['--cover-title-fs', '标题字号', 'px', 1], ['--cover-title-lh', '标题行距', '', 0.05],
-  ['--cover-sub-fs', '副标字号', 'px', 1], ['--cover-sub-top', '副标间距', 'px', 2],
-  ['--cover-meta-fs', '元信息字号', 'px', 1], ['--cover-meta-top', '元信息间距', 'px', 4], ['--cover-meta-lh', '元信息行距', '', 0.05],
-];
-// 封面枚举字段 select：默认/居中/左/右；居中/顶/底
-const STYLE_COVER_ENUM_FIELDS = [
-  ['--cover-halign', '横向布局', [['居中','center'], ['左','flex-start'], ['右','flex-end']]],
-  ['--cover-valign', '纵向布局', [['居中','center'], ['顶','flex-start'], ['底','flex-end']]],
-  ['--cover-text', '文字对齐', [['居中','center'], ['左','left'], ['右','right']]],
-];
-// 目录数字字段；留空=不覆盖、回退版式默认
-const STYLE_TOC_NUM_FIELDS = [
-  ['--toc-h-fs', '标题字号', 'px', 1], ['--toc-a-fs', '条目字号', 'px', 1], ['--toc-a-lh', '条目行距', '', 0.05],
-];
+/* ════════════════════════════════════════════════════════════════
+ * 样式设置字段规格表（单一权威来源）
+ * 所有样式对话框字段/字体选项/默认值都在这里定义一次。
+ * 后续新增/修改字段，只改这张表，UI 构建、恢复默认、校验自动适配。
+ * ════════════════════════════════════════════════════════════════ */
+const STYLE_SPEC = {
+  // ---------- 字体选项池 ----------
+  // body/head 共用同一组 13 个预置字体（只有"跟随正文"选项 head 才有）
+  fonts: {
+    presetCommon: [
+      // [字体栈, 中文友好名]
+      ['Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif', '宋体（衬线）'],
+      ['"Microsoft YaHei", "PingFang SC", system-ui, sans-serif', '微软雅黑'],
+      ['KaiTi, STKaiti, serif', '楷体'],
+      ['FangSong, STFangsong, serif', '仿宋'],
+      ['SimHei, "Heiti SC", sans-serif', '黑体'],
+      ['DengXian, "Segoe UI", sans-serif', '等线'],
+      ['"PingFang SC", "Microsoft YaHei", sans-serif', '苹方（macOS）'],
+      ['"Noto Serif SC", "Source Han Serif SC", Georgia, SimSun, serif', '思源宋体'],
+      ['"Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif', '思源黑体'],
+      ['"LXGW WenKai", "LXGW WenKai Screen", KaiTi, serif', '霞鹜文楷'],
+      ['"HarmonyOS Sans SC", "Microsoft YaHei", sans-serif', '鸿蒙黑体'],
+      ['Georgia, "Times New Roman", serif', '西文衬线 Georgia'],
+      ['"Segoe UI", system-ui, Arial, sans-serif', '西文无衬线 Segoe UI'],
+    ],
+    followValue: '',           // 标题字体"跟随正文字体"的 option value
+    customMarker: '__custom__', // "自定义…"选项的 value
+  },
+
+  // ---------- 配色区 ----------
+  color: {
+    // [字段key, 中文标签, CSS变量名]
+    fields: [
+      ['body', '正文', '--md-body-color'],
+      ['strong', '强调', '--md-strong-color'],
+      ['muted', '次要文字', '--md-muted-color'],
+      ['accent', '主题色', '--md-accent'],
+      ['panel', '表头底', '--md-panel'],
+      ['quote', '引用底', '--md-quote-bg'],
+      ['code', '代码底', '--md-code-bg'],
+      ['border', '分隔线', '--md-border'],
+      ['stripe', '斑马纹', '--md-stripe'],
+      ['h0', '标题一', '--md-h1-color'],
+      ['h1', '标题二', '--md-h2-color'],
+      ['h2', '标题三', '--md-h3-color'],
+      ['h3', '标题四', '--md-h4-color'],
+      ['h4', '标题五', '--md-h5-color'],
+      ['h5', '标题六', '--md-h6-color'],
+      ['link', '超链接', '--md-link-color'],
+      ['tdone', '已完成框', '--md-task-done-color'],
+      ['ttodo', '待办框', '--md-task-todo-color'],
+    ],
+    // 跟随色：默认值从哪个变量解析（自身未声明时）
+    followerDefaults: { link: '--md-link-color', tdone: '--md-task-done-color', ttodo: '--md-task-todo-color' },
+  },
+
+  // ---------- 成书版式 ----------
+  theme: {
+    fontBodyVar: '--md-font-body',
+    fontHeadVar: '--md-font-head',
+    // [CSS变量名, 中文标签, 单位, step]
+    numFields: [
+      ['--md-fs', '正文字号', 'px', 0.5],
+      ['--md-lh', '行距', '', 0.05],
+      ['--md-h1-fs', '标题一', 'px', 0.5],
+      ['--md-h2-fs', '标题二', 'px', 0.5],
+      ['--md-h3-fs', '标题三', 'px', 0.5],
+      ['--md-h4-fs', '标题四', 'px', 0.5],
+      ['--md-h5-fs', '标题五', 'px', 0.5],
+      ['--md-h6-fs', '标题六', 'px', 0.5],
+    ],
+  },
+
+  // ---------- 封面 ----------
+  cover: {
+    // [CSS变量名, 中文标签, 单位, step]
+    numFields: [
+      ['--cover-min-h', '最小高度', 'px', 10],
+      ['--cover-pad-top', '顶部留白', 'px', 5],
+      ['--cover-pad-bottom', '底部留白', 'px', 5],
+      ['--cover-title-fs', '标题字号', 'px', 1],
+      ['--cover-title-lh', '标题行距', '', 0.05],
+      ['--cover-sub-fs', '副标字号', 'px', 1],
+      ['--cover-sub-top', '副标间距', 'px', 2],
+      ['--cover-meta-fs', '元信息字号', 'px', 1],
+      ['--cover-meta-top', '元信息间距', 'px', 4],
+      ['--cover-meta-lh', '元信息行距', '', 0.05],
+    ],
+    // 枚举 select：[CSS变量名, 中文标签, [[显示名, value], ...]]
+    enumFields: [
+      ['--cover-halign', '横向布局', [['居中', 'center'], ['左', 'flex-start'], ['右', 'flex-end']]],
+      ['--cover-valign', '纵向布局', [['居中', 'center'], ['顶', 'flex-start'], ['底', 'flex-end']]],
+      ['--cover-text', '文字对齐', [['居中', 'center'], ['左', 'left'], ['右', 'right']]],
+    ],
+  },
+
+  // ---------- 目录 ----------
+  toc: {
+    numFields: [
+      ['--toc-h-fs', '标题字号', 'px', 1],
+      ['--toc-a-fs', '条目字号', 'px', 1],
+      ['--toc-a-lh', '条目行距', '', 0.05],
+    ],
+  },
+};
+
+/* ---- 向后兼容：保留旧常量名指向 STYLE_SPEC 子表 ---- */
+const STYLE_COLOR_FIELDS = STYLE_SPEC.color.fields;
+const STYLE_COLOR_DEFAULT_VARS = STYLE_SPEC.color.followerDefaults;
+const STYLE_THEME_NUM_FIELDS = STYLE_SPEC.theme.numFields;
+const STYLE_COVER_NUM_FIELDS = STYLE_SPEC.cover.numFields;
+const STYLE_COVER_ENUM_FIELDS = STYLE_SPEC.cover.enumFields;
+const STYLE_TOC_NUM_FIELDS = STYLE_SPEC.toc.numFields;
 let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
 let styleDlgCss = null;        // 内存草稿，实时预览基于它
 let styleDlgName = '自定义';   // 配色区注释里的配色名
@@ -2032,6 +2078,19 @@ function buildStyleThemeFields() {
     }
     if (!matched && BOOK_THEMES[bookCfg.theme]) styleDlgBaseTheme = bookCfg.theme;
   } else if (BOOK_THEMES[bookCfg.theme]) styleDlgBaseTheme = bookCfg.theme;
+
+  // 从 STYLE_SPEC 动态填充字体 select（单一权威来源）
+  const fonts = STYLE_SPEC.fonts;
+  const fillSel = (selId, opts) => {
+    const sel = $(selId);
+    sel.innerHTML = '';
+    for (const [v, l] of opts) {
+      const o = document.createElement('option'); o.value = v; o.textContent = l; sel.appendChild(o);
+    }
+  };
+  fillSel('stlFontBody', [...fonts.presetCommon, [fonts.followValue, '跟随正文字体'], [fonts.customMarker, '自定义…']]);
+  fillSel('stlFontHead', [[fonts.followValue, '跟随正文字体'], ...fonts.presetCommon, [fonts.customMarker, '自定义…']]);
+
   const readVar = name => {
     if (!sec) return '';
     const m = new RegExp(name.replace(/[-]/g, '\\$&') + '\\s*:\\s*([^;]+);').exec(sec);
@@ -4042,13 +4101,20 @@ function toggleTask() {
   editReplace(ed, a, b, out);
   ed.setSelectionRange(a, a + out.length);
 }
-// 选中的英文转大写/小写（中文不受影响）
-function changeCase(upper) {
+// 英文大小写三态循环：全小写→首字母大写→全大写→全小写...（中文不受影响）
+function changeCaseCycle() {
   const ed = $('editor');
   const s = ed.selectionStart, e = ed.selectionEnd;
   if (s === e) { toast('请先选中要转换的文字'); return; }
   const sel = ed.value.slice(s, e);
-  const out = upper ? sel.toUpperCase() : sel.toLowerCase();
+  const letters = sel.match(/[a-zA-Z]/g);
+  if (!letters) { toast('选中内容中没有英文字母'); return; }
+  const allUpper = letters.every(c => c === c.toUpperCase());
+  const allLower = letters.every(c => c === c.toLowerCase());
+  let out;
+  if (allUpper) out = sel.toLowerCase();           // 全大写 → 全小写
+  else if (allLower) out = sel.replace(/\b([a-z])/g, m => m.toUpperCase()); // 全小写 → 首字母大写
+  else out = sel.toUpperCase();                    // 混合/首字母大写 → 全大写
   editReplace(ed, s, e, out);
   ed.setSelectionRange(s, s + out.length);
 }
@@ -4504,8 +4570,7 @@ $('btnMdLink').onclick = insertLink;
 $('btnMdAnchor').onclick = insertAnchor;
 $('btnMdCodeBlock').onclick = insertCodeBlock;
 $('btnMdDate').onclick = insertDatetime;
-$('btnMdUpper').onclick = () => changeCase(true);
-$('btnMdLower').onclick = () => changeCase(false);
+$('btnMdCase').onclick = () => changeCaseCycle();
 document.querySelectorAll('.md-h').forEach(b => b.onclick = () => setHeading(+b.dataset.h));
 $('btnInsertComment').onclick = insertComment;
 // 字号：编辑模式调编辑器，其他模式调 --md-zoom
