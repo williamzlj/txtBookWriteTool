@@ -136,6 +136,19 @@ body[data-mode="edit"] #topbar .mode-edit { gap: 0px 4px; }
 }
 #pvToggleBtn:hover { color: var(--accent); border-color: var(--accent); }
 body[data-mode="edit"] #pvToggleBtn { display: flex; }
+/* 同步滚动开关：预览显隐按钮下方，仅编辑模式且预览可见 */
+#syncScrollBtn {
+  position: absolute; top: 41px; right: 0;
+  width: 26px; height: 26px; z-index: 30; padding: 0; display: none;
+  align-items: center; justify-content: center;
+  background: var(--panel); border: 1px solid var(--border); border-right: none;
+  border-radius: 5px 0 0 5px; color: var(--muted); font-size: 14px; line-height: 1;
+  cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,.18);
+}
+#syncScrollBtn:hover { color: var(--accent); border-color: var(--accent); }
+body[data-mode="edit"] #syncScrollBtn { display: flex; }
+#main.pv-collapsed #syncScrollBtn { display: none; }
+#syncScrollBtn.on { color: #fff; background: var(--accent); border-color: var(--accent); }
 #main.pv-collapsed #livePreview, #main.pv-collapsed #divEdit { display: none; }
 .tnode.multisel { background: color-mix(in srgb, var(--sel) 70%, transparent); }
 .tnode.multisel .ico { color: #4a9a58; font-weight: 700; }
@@ -734,9 +747,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      </select>
      <span class="sep"></span>
      <button id="btnBookCfg" title="填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号">排版设置</button>
-     <button id="btnExportPdf" class="primary" disabled title="打印 / 另存为 PDF（预览确认后点此）">导出 PDF</button>
-     <button id="btnExportHtml" disabled title="导出为单文件 HTML（含左侧目录、自定义样式）">导出 HTML</button>
-     <button id="btnExportMd" disabled title="按目录顺序合并导出 .md，下载到浏览器下载文件夹，文件名含导出日期">导出 MD</button>
+     <button id="btnExportPdf" class="primary" disabled title="打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件">导出 PDF</button>
+     <button id="btnExportHtml" disabled title="导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件">导出 HTML</button>
+     <button id="btnExportMd" disabled title="导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件">导出 MD</button>
    </div>
  </div>
 </header>
@@ -809,6 +822,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </section>
   <button id="sideExpandBtn" title="展开文件目录" aria-label="展开文件目录">›</button>
   <button id="pvToggleBtn" class="hidden" title="隐藏右侧预览，专心编辑" aria-label="隐藏右侧预览">›</button>
+  <button id="syncScrollBtn" class="hidden" title="同步滚动：编辑与预览互相跟随" aria-label="同步滚动">⇅</button>
 </div>
 
 <footer id="statusbar">
@@ -935,7 +949,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>◀/▶</b>：按目录顺序切换文件（草稿除外）；<b>搜索</b>：全文查找，点结果跳转，Esc 或 ✕ 清空。</li>
       <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
       <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
-      <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除。</li>
+      <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏均按组操作。</li>
       <li><b>拆分</b>：按光标/标题/关键词拆分，原文件保留原名存前半，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（排序原文件在前），目标名已存在则中止；目录树可拖动移动，拖到项目名=移到根目录。</li>
     </ul>
     <h4>输出</h4>
@@ -1335,7 +1349,7 @@ function sortNodes(nodes) {
 }
 
 /* ================= tree render ================= */
-let dragPath = null;   // 正在拖动的节点路径
+let dragPaths = null;   // 正在拖动的节点路径数组（多选组整组拖动）
 function renderTree() {
   const el = $('tree'); el.innerHTML = '';
   const mk = (node, depth) => {
@@ -1356,13 +1370,17 @@ function renderTree() {
         ? 'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n'
         : node.name + ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n')
       : node.draft ? '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n' : '')
-      + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并用，Esc 或「取消选择」清空）；拖动可移动' : '拖动文件/文件夹到这里可移动');
+      + (node.type === 'file' ? 'Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动' : '拖动文件/文件夹到这里可移动');
     row.draggable = true;
-    row.ondragstart = e => { dragPath = node.path; e.dataTransfer.setData('text/plain', node.path); e.dataTransfer.effectAllowed = 'move'; };
-    row.ondragend = () => { dragPath = null; row.classList.remove('drop-target'); };
+    row.ondragstart = e => {
+      dragPaths = multiSel.includes(node.path) && multiSel.length > 1 ? multiSel.slice() : [node.path];
+      e.dataTransfer.setData('text/plain', dragPaths.join('\n'));
+      e.dataTransfer.effectAllowed = 'move';
+    };
+    row.ondragend = () => { dragPaths = null; row.classList.remove('drop-target'); };
     row.ondragover = e => {
-      if (node.type !== 'dir' || !dragPath) return;
-      if (dragPath === node.path || dragPath.startsWith(node.path + '/')) return;
+      if (node.type !== 'dir' || !dragPaths) return;
+      if (dragPaths.some(p => p === node.path || p.startsWith(node.path + '/'))) return;
       e.preventDefault();
       row.classList.add('drop-target');
     };
@@ -1370,10 +1388,10 @@ function renderTree() {
     row.ondrop = async e => {
       e.preventDefault(); e.stopPropagation();
       row.classList.remove('drop-target');
-      const p = e.dataTransfer.getData('text/plain') || dragPath;
-      const src = p && findNode(tree, p);
-      dragPath = null;
-      if (src && src !== node) await moveNode(src, node);
+      const nodes = dropDragNodes(e);
+      if (!nodes.length) return;
+      if (nodes.length === 1) await moveNode(nodes[0], node);
+      else await moveNodes(nodes, node);
     };
     row.onclick = async (ev) => {
       if ((ev.ctrlKey || ev.metaKey) && node.type === 'file' && /\.(md|markdown|txt)$/i.test(node.name)) {
@@ -1419,21 +1437,7 @@ async function moveNode(src, destDirNode) {
     const destDir = destDirNode ? destDirNode.handle : rootHandle;
     try { await destDir.getFileHandle(src.name); toast('目标已存在同名文件：' + src.name); return; } catch (e) {}
     const oldCur = current ? current.node.path : null;
-    if (src.type === 'file') {
-      let moved = false;
-      try { if (src.handle.move) { await src.handle.move(destDir, src.name); moved = true; } } catch (e) {}
-      if (!moved) {
-        const f = await src.handle.getFile();
-        const nh = await destDir.getFileHandle(src.name, { create: true });
-        const w = await nh.createWritable(); await w.write(f); await w.close();
-        const sp = await getDirHandleByPath(parentPath(src.path));
-        await sp.removeEntry(src.name);
-      }
-    } else {
-      await copyDir(src.handle, await destDir.getDirectoryHandle(src.name, { create: true }));
-      const sp = await getDirHandleByPath(parentPath(src.path));
-      await sp.removeEntry(src.name, { recursive: true });
-    }
+    await moveEntry(src, destDir);
     multiSel = []; selectedNode = null; current = null;
     expanded.add(destPath);
     await refreshTree();
@@ -1447,6 +1451,68 @@ async function moveNode(src, destDirNode) {
     renderTree(); updateToolbar();
     toast('已移动到：' + (destPath || '根目录'));
   } catch (e) { toast('移动失败：' + e.message); }
+}
+// 物理移动：file 用 handle.move（不支持则复制+删除），dir 递归复制+删除
+async function moveEntry(src, destDir) {
+  if (src.type === 'file') {
+    let moved = false;
+    try { if (src.handle.move) { await src.handle.move(destDir, src.name); moved = true; } } catch (e) {}
+    if (!moved) {
+      const f = await src.handle.getFile();
+      const nh = await destDir.getFileHandle(src.name, { create: true });
+      const w = await nh.createWritable(); await w.write(f); await w.close();
+      const sp = await getDirHandleByPath(parentPath(src.path));
+      await sp.removeEntry(src.name);
+    }
+  } else {
+    await copyDir(src.handle, await destDir.getDirectoryHandle(src.name, { create: true }));
+    const sp = await getDirHandleByPath(parentPath(src.path));
+    await sp.removeEntry(src.name, { recursive: true });
+  }
+}
+// 落点解析：dataTransfer 多行路径优先，回退 dragPaths；返回树内节点
+function dropDragNodes(e) {
+  const raw = e.dataTransfer.getData('text/plain');
+  const ps = raw ? raw.split('\n').map(s => s.trim()).filter(Boolean) : (dragPaths || []).slice();
+  dragPaths = null;
+  return ps.map(p => findNode(tree, p)).filter(Boolean);
+}
+// 批量移动（多选拖拽）：组内子项归并到其祖先；重名/已在目标位置逐项跳过
+async function moveNodes(nodes, destDirNode) {
+  const destPath = destDirNode ? destDirNode.path : '';
+  const destDir = destDirNode ? destDirNode.handle : rootHandle;
+  const tops = nodes.filter(n => !nodes.some(m => m !== n && n.path.startsWith(m.path + '/')));
+  if (!tops.length) return;
+  await flushSave();
+  let ok = 0, skip = 0;
+  const movedPairs = [];
+  for (const src of tops) {
+    if (src.type === 'dir' && (destPath === src.path || destPath.startsWith(src.path + '/'))) { skip++; continue; }
+    if (destPath === parentPath(src.path)) { skip++; continue; }
+    try {
+      let conflict = false;
+      try { await destDir.getFileHandle(src.name); conflict = true; } catch (e) {}
+      if (!conflict && src.type === 'dir') { try { await destDir.getDirectoryHandle(src.name); conflict = true; } catch (e) {} }
+      if (conflict) { skip++; continue; }
+      await moveEntry(src, destDir);
+      movedPairs.push([src.path, destPath ? destPath + '/' + src.name : src.name]);
+      ok++;
+    } catch (e) { skip++; }
+  }
+  if (!ok) { toast('没有可移动的项目（重名或已在目标位置）'); return; }
+  multiSel = [];
+  expanded.add(destPath);
+  await refreshTree();
+  const oldCur = current ? current.node.path : null;
+  if (oldCur) {
+    const pair = movedPairs.find(([o]) => o === oldCur || oldCur.startsWith(o + '/'));
+    if (pair) {
+      const node = findNode(tree, pair[1] + oldCur.slice(pair[0].length));
+      if (node) { selectedNode = node; await openFile(node); }
+    }
+  }
+  renderTree(); updateToolbar();
+  toast('已移动 ' + ok + ' 项到：' + (destPath || '根目录') + (skip ? '（跳过 ' + skip + ' 项）' : ''));
 }
 
 /* ================= file open / save ================= */
@@ -1627,8 +1693,165 @@ function renderLivePreview() {
   if (!current || !livePreviewOn) return;
   const c = $('livePreview');
   c.innerHTML = '<div class="pv-inner">' + mdToHtml(current.content) + '</div>';
+  buildPvMap(c.firstChild);
+  buildEditorMap();
   fixImages(c, parentPath(current.node.path));
 }
+
+/* ================= 同步滚动（编辑↔预览） ================= */
+// 状态：默认开；预览隐藏时不工作；开关记忆 wt-sync-scroll
+let syncScrollOn = localStorage.getItem('wt-sync-scroll') !== '0';
+let pvMap = [];        // 锚点表：顶层块的源行号 ↔ 预览元素
+let syncLock = 0, fwdLockT = 0, revLockT = 0;
+let edLineTops = null, edMirror = null, edTopPad = 0;   // 编辑器镜像测量：源行→像素偏移
+// 手动校准：预览整体恒定偏下 ~30px（2026-09-23 实测），正向减、反向加，保持往返互逆；设 0 关闭
+const SYNC_NUDGE = -40;
+// 建锚点表：marked.lexer 顶层 token（跳过 space/def）与渲染元素按序配对；
+// 数量不匹配（裸 HTML 块等）→ 清空，回落纯比例同步
+function buildPvMap(pvInner) {
+  pvMap = [];
+  if (!syncScrollOn || !current || !pvInner) return;
+  try {
+    const toks = marked.lexer(expandImgParams(current.content));
+    const els = [...pvInner.children];
+    let ln = 0, si = 0;
+    for (const t of toks) {
+      const nl = (t.raw.match(/\n/g) || []).length;
+      if (t.type !== 'space' && t.type !== 'def' && els[si]) { pvMap.push({ ln, el: els[si] }); si++; }
+      ln += nl;
+    }
+    if (si !== els.length) pvMap = [];
+  } catch (e) { pvMap = []; }
+}
+// 镜像 div 按编辑器同样式逐行测量（软换行后每源行的真实像素偏移），双向同步走精确行号
+function buildEditorMap() {
+  const ed = $('editor');
+  if (!current || !ed.value || ed.value.length > 4e6) { edLineTops = null; return; }
+  const lines = ed.value.split('\n');
+  if (lines.length > 5000) { edLineTops = null; return; }   // 超长文件回落比例同步
+  if (!edMirror) {
+    edMirror = document.createElement('div');
+    edMirror.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(edMirror);
+  }
+  const cs = getComputedStyle(ed), st = edMirror.style;
+  st.position = 'absolute'; st.visibility = 'hidden'; st.left = '-99999px'; st.top = '0';
+  st.zIndex = '-1'; st.whiteSpace = 'pre-wrap'; st.overflow = 'hidden';
+  st.fontFamily = cs.fontFamily; st.fontSize = cs.fontSize; st.fontWeight = cs.fontWeight;
+  st.fontStyle = cs.fontStyle; st.lineHeight = cs.lineHeight; st.letterSpacing = cs.letterSpacing;
+  st.wordBreak = cs.wordBreak; st.overflowWrap = cs.overflowWrap; st.tabSize = cs.tabSize;
+  st.boxSizing = 'content-box'; st.padding = '0'; st.border = 'none'; st.margin = '0';
+  // 内容宽度 = clientWidth - 左右 padding（scrollbar-gutter 已含在 clientWidth 之外）
+  st.width = Math.max(60, ed.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)) + 'px';
+  edTopPad = parseFloat(cs.paddingTop) || 0;
+  edMirror.textContent = '';
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < lines.length; i++) {
+    const d = document.createElement('div');
+    d.textContent = lines[i] || '\u200b';   // 空行占一行高
+    frag.appendChild(d);
+  }
+  edMirror.appendChild(frag);
+  const divs = edMirror.children;
+  const tops = new Array(divs.length);
+  for (let i = 0; i < divs.length; i++) tops[i] = divs[i].offsetTop;
+  edLineTops = tops;
+}
+// 首个可见源行（编辑器视口顶部，二分）
+function edFirstVisibleLine() {
+  const t = edLineTops;
+  if (!t || !t.length) return null;
+  const target = $('editor').scrollTop - edTopPad;
+  if (target <= t[0]) return 0;
+  let lo = 0, hi = t.length - 1, idx = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (t[mid] <= target) { idx = mid; lo = mid + 1; } else hi = mid - 1;
+  }
+  return idx;
+}
+// 分数行号 → 编辑器内容像素偏移
+function yAtLine(l) {
+  const t = edLineTops;
+  if (!t || !t.length) return 0;
+  if (l <= 0) return t[0];
+  if (l >= t.length - 1) return t[t.length - 1];
+  const i = Math.floor(l);
+  return t[i] + (l - i) * (t[i + 1] - t[i]);
+}
+// 编辑器滚动 → 预览（精确源行号 + 锚点插值）
+function syncPreviewFromEditor() {
+  if (!syncScrollOn || mode !== 'edit' || !livePreviewOn || (syncLock & 2)) return;
+  const ed = $('editor'), pv = $('livePreview');
+  const total = current ? current.content.split('\n').length : 0;
+  if (total < 2 || ed.scrollHeight <= ed.clientHeight + 4 || pv.scrollHeight <= pv.clientHeight + 4) return;
+  const r = ed.scrollTop / (ed.scrollHeight - ed.clientHeight);
+  const vl = edFirstVisibleLine();
+  const top = pvMap.length
+    ? pvTopForLine(vl !== null ? vl : r * (total - 1), pv, total)
+    : r * (pv.scrollHeight - pv.clientHeight);
+  syncLock |= 1;   // 压掉预览的 scroll 事件，防回环
+  pv.scrollTop = Math.max(0, top - SYNC_NUDGE);   // 手动校准：预览上移
+  clearTimeout(fwdLockT); fwdLockT = setTimeout(() => { syncLock &= ~1; }, 140);
+}
+// 预览滚动 → 编辑器（锚点块内像素比例 → 镜像像素，精确回滚）
+function syncEditorFromPreview() {
+  if (!syncScrollOn || mode !== 'edit' || !livePreviewOn || (syncLock & 1)) return;
+  const ed = $('editor'), pv = $('livePreview');
+  const total = current ? current.content.split('\n').length : 0;
+  if (total < 2 || ed.scrollHeight <= ed.clientHeight + 4 || pv.scrollHeight <= pv.clientHeight + 4) return;
+  const st = pv.scrollTop + SYNC_NUDGE;   // 与正向 nudge 互逆
+  const maxTop = pv.scrollHeight - pv.clientHeight;
+  let targetY = null;   // 编辑器内容像素目标（镜像坐标）
+  if (pvMap.length) {
+    const m = pvMap, base = pv.offsetTop;
+    const firstRel = m[0].el.offsetTop - base, lastRel = m[m.length - 1].el.offsetTop - base;
+    if (st <= firstRel) {
+      targetY = (firstRel > 0 ? Math.max(0, st / firstRel) : 1) * yAtLine(m[0].ln);
+    } else if (st >= lastRel) {
+      // 尾部锚点之外：按剩余滚动比例推进到末行，保证两端对齐
+      const f = Math.min(1, (st - lastRel) / Math.max(1, maxTop - lastRel));
+      const yL = yAtLine(m[m.length - 1].ln);
+      targetY = yL + f * (yAtLine(total - 1) - yL);
+    } else {
+      for (let i = 0; i < m.length - 1; i++) {
+        const a = m[i].el.offsetTop - base, b = m[i + 1].el.offsetTop - base;
+        if (st < b) {
+          const f = (st - a) / Math.max(1, b - a);
+          targetY = yAtLine(m[i].ln) + f * (yAtLine(m[i + 1].ln) - yAtLine(m[i].ln));
+          break;
+        }
+      }
+      if (targetY === null) targetY = yAtLine(m[m.length - 1].ln);
+    }
+  }
+  syncLock |= 2;   // 压掉编辑器的 scroll 事件，防回环
+  ed.scrollTop = Math.max(0, (edLineTops && targetY !== null) ? edTopPad + targetY
+    : (pv.scrollTop / (pv.scrollHeight - pv.clientHeight)) * (ed.scrollHeight - ed.clientHeight));
+  clearTimeout(revLockT); revLockT = setTimeout(() => { syncLock &= ~2; }, 140);
+}
+function pvTopForLine(estLine, pv, total) {
+  // 基准=滚动容器顶（含 .md-body 的 30px padding），否则预览恒定偏下
+  const m = pvMap, base = pv.offsetTop, maxTop = pv.scrollHeight - pv.clientHeight;
+  // 块内比例：有镜像时用编辑器视觉像素比例（折行实测），无镜像退回源行号比例
+  const frac = (l, la, lb) => {
+    if (!edLineTops) return (l - la) / Math.max(1, lb - la);
+    const y0 = yAtLine(la), y1 = yAtLine(lb);
+    return y1 > y0 ? Math.min(1, Math.max(0, (yAtLine(l) - y0) / (y1 - y0))) : 0;
+  };
+  if (estLine <= m[0].ln) return frac(estLine, 0, m[0].ln) * (m[0].el.offsetTop - base);
+  const last = m[m.length - 1], lastTop = last.el.offsetTop - base;
+  if (estLine >= last.ln) return lastTop + frac(estLine, last.ln, total - 1) * Math.max(0, maxTop - lastTop);
+  for (let i = 0; i < m.length - 1; i++) {
+    if (estLine < m[i + 1].ln) {
+      const a = m[i].el.offsetTop - base, b = m[i + 1].el.offsetTop - base;
+      return a + frac(estLine, m[i].ln, m[i + 1].ln) * (b - a);
+    }
+  }
+  return lastTop;
+}
+$('editor').addEventListener('scroll', syncPreviewFromEditor);
+$('livePreview').addEventListener('scroll', syncEditorFromPreview);
 async function fixImages(container, baseDirPath) {
   for (const img of container.querySelectorAll('img')) {
     const src = img.getAttribute('src') || '';
@@ -2788,15 +3011,28 @@ body[data-book-theme=...] .book-toc a 规则按特异性覆盖，倍率不生效
 @media print{#toTop{display:none}.toc.book-toc{display:none!important}.book-toc{border-bottom:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}.book-title{margin-top:0!important;padding-top:60mm;padding-bottom:120mm;font-size:44px!important;}}   /* book-title 用 padding 下移至页面上中部（margin 会被打印分页截断，40mm 可调） */
 @page{size:A4;margin:24mm 20mm 22mm}
 `;
-async function exportMerged() {
+async function exportMerged(single) {
+  if (!rootHandle) return;
   await flushSave();
-  if (!tree.length) { toast('没有内容'); return; }
-  await renderMerged();  // 确保目录/图片已加载
-  const clone = $('mergedBody').cloneNode(true);
-  // 整体导出：去分隔线，删除正文内嵌扉页
-  clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
-  clone.querySelector('.book-front')?.remove();
-  // 标题头：书名 + 作者/日期各一行
+  let clone;
+  if (single) {
+    // 单文件导出：仅当前文件（预览模式）
+    if (!current) { toast('请先选择文件'); return; }
+    clone = document.createElement('div');
+    clone.innerHTML = mdToHtml(current.content);
+    let hn = 0;
+    for (const h of clone.querySelectorAll('h1,h2,h3,h4')) h.id = 'h-e-' + (hn++);
+    await fixImages(clone, parentPath(current.node.path));
+  } else {
+    if (!tree.length) { toast('没有内容'); return; }
+    await renderMerged();  // 确保目录/图片已加载
+    clone = $('mergedBody').cloneNode(true);
+    // 整体导出：去分隔线，删除正文内嵌扉页
+    clone.querySelectorAll('hr.file-boundary').forEach(h => h.remove());
+    clone.querySelector('.book-front')?.remove();
+  }
+  const exportBase = single ? current.node.name.replace(/\.(md|markdown|txt)$/i, '') : rootHandle.name;
+  // 标题头：书名 + 作者/日期各一行（单文件导出无书名头，跳过）
   const btEl = clone.querySelector('.book-title');
   if (btEl) {
     const metaEl = document.createElement('div');
@@ -2839,7 +3075,7 @@ async function exportMerged() {
   const userCss = $('userCssStyle').textContent;
   const bodyCls = bookCfg.indent !== false ? ' class="book-indent"' : '';
   const doc = '<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="UTF-8"><title>' +
-    esc(rootHandle.name) + '</title><style>' + EXPORT_SHELL_CSS + '</style><style>' + contentCss + '</style>' +
+    esc(exportBase) + '</title><style>' + EXPORT_SHELL_CSS + '</style><style>' + contentCss + '</style>' +
     '<style>' + themeCss + '</style>' +
     (userCss ? '<style>' + userCss + '</style>' : '') +
     '</head><body data-book-theme="' + bookCfg.theme + '"' + bodyCls + '><div class="wrap">' + tocHtml +
@@ -2851,28 +3087,37 @@ async function exportMerged() {
   const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = rootHandle.name + '-' + date + '.html';
+  a.download = exportBase + '-' + date + '.html';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   toast('已导出 ' + a.download);
 }
 
-async function exportMd() {
+async function exportMd(single) {
   if (!rootHandle) return;
   await flushSave();
-  const files = collectFiles(tree);
-  if (!files.length) { toast('没有可导出的内容'); return; }
-  const parts = [];
-  for (const f of files) {
-    const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
-    parts.push(t);
+  let text, exportBase;
+  if (single) {
+    if (!current) { toast('请先选择文件'); return; }
+    text = current.content.replace(/^\uFEFF/, '').trim();
+    exportBase = current.node.name.replace(/\.(md|markdown|txt)$/i, '');
+  } else {
+    const files = collectFiles(tree);
+    if (!files.length) { toast('没有可导出的内容'); return; }
+    const parts = [];
+    for (const f of files) {
+      const t = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, '').trim();
+      parts.push(t);
+    }
+    text = parts.join('\n\n');
+    exportBase = rootHandle.name;
   }
   const d = new Date();
   const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  const blob = new Blob([parts.join('\n\n')], { type: 'text/markdown;charset=utf-8' });
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = rootHandle.name + '-' + date + '.md';
+  a.download = exportBase + '-' + date + '.md';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   toast('已导出 ' + a.download);
@@ -2968,6 +3213,52 @@ async function renameNode() {
 }
 // 切换输出状态：加/去 _
 async function toggleHidden() {
+  // 多选组隐藏/取消：以选中项状态为准，组内已符合的跳过
+  if (multiSel.length >= 2) {
+    const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
+    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
+    const hide = !(selectedNode || batch[0]).name.startsWith('_');
+    await flushSave();
+    let ok = 0, skip = 0;
+    const renamedPairs = [];
+    try {
+      for (const n of batch) {
+        if (hide === n.name.startsWith('_')) { skip++; continue; }
+        const newName = hide ? '_' + n.name : n.name.slice(1);
+        if (!newName) { skip++; continue; }
+        try {
+          const dirPath = parentPath(n.path);
+          const dir = await getDirHandleByPath(dirPath);
+          try { await dir.getFileHandle(newName); skip++; continue; } catch (e) { if (e.name !== 'NotFoundError') throw e; }
+          const f = await n.handle.getFile();
+          const nh = await dir.getFileHandle(newName, { create: true });
+          const w = await nh.createWritable(); await w.write(f); await w.close();
+          await dir.removeEntry(n.name);
+          const newPath = dirPath ? dirPath + '/' + newName : newName;
+          await moveHistoryDir(n.path, newPath);
+          histBaseRename(n.path, newPath);
+          renamedPairs.push([n.path, newPath]);
+          ok++;
+        } catch (e) { skip++; }
+      }
+      if (!ok) { toast('没有可操作的文件'); return; }
+      selectedNode = null;
+      await refreshTree();
+      if (current) {
+        const pair = renamedPairs.find(([o]) => o === current.node.path);
+        if (pair) {
+          current = null;
+          const node = findNode(tree, pair[1]);
+          if (node) { selectedNode = node; await openFile(node); }
+        }
+      }
+      renderTree(); updateToolbar();
+      if (mode === 'read') await renderMerged();
+      else if (mode === 'outline') renderOutline();
+      toast((hide ? '已隐藏 ' : '已取消隐藏 ') + ok + ' 个文件' + (skip ? '（跳过 ' + skip + ' 个）' : ''));
+    } catch (e) { toast('操作失败：' + e.message); }
+    return;
+  }
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
   const hide = !n.name.startsWith('_');
@@ -3481,8 +3772,36 @@ async function entryExists(dir, name, kind) {
     return true;
   } catch (e) { return false; }
 }
-// 复制选中的文件/文件夹到同一目录
+// 复制选中的文件/文件夹到同一目录（多选组逐项 -copyN）
 async function copySelected() {
+  if (multiSel.length >= 2) {
+    const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
+    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
+    await flushSave();
+    let ok = 0;
+    const dirCache = {};
+    try {
+      for (const n of batch) {
+        try {
+          const pp = parentPath(n.path);
+          const dir = dirCache[pp] || (dirCache[pp] = await getDirHandleByPath(pp));
+          let newName = '';
+          for (let i = 1; i < 1000; i++) {
+            const cand = copyCandidateName(n.name, n.type, i);
+            if (!await entryExists(dir, cand, n.type)) { newName = cand; break; }
+          }
+          if (!newName) continue;
+          const f = await n.handle.getFile();
+          const nh = await dir.getFileHandle(newName, { create: true });
+          const w = await nh.createWritable(); await w.write(f); await w.close();
+          ok++;
+        } catch (e) {}
+      }
+      await refreshTree(); renderTree(); updateToolbar();
+      toast('已复制 ' + ok + ' 项' + (ok < batch.length ? '（跳过 ' + (batch.length - ok) + ' 项）' : ''));
+    } catch (e) { toast('复制失败：' + e.message); }
+    return;
+  }
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
   await flushSave();
@@ -3510,6 +3829,26 @@ async function copySelected() {
   } catch (e) { toast('复制失败：' + e.message); }
 }
 async function deleteNode() {
+  // 多选组删除（multiSel 只含文件）
+  if (multiSel.length >= 2) {
+    const batch = multiSel.map(p => findNode(tree, p)).filter(Boolean);
+    if (batch.length < 2) { toast('所选文件已不存在，请重新选择'); return; }
+    if (!confirm('确定删除所选 ' + batch.length + ' 个文件？\n（移入回收站，可在「回收站」中恢复）')) return;
+    try {
+      await flushSave();
+      const batchId = ts();
+      for (const n of batch) {
+        try { await trashMove(n.handle, n.path, 'file', batchId); } catch (e) {}
+        if (current && (current.node === n || current.node.path.startsWith(n.path + '/'))) {
+          current = null; $('editor').value = '';
+        }
+      }
+      multiSel = []; selectedNode = null;
+      await refreshTree(); renderTree(); updateToolbar(); updateStatus();
+      toast('已将 ' + batch.length + ' 个文件移入回收站');
+    } catch (e) { toast('删除失败：' + e.message); }
+    return;
+  }
   const n = selectedNode || (current ? current.node : null);
   if (!n) return;
   if (!confirm('确定删除「' + n.name + '」' + (n.type === 'dir' ? '及其全部内容' : '') + '？\n（移入回收站，可在「回收站」中恢复）')) return;
@@ -4464,11 +4803,13 @@ function updateToolbar() {
   $('btnMerge').textContent = multiSel.length >= 2 ? '合并(' + multiSel.length + ')' : '合并';
   const splitN = selectedNode || (current ? current.node : null);
   $('btnSplit').disabled = !(hasRoot && splitN && splitN.type === 'file' && !splitN.external);
+  $('btnSplit').classList.toggle('hidden', multiSel.length >= 2);   // 多选无拆分场景，隐藏腾空间
   $('btnUnsel').classList.toggle('hidden', !multiSel.length);
   document.querySelectorAll('.needs-file').forEach(b => b.disabled = !current);
   $('editor').disabled = !current;   // 无当前文件时禁用编辑器，避免写了无法保存
   $('editor').placeholder = current ? '' : '请先在左侧选择文件，或点击「新建txt」 / 「新建md」';
   $('pvToggleBtn').classList.toggle('hidden', !current);
+  $('syncScrollBtn').classList.toggle('hidden', !current);
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
@@ -4478,6 +4819,10 @@ function updateToolbar() {
   $('btnRename').disabled = !hasSel;
   $('btnCopy').disabled = !hasSel;
   $('btnDelete').disabled = !hasSel;
+  // 多选组时按钮显示数量
+  const bn = multiSel.length >= 2 ? '(' + multiSel.length + ')' : '';
+  $('btnCopy').textContent = '复制' + bn;
+  $('btnDelete').textContent = '删除' + bn;
   $('btnTrash').disabled = !hasRoot;
   $('btnExportMd').disabled = !hasRoot;
   $('btnCss').disabled = !hasRoot;
@@ -4486,7 +4831,8 @@ function updateToolbar() {
   const selN = selectedNode || (current ? current.node : null);
   const tbHide = $('btnToggleHide');
   tbHide.disabled = !selN;
-  tbHide.textContent = selN && selN.name.startsWith('_') ? '取消隐藏' : '隐藏文件';
+  const bn2 = multiSel.length >= 2 ? '(' + multiSel.length + ')' : '';
+  tbHide.textContent = selN && selN.name.startsWith('_') ? '取消隐藏' + bn2 : '隐藏文件' + bn2;
   tbHide.title = selN && selN.name.startsWith('_')
     ? '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）'
     : '隐藏：名称前加 _，不参与阅览/PDF/导出';
@@ -4585,8 +4931,10 @@ let fsEditor = parseFloat(localStorage.getItem('wt-efs')) || 15;
 function applyFs() {
   document.documentElement.style.setProperty('--fs-editor', fsEditor + 'px');
   localStorage.setItem('wt-efs', String(fsEditor));
+  buildEditorMap();   // 字号变了换行偏移全变，重建镜像测量
 }
 applyFs();
+new ResizeObserver(() => buildEditorMap()).observe($('editor'));   // 面板宽度/窗口变化时重建
 const ZOOM_BASE = 16.5;   // 兜底基准：版式区缺少 --md-fs 时使用
 async function zoomContent(dir) {
   if (!rootHandle) return;
@@ -4653,20 +5001,58 @@ function togglePreviewPane() {
 }
 $('pvToggleBtn').onclick = togglePreviewPane;
 applyPvHidden();
-$('btnExportPdf').onclick = () => {
-  if (mode !== 'read') setMode('read'); else renderMerged();
-  // 打印 PDF 默认文件名临时设项目名-日期
+// 同步滚动开关（⇅ 按钮，仅编辑模式且预览可见时显示）
+function applySyncScrollBtn() {
+  $('syncScrollBtn').classList.toggle('on', syncScrollOn);
+  $('syncScrollBtn').title = syncScrollOn ? '同步滚动：开（点击关闭）' : '同步滚动：关（点击开启）';
+}
+$('syncScrollBtn').onclick = () => {
+  syncScrollOn = !syncScrollOn;
+  localStorage.setItem('wt-sync-scroll', syncScrollOn ? '1' : '0');
+  applySyncScrollBtn();
+  if (syncScrollOn) syncPreviewFromEditor();
+};
+applySyncScrollBtn();
+// 预览模式导 PDF：当前文件渲染进阅览视图（打印 CSS 自动只显示阅览视图）；
+// 不切模式、无封面扉页，下次进阅览 renderMerged 整体重渲染
+async function renderSinglePrint() {
+  const body = $('mergedBody'); const toc = $('tocList');
+  body.innerHTML = ''; toc.innerHTML = '';
+  const sec = document.createElement('div');
+  sec.innerHTML = mdToHtml(current.content);
+  body.appendChild(sec);
+  const heads = [...sec.querySelectorAll('h1,h2,h3,h4')];
+  heads.forEach((h, i) => { h.id = 'h-sp-' + i; });
+  await fixImages(sec, parentPath(current.node.path));
+  for (const h of heads) {
+    const a = document.createElement('a');
+    a.className = 'l' + Math.min(+h.tagName[1], 4);
+    a.textContent = h.textContent.trim() || '（无标题）';
+    a.href = '#' + h.id;
+    a.onclick = e => { e.preventDefault(); document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    toc.appendChild(a);
+  }
+}
+$('btnExportPdf').onclick = async () => {
+  const single = mode === 'preview';
+  if (single && !current) { toast('请先选择文件'); return; }
+  if (single) { await flushSave(); await renderSinglePrint(); }
+  else { if (mode !== 'read') setMode('read'); else renderMerged(); }
+  // 打印默认文件名：预览=当前文件名，其余=项目名
   const d = new Date();
   const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  const projName = (bookCfg.title || (rootHandle ? rootHandle.name : '') || '成书').replace(/[\\/:*?"<>|]/g, '');
+  const rawName = single
+    ? current.node.name.replace(/\.(md|markdown|txt)$/i, '')
+    : (bookCfg.title || (rootHandle ? rootHandle.name : '') || '成书');
+  const safeName = rawName.replace(/[\\/:*?"<>|]/g, '');
   const prevTitle = document.title;
-  document.title = projName + '-' + dateStr;
-  toast('目标务必选内置「另存为 PDF」（会自动填文件名 ' + projName + '-' + dateStr + '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）', 6000);
+  document.title = safeName + '-' + dateStr;
+  toast('目标务必选内置「另存为 PDF」（会自动填文件名 ' + safeName + '-' + dateStr + '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）', 6000);
   const restore = () => { document.title = prevTitle; window.removeEventListener('afterprint', restore); };
   window.addEventListener('afterprint', restore);
   setTimeout(() => window.print(), 500);
 };
-$('btnExportHtml').onclick = () => exportMerged();
+$('btnExportHtml').onclick = () => exportMerged(mode === 'preview');
 
 /* ---------- 成书设置 ---------- */
 function todayInput() {
@@ -4766,7 +5152,7 @@ $('bkSave').onclick = async () => {
   await applyBookCfgAndRender();
   toast('成书设置已保存');
 };
-$('btnExportMd').onclick = exportMd;
+$('btnExportMd').onclick = () => exportMd(mode === 'preview');
 $('btnTheme').onclick = () => {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = cur;
@@ -4981,15 +5367,15 @@ function makeDivider(div, leftEl, opt) {
 makeDivider($('divSidebar'), $('sidebar'), { min: 120, max: 640, store: 'wt-w-sidebar' });
 makeDivider($('divEdit'), $('livePreview'), { min: 220, max: 1600, store: 'wt-w-preview', invert: true });
 makeDivider($('divRead'), $('tocPanel'), { min: 120, max: 640, store: 'wt-w-toc' });
-// 拖到项目名上 = 移到根目录
-$('projName').ondragover = e => { if (dragPath && parentPath(dragPath)) { e.preventDefault(); $('projName').classList.add('drop-target'); } };
+// 拖到项目名上 = 移到根目录（多选组整组）
+$('projName').ondragover = e => { if (dragPaths && dragPaths.some(p => parentPath(p))) { e.preventDefault(); $('projName').classList.add('drop-target'); } };
 $('projName').ondragleave = () => $('projName').classList.remove('drop-target');
 $('projName').ondrop = async e => {
   e.preventDefault(); $('projName').classList.remove('drop-target');
-  const p = e.dataTransfer.getData('text/plain') || dragPath;
-  const src = p && findNode(tree, p);
-  dragPath = null;
-  if (src && parentPath(src.path)) await moveNode(src, null);
+  const nodes = dropDragNodes(e).filter(n => parentPath(n.path));
+  if (!nodes.length) return;
+  if (nodes.length === 1) await moveNode(nodes[0], null);
+  else await moveNodes(nodes, null);
 };
 /* ================= search ================= */
 const escapeReg = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
