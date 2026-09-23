@@ -612,7 +612,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
   <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
-  <button id="btnSplit" disabled title="把选中的文件按标题级别或行首关键词拆分成多个文件：统一命名为 xxx-split-0、xxx-split-1…（编号从 0 开始，原文件移入回收站，可恢复）">拆分</button>
+  <button id="btnSplit" disabled title="拆分文件：光标/标题/关键词，原文件保留原名（就地截断），后续用 base_2.md、base_3.md… 下划线编号（Windows 排序原文件永远在前）">拆分</button>
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
@@ -867,7 +867,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <h3>拆分文件</h3>
   <div class="row"><label style="width:72px">文件：</label><span id="spName" style="font-size:13px;font-family:monospace"></span></div>
   <div class="row"><label style="width:72px">方式：</label>
-    <label><input type="radio" name="spMode" value="heading" checked> 按标题拆分</label>
+    <label><input type="radio" name="spMode" value="cursor" checked> 从光标拆分</label>
+    <label><input type="radio" name="spMode" value="heading"> 按标题拆分</label>
     <label><input type="radio" name="spMode" value="keyword"> 按关键词拆分</label>
   </div>
   <div class="row" id="spHeadingRow"><label style="width:72px">标题级别：</label>
@@ -883,6 +884,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="row hidden" id="spKeywordRow"><label style="width:64px">关键词：</label>
     <input id="spKeyword" style="flex:1" placeholder="行首出现该关键词的行即拆分点">
+  </div>
+  <div class="row hidden" id="spCursorRow"><label style="width:64px">光标行：</label>
+    <span id="spCursorInfo" style="font-size:12.5px;color:var(--muted)"></span>
   </div>
   <div id="spInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0">​</div>
   <div class="btns">
@@ -1340,7 +1344,10 @@ function sanitizeFileName(name) {
   return name.replace(/[\\/:*?"<>|]/g, '').replace(/^[\s.]+|[\s.]+$/g, '');
 }
 function sortNodes(nodes) {
-  const nat = (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN', { numeric: true });
+  // 文件名分隔符优先级：'.'（扩展名）最轻 → '-' 次之 → '_'（拆分后缀）最重
+  // 用数字前缀 remap，localeCompare numeric 模式下 1 < 2 < 3 绝对成立，且 locale 绝不忽略纯 ASCII
+  const remap = s => s.replace(/[._-]/g, c => c === '.' ? '1.' : c === '-' ? '2-' : '3_');
+  const nat = (a, b) => remap(a.name).localeCompare(remap(b.name), 'zh-Hans-CN', { numeric: true });
   const dirs = nodes.filter(n => n.type === 'dir');
   const files = nodes.filter(n => n.type === 'file');
   const unnumDirs = dirs.filter(d => numOf(d.name) === null).sort(nat);
@@ -3578,8 +3585,8 @@ async function mergeSelected() {
   } catch (e) { toast('合并失败：' + e.message); }
 }
 
-/* split：按标题级别/关键词拆分 */
-let spTarget = null, spText = '';   // 拆分目标节点与内容快照（打开对话框时读取）
+/* split：按标题级别/关键词/光标拆分 */
+let spTarget = null, spText = '', spCursorLine = -1;   // 拆分目标节点、内容快照、光标所在行（cursor 模式用）
 // 拆分行：标题按级别匹配，跳过代码块内行
 function findSplitPoints(lines, mode, level, kw) {
   const pts = [];
@@ -3595,8 +3602,12 @@ function findSplitPoints(lines, mode, level, kw) {
   return pts;
 }
 // 按拆分点切块；首块为空时并入原文件名
-function splitParts(text, mode, level, kw) {
+function splitParts(text, mode, level, kw, cursorLine) {
   const lines = text.split('\n');
+  if (mode === 'cursor') {
+    if (cursorLine <= 0 || cursorLine >= lines.length) return [];  // 光标在第一行或最后一行：无法拆
+    return [lines.slice(0, cursorLine).join('\n'), lines.slice(cursorLine).join('\n')];
+  }
   const pts = findSplitPoints(lines, mode, level, kw);
   if (!pts.length) return [];
   const parts = [];
@@ -3619,14 +3630,24 @@ function splitParams() {
 function updateSplitInfo() {
   const p = splitParams();
   if (p.mode === 'keyword' && !p.kw) { $('spInfo').textContent = '请输入关键词'; return; }
+  if (p.mode === 'cursor') {
+    const lines = spText.split('\n');
+    $('spCursorInfo').textContent = `第 ${spCursorLine + 1} / ${lines.length} 行`;
+    if (spCursorLine <= 0) { $('spInfo').textContent = '光标在第一行，无法拆分'; return; }
+    if (spCursorLine >= lines.length) { $('spInfo').textContent = '光标在最后一行，无法拆分'; return; }
+    const { base, ext } = splitNameInfo(spTarget.name);
+    $('spInfo').innerHTML = `将拆为 2 份：<div class="sp-names">· ${esc(spTarget.name)}（原文件截断为前 ${spCursorLine} 行）<br>· ${esc(base + '_2' + ext)}（光标行起）</div>`;
+    return;
+  }
   const parts = splitParts(spText, p.mode, p.level, p.kw);
   if (parts.length < 2) { $('spInfo').textContent = parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'; return; }
   const { base, ext } = splitNameInfo(spTarget.name);
   const names = [];
-  for (let k = 0; k < parts.length && k < 4; k++) names.push(base + '-split-' + k + ext);
-  // 文件名单独一行显示，避免一行过长撑宽对话框
-  $('spInfo').innerHTML = '找到 ' + (parts.length - 1) + ' 个拆分点，将拆为 ' + parts.length + ' 个文件：'
-    + '<div class="sp-names">' + names.map(n => '· ' + esc(n)).join('<br>') + (parts.length > 4 ? '<br>…' : '') + '</div>';
+  for (let k = 2; k <= parts.length && names.length < 3; k++) names.push(base + '_' + k + ext);
+  $('spInfo').innerHTML = '找到 ' + (parts.length - 1) + ' 个拆分点，将拆为 ' + parts.length + ' 份：<div class="sp-names">· '
+    + esc(spTarget.name) + '（第一个拆分块）<br>'
+    + names.map(n => '· ' + esc(n)).join('<br>')
+    + (parts.length > 4 ? '<br>…' : '') + '</div>';
 }
 async function openSplit() {
   const n = selectedNode || (current ? current.node : null);
@@ -3637,19 +3658,24 @@ async function openSplit() {
   let text;
   try { text = await (await n.handle.getFile()).text(); } catch (e) { toast('读取失败：' + e.message); return; }
   spTarget = n; spText = text.replace(/^\uFEFF/, '');
+  // 光标所在行：编辑器当前 selectionStart 之前有几个 \n 就是第几行（从 0 起）
+  const ed = $('editor');
+  spCursorLine = (ed.value.slice(0, ed.selectionStart).match(/\n/g) || []).length;
   $('spName').textContent = n.name;
   $('spKeyword').value = '';
-  document.querySelector('input[name="spMode"][value="heading"]').checked = true;
-  $('spHeadingRow').classList.remove('hidden');
+  document.querySelector('input[name="spMode"][value="cursor"]').checked = true;
+  $('spHeadingRow').classList.add('hidden');
   $('spKeywordRow').classList.add('hidden');
+  $('spCursorRow').classList.remove('hidden');
   updateSplitInfo();
   $('dlgSplit').showModal();
 }
 $('btnSplit').onclick = openSplit;
 document.querySelectorAll('input[name="spMode"]').forEach(r => r.onchange = () => {
-  const heading = splitParams().mode === 'heading';
-  $('spHeadingRow').classList.toggle('hidden', !heading);
-  $('spKeywordRow').classList.toggle('hidden', heading);
+  const p = splitParams();
+  $('spHeadingRow').classList.toggle('hidden', p.mode !== 'heading');
+  $('spKeywordRow').classList.toggle('hidden', p.mode !== 'keyword');
+  $('spCursorRow').classList.toggle('hidden', p.mode !== 'cursor');
   updateSplitInfo();
 });
 $('spLevel').onchange = updateSplitInfo;
@@ -3660,33 +3686,37 @@ $('spOk').onclick = async () => {
   if (!node) return;
   const p = splitParams();
   if (p.mode === 'keyword' && !p.kw) { toast('请输入关键词'); return; }
-  const parts = splitParts(spText, p.mode, p.level, p.kw);
+  const parts = splitParts(spText, p.mode, p.level, p.kw, spCursorLine);
   if (parts.length < 2) { toast(parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'); return; }
   const { base, ext } = splitNameInfo(node.name);
   try {
     const dir0 = await getDirHandleByPath(parentPath(node.path));
-    // 已存在同名 -split-N 文件则中止，避免覆盖
-    for (let k = 0; k < parts.length; k++) {
-      const nm = base + '-split-' + k + ext;
-      try { await dir0.getFileHandle(nm); toast('已存在同名文件「' + nm + '」，请先重命名或删除后再拆分'); return; } catch (e) {}
+    // 统一命名规则：原文件保留原名写 parts[0]，parts[1..] 写成 base_2.ext ~ base_N.ext
+    // 下划线 '_' 码位 95 > '.' 46，Windows 排序原文件永远在前
+    for (let k = 2; k <= parts.length; k++) {
+      const nm = base + '_' + k + ext;
+      try { await dir0.getFileHandle(nm); toast('已存在同名文件「' + nm + '」，请先重命名或删除'); return; } catch (e) {}
     }
-    await backupHistory(node, spText);   // 拆分前旧内容存入历史版本
-    // 分块统一命名 base-split-0..N-1，保证排序连续
-    for (let k = 0; k < parts.length; k++) {
-      const nm = base + '-split-' + k + ext;
-      const fh = await dir0.getFileHandle(nm, { create: true });
-      const w = await fh.createWritable(); await w.write(parts[k].replace(/\s+$/, '') + '\n'); await w.close();
+    await backupHistory(node, spText);
+    // 原文件就地覆盖为 parts[0]（光标前 / 第一个拆分块）
+    let fh0 = await dir0.getFileHandle(node.name);
+    let w0 = await fh0.createWritable(); await w0.write(parts[0].replace(/\s+$/, '') + '\n'); await w0.close();
+    // 写 parts[1..] 为 base_2.ext ~ base_N.ext
+    for (let k = 1; k < parts.length; k++) {
+      const nm = base + '_' + (k + 1) + ext;
+      let fh = await dir0.getFileHandle(nm, { create: true });
+      let w = await fh.createWritable(); await w.write(parts[k].replace(/\s+$/, '') + '\n'); await w.close();
     }
-    const firstPath = parentPath(node.path) ? parentPath(node.path) + '/' + base + '-split-0' + ext : base + '-split-0' + ext;
-    await trashMove(node.handle, node.path, 'file');   // 原文件（内容已全部拆入分块）移入回收站，可恢复
     $('dlgSplit').close();
-    if (current && current.node === node) current = null;
     clearTimeout(saveTimer);
     await refreshTree();
-    const nn = findNode(tree, firstPath);
-    if (nn) { selectedNode = nn; await openFile(nn); }
-    renderTree(); updateToolbar();
-    toast('已拆分为 ' + parts.length + ' 个文件，原文件已移入回收站');
+    if (current && current.node === node) {
+      await openFile(node);   // 刷新编辑器（原文件内容已截断/重写）
+    } else { renderTree(); updateToolbar(); }
+    const suffix = p.mode === 'cursor'
+      ? `，原文件保留前 ${spCursorLine} 行，光标行起写入 ${base}_2${ext}`
+      : `，后续 ${parts.length - 1} 份为 ${base}_2${ext} ~ ${base}_${parts.length}${ext}`;
+    toast(`已拆分为 ${parts.length} 份${suffix}`);
   } catch (e) { toast('拆分失败：' + e.message); }
 };
 
