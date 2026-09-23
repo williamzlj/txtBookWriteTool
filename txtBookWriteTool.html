@@ -603,20 +603,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnNewMd" disabled title="新建 .md 文件，自动编号 +10">新建md</button>
   <button id="btnNewDir" disabled>新建文件夹</button>
   <button id="btnRename" disabled>重命名</button>
-  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超过16个中文字宽时截断，英文算半个字）">自动文件名</button>
-  <button id="btnRenumber" disabled title="先选中一个文件或文件夹：对该文件夹内的文件和带编号子文件夹统一重新编号为 110、120、130…（不含草稿，原文字保留，无编号的文件自动补编号）">重新编号</button>
+  <button id="btnAutoName" disabled title="按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）">自动文件名</button>
+  <button id="btnRenumber" disabled title="统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）">重新编号</button>
   <span class="sep"></span>
-  <button id="btnToggleHide" disabled title="快速切换输出状态：隐藏＝文件名前加下划线 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
-  <button id="btnCopy" disabled title="复制选中的文件或文件夹到同一目录，名称后加 -copy1（同名时自动依次为 -copy2、-copy3）">复制</button>
+  <button id="btnToggleHide" disabled title="隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏">隐藏文件</button>
+  <button id="btnCopy" disabled title="复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）">复制</button>
   <button id="btnDelete" disabled>删除</button>
-  <button id="btnTrash" disabled title="回收站：被删除/合并的文件先移到这里，可恢复">回收站</button>
-  <button id="btnMerge" disabled title="Ctrl+点击文件多选；合并后内容写入第一个文件，其余删除">合并</button>
+  <button id="btnTrash" disabled title="回收站：删除/合并的文件移到这里，可恢复">回收站</button>
+  <button id="btnMerge" disabled title="Ctrl+点击多选；内容写入第一个文件，其余删除">合并</button>
   <button id="btnUnsel" class="hidden" title="清空多选（Esc 同效）">取消选择</button>
-  <button id="btnSplit" disabled title="拆分文件：光标/标题/关键词，原文件保留原名（就地截断），后续用 base_2.md、base_3.md… 下划线编号（Windows 排序原文件永远在前）">拆分</button>
+  <button id="btnSplit" disabled title="拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）">拆分</button>
   <span class="sep"></span>
   <button id="btnFontDown" title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
   <button id="btnFontUp" title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
-  <button id="btnFontReset" title="重置字号：编辑模式恢复编辑器默认字号（15px），预览/阅览恢复版式默认字号（缩放 100%）">↺</button>
+  <button id="btnFontReset" title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
   <button id="btnAbout" title="软件使用说明">说明</button>
   <button id="btnTheme" title="切换明暗主题">🌙</button>
  </div>
@@ -667,10 +667,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnMdHr" class="ic needs-file" disabled title="插入分隔线">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8h12"/></svg>
      </button>
-     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格（　），用于中文排版">
+     <button id="btnFullSpace" class="ic needs-file" disabled title="插入中文全角空格，用于中文排版">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
      </button>
-     <button id="btnInsertComment" class="ic needs-file" disabled title="HTML 注释：选中文字则包成 &lt;!--注释--&gt;，未选中则插入注释模板；仅写作时可见，阅览与导出中不显示">
+     <button id="btnInsertComment" class="ic needs-file" disabled title="HTML 注释：选中则包成 &lt;!--注释--&gt;，未选中则插入模板；仅写作时可见，阅览导出不显示">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
      </button>
      <button id="btnMdDate" class="ic needs-file" disabled title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
@@ -695,7 +695,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnMdAnchor" class="ic needs-file" disabled title="插入锚点（页内跳转标记 &lt;a id=&quot;name&quot;&gt;）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="2.8" r="1.25"/><path d="M8 4.1v9.4M5.3 6.8h5.4"/><path d="M2.9 10.3a5.1 5.1 0 0 0 10.2 0"/><path d="M2.9 10.3h1.7M11.4 10.3h1.7"/></svg>
      </button>
-     <button id="btnInsertImg" class="ic needs-file" disabled title="插入图片（也可直接粘贴/拖入）；图片语法: ![](路径 =600x400 center)，可只写 =600x 或 =x300，对齐可选 center/left/right">
+     <button id="btnInsertImg" class="ic needs-file" disabled title="插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="1.2"/><circle cx="5.4" cy="6.8" r="1.1"/><path d="M2.8 11.8l3.2-3.2 2.4 2.4 2.2-2.2 2.6 3"/></svg>
      </button>
      
@@ -716,7 +716,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
    <div class="mode-view">
       
       <button id="btnCss" disabled title="可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css">编辑样式</button>
-      <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区（标题/正文/强调/引用/列表/代码/分隔线/链接/表格等），点“样式”可微调任意内容">
+      <select id="presetSel" disabled title="选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容">
         <option value="classic">经典黑</option>
         <option value="red">典雅红</option>
         <option value="academic">学术蓝</option>
@@ -725,7 +725,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         <option value="purple">典雅紫</option>
         <option value="">自定义配色</option>
       </select>
-     <select id="bookThemeSel" title="成书版式：替换 style.css 成书版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
+     <select id="bookThemeSel" title="成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调">
        <option value="classic">经典书籍</option>
        <option value="modern">现代简洁</option>
        <option value="academic">学术</option>
@@ -757,21 +757,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <h1>txtBookWriteTool</h1>
       <h3>一款用txt写作的小工具</h3>
       <div class="tip">
-        软件特色：单文件运行、利用简单的txt和文件夹结构来灵活管理写作内容。<br><br>
+        软件特色：单文件运行，用简单的 txt 和文件夹结构灵活管理写作内容。<br><br>
         <button id="btnOpen2" class="primary" style="font-size:15px; padding:8px 26px;">选择写作文件夹</button>
         <br><br>
         <b>使用说明</b><br>
         <ol class="list" style="font-size:14px;text-align:left;">
-        <li>请选择一个<b>本地文件夹</b>作为书稿目录<br> </li>
-        <li>文件夹内的<b>.txt/.md文件</b>自动按目录树管理<br> </li>
-        <li>「编辑」模式支持<b>markdown</b>格式编辑和预览<br> </li>
-        <li>「大纲」模式支持拖动调整文件顺序<br> </li>
-        <li>「阅览」模式会把文件夹里的内容<b>合并成一本书</b>连续显示<br> </li>
-        <li>软件支持草稿模式，当文件名以 <b>_</b> 开头时（如 _灵感.txt）被视为为草稿，不参与阅览和PDF导出<br> </li>
-        <li>单文件编辑：也可以直接把<b>文件夹</b>或 <b>.txt/.md文件</b>拖入窗口打开<br> </li>
-        <li>请使用 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开本页面</li>
+        <li>请用 <b>Edge</b> 或 <b>Chrome</b> 浏览器，其他浏览器有待后续支持</li>
+        <li>选择一个<b>本地文件夹</b>作为书稿目录，其中 <b>.txt/.md</b> 文件自动按目录树管理<br> </li>
+        <li>「编辑」模式 Markdown 编辑与预览；<br>「大纲」模式拖动调序；<br>「阅览」模式<b>合并成一本书</b>连续显示<br> </li>
+        <li>文件名以 <b>_</b> 开头（如 _灵感.txt）时被视为草稿，不参与阅览和 PDF 导出<br> </li>
+        <li>可把<b>文件夹</b>或 <b>.txt/.md 文件</b>直接拖入窗口打开；</li>
+        
         </ol>
-        <h4>软件作者：张亮军（无锡·海岸城） &nbsp;&nbsp;&nbsp;更新日期：2026年9月</h4>
+        <br>
+        <h4>软件作者：张亮军（无锡·海岸城） &nbsp;&nbsp;&nbsp;更新日期：2026年9月23日</h4>
       </div>
     </div>
     <div id="editView" class="hidden">
@@ -903,79 +902,57 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
 </dialog>
 <dialog id="dlgAbout">
-  <h3>txtBookWriteTool （一款用txt写作的小工具） · 使用说明</h3>
+  <h3>txtBookWriteTool · 使用说明</h3>
   <div class="author">
       <div class="name">张亮军　无锡·海岸城</div>
       <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
   </div>
   <div class="ab-body">
     <h4>这是什么</h4>
-    <ul>
-      <li>这是一款用txt写作的小工具。单文件运行，小巧轻便。</li>
-      <li>软件支持把电脑上的一个普通文件夹当作书稿目录，里面放 <code>.txt</code> / <code>.md</code> 文件，全部用 Markdown 语法写作。</li>
-      <li>软件支持把目录下所有 <code>.txt</code> / <code>.md</code> 文件合并为一个文件，方便阅览和导出。</li>
-      <li>软件支持用下划线<code>_</code>前缀来标记隐藏文件(比如<code> _灵感.txt</code>)，方便管理素材资料。</li>
-      <li>文件默认保存为 <code>.txt</code> 但按 Markdown 解析（方便在 Windows 资源管理器里预览）</li>
-      <li>数据全部在本地文件夹，不联网、不上传。</li>
-      <li>请使用新版 <b>Edge</b> 或 <b>Chrome</b> 浏览器打开；首次选择文件夹时在弹窗里点“允许”。</li>
-    </ul>
-    <h4>开始使用</h4>
-    <ul>
-      <li><b>打开文件夹</b>：选择书稿根目录。授权会被记住，下次打开页面自动加载；</li>
-    </ul>
+    txtBookWriteTool 是一款免费开源的本地写作工具。它以一个普通文件夹作为书稿目录，用 .txt / .md 文件按 Markdown 语法写作，最终可合并成书、导出 PDF / HTML / Markdown。
+    
     <h4>编号与排序</h4>
     <ul>
-      <li>文件名用三位数字编号：<code>110.txt</code>、<code>110-标题.txt</code>。新建文件自动取当前目录下最大编号并 +10，留好未来文件的插入空位。</li>
-      <li><b>文件夹也可以编号</b>：重命名为 <code>120-正文</code> 后，文件和文件夹按 110、120、130 统一排序，可实现“序言 → 正文文件夹 → 后记”的穿插结构；不编号的文件夹固定排在最前。</li>
-      <li><b>重新编号</b>：先选中一个文件或文件夹，点该按钮，只对所在文件夹内的文件和带编号子文件夹统一重排为 110、120、130…，文字部分保留。</li>
-      <li><b>自动命名</b>：把 <code>110.txt</code> 改成 <code>110-第一行文字.txt</code>（超过 16 字截断）。</li>
+      <li><b>文件三位数字编号</b>:（<code>举例：110.txt</code>），新建文件会在已有编号基础上自动+10。</li>
+      <li><b>文件夹也可编号</b>:，与文件统一排序，无编号的文件夹排最前。</li>
+      <li><b>自动重新编号</b>：所在文件夹统一重排、文字保留。</li>
+      <li><b>自动命名</b>：<code>110.txt</code> → <code>110-第一行文字.txt</code>（超 16 字截断）。</li>
     </ul>
     <h4>草稿 / 素材</h4>
     <ul>
-      <li>文件名或文件夹名以 <code>_</code> 开头（也兼容 <code>[草稿]</code>、<code>draft-</code>）即为草稿：可正常编辑、搜索，但不参与阅览和导出；草稿文件夹内的全部内容都不输出。去掉下划线即恢复。</li>
-      <li><b>快速隐藏</b>：选中任意文件或文件夹点隐藏文件按钮，名称前会加上 <code>_</code> ，不予输出（阅览/PDF/HTML/MD 均不含）；当选中已隐藏项目时按钮变成取消隐藏，再点恢复。</li>
+      <li>名字以 <code>_</code> 开头（兼容 <code>[草稿]</code>、<code>draft-</code>）即被视为草稿：草稿可编辑可搜索，但不参与阅览导出；</li>
+      <li>点击隐藏文件按钮快速切换状态。</li>
     </ul>
     <h4>四种模式</h4>
     <ul>
-      <li><b>编辑</b>：左边写 Markdown，右边实时预览；自动保存。</li>
-      <li><b>预览</b>：单独预览当前文件。</li>
-      <li><b>阅览</b>：把整个文件夹按顺序合并成一本书（顶部居中显示项目名），左侧目录先列文件名、再列该文件内的标题。</li>
-      <li><b>大纲</b>：以卡片纵览全书——文件夹是卷、文件是章节，卡片显示标题、摘要和字数；直接拖动卡片即可调整章节顺序，编号自动重排，拖到文件夹卡片中段可移入该文件夹。</li>
+      <li><b>编辑</b>：左写右预览，自动保存；<b>预览</b>：单独预览当前文件。</li>
+      <li><b>阅览</b>：全文件夹合并成书，左侧目录先文件名、再文内标题。</li>
+      <li><b>大纲</b>：卡片纵览全书，拖卡片调序/移入文件夹，编号自动重排。</li>
     </ul>
     <h4>写作辅助</h4>
     <ul>
-      <li><b>图片</b>：直接粘贴或拖入即自动存入 assets 并插入；语法 <code>![](路径 =600x400 center)</code>，可只写宽或高，对齐用 center/left/right。</li>
-      <li><b>表格</b>：插入表格对话框；光标在表格内时浮出工具条可增删行列。</li>
-      <li><b>调色盘</b>：选颜色确认后把色值插到光标处。</li>
-      <li><b>◀ / ▶</b>：按目录顺序快速切换上一个 / 下一个文件（草稿除外），编辑、预览、阅览模式下都可用。</li>
-      <li><b>全角空格</b>：在光标处插入一个中文全角空格（　），用于中文排版。</li>
-      <li><b>插入注释</b>：在光标处插入 <b>&lt;!--注释--&gt;</b>，占位文字自动选中可直接输入；HTML 注释只在编辑源码时可见，阅览、PDF、导出 HTML 中均不显示（导出 MD 原文保留）。</li>
-      <li><b>替换</b>：点「替换」在对话框中选择作用范围——仅当前文件，或整个项目的全部 md/txt 文件（草稿也包含，替换前需确认）。<b>替换前的内容会自动存入「历史版本」，可随时恢复。</b></li>
-      <li><b>搜索</b>：顶栏搜索框在项目全部文件内容中查找，点结果跳到对应行，Esc 或 ✕ 清空。</li>
-      <li><b>合并</b>：Ctrl+点击多选文件（Esc 或“取消选择”清空），合并后内容写入第一个文件、其余删除。</li>
-      <li><b>拆分</b>：选中一个文件点「拆分」，可按指定级别的标题（#）或行首关键词拆成多个文件：统一命名为 <code>xxx-split-0.txt</code>、<code>xxx-split-1.txt</code>…（编号从 0 开始保证排序连续，原文件移入回收站可恢复）。适合把论文大纲拆开后逐章编写。</li>
-      <li>目录树里可直接拖动文件/文件夹移动；拖到顶部项目名上等于移到根目录。</li>
+      <li><b>图片</b>：粘贴/拖入自动存 assets 并插入，语法 <code>![](路径 =600x400 center)</code>，宽高可只写一个；<b>表格</b>：表格内浮出工具条增删行列；<b>调色盘</b>：选色插入色值；<b>全角空格</b>：插入中文空格。</li>
+      <li><b>◀/▶</b>：按目录顺序切换文件（草稿除外）；<b>搜索</b>：全文查找，点结果跳转，Esc 或 ✕ 清空。</li>
+      <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
+      <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
+      <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除。</li>
+      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件保留原名存前半，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（排序原文件在前），目标名已存在则中止；目录树可拖动移动，拖到项目名=移到根目录。</li>
     </ul>
     <h4>输出</h4>
     <ul>
-      <li><b>导出 PDF</b>：点「阅览」标签进入成书预览；预览确认后点「导出 PDF」，打印窗口的「目标」务必选浏览器内置的<b>「另存为 PDF」</b>。</li>
-      <li><b>导出 MD</b>：按目录顺序合并为一个 Markdown 文件下载到下载文件夹（文件名带日期），可在 Typora 等编辑器中转 PDF。</li>
-      <li><b>导出 HTML</b>：单文件、含左侧目录和自定义样式（文件名带日期），正文标题下显示作者与日期，双击即可在浏览器阅读。</li>
-      
+      <li><b>导出 PDF</b>：阅览预览后点导出，打印目标选「另存为 PDF」。</li>
+      <li><b>导出 MD</b>：合并为一个 Markdown 下载（名带日期），可在 Typora 转 PDF。</li>
+      <li><b>导出 HTML</b>：单文件含左侧目录和自定义样式（名带日期），双击即可浏览器阅读。</li>
     </ul>
-    <h4>回收站与历史版本</h4>
+    <h4>回收站与历史</h4>
     <ul>
-      <li><b>回收站</b>：删除文件/文件夹、以及合并时被并入的文件，都会先移到项目内的 <code>.trash</code> 文件夹；点「回收站」可恢复、彻底删除单项或清空。</li>
-      <li><b>历史版本</b>：每次自动保存时若内容有变化，旧内容自动存入项目内的 <code>.history</code>（按文件路径镜像存储），每个文件保留最近 40 版；选中文件点「历史」可查看、恢复任意旧版（恢复前当前内容也会先存一版）。项目内批量替换前同样自动留档。</li>
-      <li><b>重命名/移动时历史跟随</b>：重命名文件或文件夹、跨目录拖拽移动时，<code>.history</code> 下对应的旧路径历史会自动迁移到新路径——旧版本不丢失，可继续叠加新版本。从回收站恢复时若遇重名自动加「(恢复 n)」后缀，历史目录也会跟随迁移。</li>
-      <li><b>删除时历史清理</b>：移入回收站时历史保留不动（便于恢复）；只有「彻底删除单项」或「清空回收站」时，才会连同 <code>.history</code> 下对应路径一并清除——与文件本身的生命周期对齐。</li>
-      <li><code>.trash</code> 和 <code>.history</code> 在本工具中自动隐藏，不参与阅览和导出；在 Windows 资源管理器中可见，备份项目时一并复制即可。不再需要时删掉该目录即可。</li>
+      <li>删除/合并的文件进项目内 <code>.trash</code>，可恢复或清空；</li>
+      <li>自动保存有变化时旧内容存 <code>.history</code>（按路径镜像），每文件留 20 版，可查看恢复；</li>
+      <li>重命名/移动时历史自动跟随，恢复重名加「(恢复 n)」后缀；批量替换前自动留档。</li>
+      <li>移入回收站历史保留；彻底删除/清空回收站才连历史清除、不可恢复，普通删除可找回。</li>
+      <li><code>.trash</code>/<code>.history</code> 文件夹在工具内自动隐藏。</li>
+      <li>建议定期复制整个项目文件夹备份。</li>
     </ul>
-    <h4>注意</h4>
-    <ul>
-      <li>「清空回收站」和「彻底删除」会一并清除对应历史版本，不可恢复；普通删除和合并都可在回收站找回（历史也保留）。重要书稿建议定期把整个项目文件夹复制备份。</li>
-    </ul>
-    
   </div>
   <div class="btns">
     <button id="aboutOk" class="primary">知道了</button>
@@ -983,7 +960,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <dialog id="dlgTrash">
   <h3>回收站</h3>
-  <div style="font-size:12.5px;color:var(--muted)">删除或合并掉的文件/文件夹先移到这里（项目文件夹内的 .trash 目录），可恢复；清空后不可找回。</div>
+  <div style="font-size:12.5px;color:var(--muted)">删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。</div>
   <div id="trashList" class="recycle-list"></div>
   <div class="btns">
     <button id="trashEmpty" class="danger">清空回收站</button>
@@ -992,7 +969,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <dialog id="dlgHistory">
   <h3>历史版本 · <span id="histFile" style="font-weight:400;color:var(--muted)"></span></h3>
-  <div style="font-size:12.5px;color:var(--muted)">每次自动保存时，若内容有变化，旧版本自动留存（每个文件最近 20 个，存于项目内 .history 目录）。</div>
+  <div style="font-size:12.5px;color:var(--muted)">自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。</div>
   <div class="hist-wrap">
     <div id="histList"></div>
     <div style="flex:1;min-width:0">
