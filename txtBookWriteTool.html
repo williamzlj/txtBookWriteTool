@@ -950,7 +950,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
       <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
       <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏均按组操作。</li>
-      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件保留原名存前半，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（排序原文件在前），目标名已存在则中止；目录树可拖动移动，拖到项目名=移到根目录。</li>
+      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件保留原名存前半，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（排序原文件在前）；目标名已占用时编号自动顺延并确认后创建；目录树可拖动移动，拖到项目名=移到根目录。</li>
     </ul>
     <h4>输出</h4>
     <ul>
@@ -1525,7 +1525,7 @@ async function openFile(node) {
     watchStart(node, f);    // 启动外部修改检测（复用已读取的 File，不重复读盘）
     if (!node.external) histRemember(node.path, text);   // 历史检查点内存基线（外部文件无项目 .history）
     if (!node.external) { try { await idbSet('lastFile', node.path); } catch (e) {} }   // 记住上次编辑的文件，便于下次自动恢复
-    if (!node.external) expandedAddTo(node.path);
+    if (!node.external) { expandedAddTo(node.path); renderTree(); }   // 祖先展开需同步到 DOM，否则该文件夹首次点击被当作「收起」
     $('editor').value = text;
     setMode(mode);            // refresh view content
     syncTreeSelected();       // 大纲卡片/搜索结果跳转时同步目录树高亮
@@ -3934,7 +3934,10 @@ function splitParts(text, mode, level, kw, cursorLine) {
 }
 function splitNameInfo(name) {
   const dot = name.lastIndexOf('.');
-  return { base: dot > 0 ? name.slice(0, dot) : name, ext: dot > 0 ? name.slice(dot) : '' };
+  const base = dot > 0 ? name.slice(0, dot) : name, ext = dot > 0 ? name.slice(dot) : '';
+  // 已是拆分产物（base_N）时继续编号而非叠加：xxx_2.txt 再拆 → xxx_3.txt
+  const m = base.match(/_(\d+)$/);
+  return m ? { base: base.slice(0, m.index), ext, startNum: +m[1] + 1 } : { base, ext, startNum: 2 };
 }
 function splitParams() {
   return {
@@ -3951,15 +3954,15 @@ function updateSplitInfo() {
     $('spCursorInfo').textContent = `第 ${spCursorLine + 1} / ${lines.length} 行`;
     if (spCursorLine <= 0) { $('spInfo').textContent = '光标在第一行，无法拆分'; return; }
     if (spCursorLine >= lines.length) { $('spInfo').textContent = '光标在最后一行，无法拆分'; return; }
-    const { base, ext } = splitNameInfo(spTarget.name);
-    $('spInfo').innerHTML = `将拆为 2 份：<div class="sp-names">· ${esc(spTarget.name)}（原文件截断为前 ${spCursorLine} 行）<br>· ${esc(base + '_2' + ext)}（光标行起）</div>`;
+    const { base, ext, startNum } = splitNameInfo(spTarget.name);
+    $('spInfo').innerHTML = `将拆为 2 份：<div class="sp-names">· ${esc(spTarget.name)}（原文件截断为前 ${spCursorLine} 行）<br>· ${esc(base + '_' + startNum + ext)}（光标行起）</div>`;
     return;
   }
   const parts = splitParts(spText, p.mode, p.level, p.kw);
   if (parts.length < 2) { $('spInfo').textContent = parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'; return; }
-  const { base, ext } = splitNameInfo(spTarget.name);
+  const { base, ext, startNum } = splitNameInfo(spTarget.name);
   const names = [];
-  for (let k = 2; k <= parts.length && names.length < 3; k++) names.push(base + '_' + k + ext);
+  for (let k = 0; k < parts.length - 1 && names.length < 3; k++) names.push(base + '_' + (startNum + k) + ext);
   $('spInfo').innerHTML = '找到 ' + (parts.length - 1) + ' 个拆分点，将拆为 ' + parts.length + ' 份：<div class="sp-names">· '
     + esc(spTarget.name) + '（第一个拆分块）<br>'
     + names.map(n => '· ' + esc(n)).join('<br>')
@@ -4004,22 +4007,33 @@ $('spOk').onclick = async () => {
   if (p.mode === 'keyword' && !p.kw) { toast('请输入关键词'); return; }
   const parts = splitParts(spText, p.mode, p.level, p.kw, spCursorLine);
   if (parts.length < 2) { toast(parts.length ? '只有一个拆分块，无需拆分' : '未找到拆分点'); return; }
-  const { base, ext } = splitNameInfo(node.name);
+  const { base, ext, startNum } = splitNameInfo(node.name);
   try {
     const dir0 = await getDirHandleByPath(parentPath(node.path));
-    // 统一命名规则：原文件保留原名写 parts[0]，parts[1..] 写成 base_2.ext ~ base_N.ext
+    // 统一命名规则：原文件保留原名写 parts[0]，parts[1..] 写成 base_N.ext
     // 下划线 '_' 码位 95 > '.' 46，Windows 排序原文件永远在前
-    for (let k = 2; k <= parts.length; k++) {
-      const nm = base + '_' + k + ext;
-      try { await dir0.getFileHandle(nm); toast('已存在同名文件「' + nm + '」，请先重命名或删除'); return; } catch (e) {}
+    // 已是拆分产物时从原编号+1 续号；目标名已存在时起始编号自动顺延到空闲段，顺延后需用户确认（不覆盖已有文件）
+    const total = parts.length;
+    const rangeFree = async s => {
+      for (let k = s; k < s + total - 1; k++) {
+        try { await dir0.getFileHandle(base + '_' + k + ext); return false; } catch (e) {}
+      }
+      return true;
+    };
+    let start = startNum;
+    while (start < 2000 && !(await rangeFree(start))) start++;
+    if (start > startNum) {   // 仅因冲突顺延时才确认，正常续号不弹窗
+      const names = [];
+      for (let k = 1; k < total; k++) names.push(base + '_' + (start + k - 1) + ext);
+      if (!confirm('目标文件名已被占用，编号已自动顺延：\n\n' + node.name + '（第一个拆分块）\n' + names.join('\n') + '\n\n仍按以上名称创建吗？')) return;
     }
     await backupHistory(node, spText);
     // 原文件就地覆盖为 parts[0]（光标前 / 第一个拆分块）
     let fh0 = await dir0.getFileHandle(node.name);
     let w0 = await fh0.createWritable(); await w0.write(parts[0].replace(/\s+$/, '') + '\n'); await w0.close();
-    // 写 parts[1..] 为 base_2.ext ~ base_N.ext
+    // 写 parts[1..] 为 base_start.ext ~ base_{start+total-2}.ext
     for (let k = 1; k < parts.length; k++) {
-      const nm = base + '_' + (k + 1) + ext;
+      const nm = base + '_' + (start + k - 1) + ext;
       let fh = await dir0.getFileHandle(nm, { create: true });
       let w = await fh.createWritable(); await w.write(parts[k].replace(/\s+$/, '') + '\n'); await w.close();
     }
@@ -4030,8 +4044,8 @@ $('spOk').onclick = async () => {
       await openFile(node);   // 刷新编辑器（原文件内容已截断/重写）
     } else { renderTree(); updateToolbar(); }
     const suffix = p.mode === 'cursor'
-      ? `，原文件保留前 ${spCursorLine} 行，光标行起写入 ${base}_2${ext}`
-      : `，后续 ${parts.length - 1} 份为 ${base}_2${ext} ~ ${base}_${parts.length}${ext}`;
+      ? `，原文件保留前 ${spCursorLine} 行，光标行起写入 ${base}_${start}${ext}`
+      : `，后续 ${parts.length - 1} 份为 ${base}_${start}${ext} ~ ${base}_${start + parts.length - 2}${ext}`;
     toast(`已拆分为 ${parts.length} 份${suffix}`);
   } catch (e) { toast('拆分失败：' + e.message); }
 };
