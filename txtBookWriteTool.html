@@ -1139,6 +1139,26 @@ window.onerror = function(msg, src, line) {
   el.textContent = '脚本错误: ' + msg + ' @' + (line || '?');
 };
 
+/* ================= 手机访问提示（依赖 File System Access API，仅桌面 Edge/Chrome 可用） ================= */
+/* 不用宽泛的 Mobile 关键词（部分桌面 webview/嵌入式浏览器 UA 会带，导致电脑上误判）；
+   提示不可关闭——手机上工具完全无法使用，按钮不属于小屏设计 */
+(() => {
+  const ua = navigator.userAgent || '';
+  const isPhone = /Android|iPhone|iPod|IEMobile|BlackBerry|Opera Mini/i.test(ua)
+    || (navigator.maxTouchPoints > 1 && /^Mac/i.test(navigator.platform || ''));
+  if (!isPhone) return;
+  /* 锁滚动：提示态无需滚动，且页面内容窄视口溢出会把 fixed 遮罩包含块撑大导致遮罩/卡片错位 */
+  if (document.documentElement) document.documentElement.style.overflow = 'hidden';
+  if (document.body) document.body.style.overflow = 'hidden';
+  const mo = document.createElement('div');
+  mo.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:2147483647!important;background:#f2f4f7!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:24px!important;box-sizing:border-box!important;font:14px/1.7 system-ui,sans-serif!important;';
+  mo.innerHTML = '<div style="max-width:420px;width:100%;box-sizing:border-box;background:#fff;border:1px solid #e3e6ea;border-radius:12px;padding:28px 26px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.08)">'
+    + '<div style="font-size:17px;font-weight:600;margin-bottom:8px">暂不支持手机浏览器</div>'
+    + '<div style="color:#666">这个工具目前只支持在桌面浏览器（Edge/Chrome）打开，不支持在手机浏览器打开。请将本页地址发送到电脑，在桌面浏览器中使用。</div>'
+    + '</div>';
+  (document.documentElement || document.body).appendChild(mo);
+})();
+
 /* ================= state ================= */
 const $ = id => document.getElementById(id);
 let rootHandle = null;          // 根目录句柄
