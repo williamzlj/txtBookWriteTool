@@ -44,10 +44,10 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
 }
 #topbar button { padding: 4px 9px; }
 #topbar #btnLang { position: relative; display: inline-flex; align-items: center; padding: 4px 2px; border-radius: 999px; overflow: hidden; }
-#topbar #btnLang::before { content: ''; position: absolute; top: 2px; bottom: 2px; left: 2px; width: 24px; border-radius: 999px; background: var(--accent); opacity: .16; transition: transform .18s; }
+#topbar #btnLang::before { content: ''; position: absolute; top: 2px; bottom: 2px; left: 2px; width: 24px; border-radius: 999px; background: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .18s; }
 #topbar #btnLang.en::before { transform: translateX(24px); }
-#topbar #btnLang .lg { position: relative; width: 24px; text-align: center; color: var(--muted); }
-#topbar #btnLang:not(.en) .lg-zh, #topbar #btnLang.en .lg-en { color: var(--accent); font-weight: 700; }
+#topbar #btnLang .lg { position: relative; width: 24px; text-align: center; color: var(--text); font-weight: 700; }
+#topbar #btnLang:not(.en) .lg-zh, #topbar #btnLang.en .lg-en { color: #fff; font-weight: 700; }
 .tb-row { display: flex; align-items: center; gap: 5px; }
 .tb-row1 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
 .tb-row1 > * { flex: none; }
