@@ -386,21 +386,29 @@ body.book-indent .md-body blockquote p { text-indent: 0; }
 .md-body pre { background: var(--md-code-bg); padding: 14px 18px; border-radius: 8px; overflow: auto; margin: 1em 0; }
 .md-body pre code { background: none; padding: 0; }
 .md-body hr { border: none; border-top: 1px solid var(--md-border); margin: 2em 0; }
-.md-body ul, .md-body ol { padding-left: 1.8em; margin: .7em 0; }
-.md-body li { margin: .3em 0; }
+/* 列表左缩进 = 2em：三种列表（无序/有序/任务）的文字都落在正文首行缩进的同一列 */
+.md-body ul, .md-body ol { padding-left: 2em; margin: .7em 0; }
+.md-body li { margin: .3em 0; text-indent: 0; }
 .md-body li::marker { color: var(--md-accent); }
-/* 任务列表无圆点无缩进；框边/框底走 --md-task-todo/done-color */
-.md-body ul.contains-task-list, .md-body ol.contains-task-list { padding-left: 1.2em; }
+/* 任务列表：列表缩进与普通列表完全一致（不再单独设 padding-left）。
+   marked 会把连续的 - 条目合成同一个 ul，只要有一条带复选框，整个 ul 都带 contains-task-list，
+   若给该 ul 单独缩进，同列表里没有复选框的普通条目会整体左移 → 红点与数字错位。
+   勾选框改用负 margin 悬到缩进区（见下方 input 规则），待办文字因此与普通列表文字同列。
+   框边/框底走 --md-task-todo/done-color */
 .md-body li.task-list-item { list-style: none; text-indent: 0; margin: .35em 0; }
 .md-body li.task-list-item::marker { content: ''; }
 .md-body li.task-list-item > p { text-indent: 0; margin: .15em 0; }
-body.book-indent .md-body li.task-list-item,
-body.book-indent .md-body li.task-list-item p { text-indent: 0; }
+/* 列表项一律不套用首行缩进（无序/有序/任务列表一致），段落型列表项同样处理 */
+body.book-indent .md-body li,
+body.book-indent .md-body li p { text-indent: 0; }
 .md-body li.task-list-item input[type="checkbox"] {
   appearance: none; -webkit-appearance: none; box-sizing: border-box;
   /* font:inherit 使 em 跟随正文字号 */
   font: inherit; 
-  width: 0.9em; height: 0.9em; padding: 0; margin: -0.15em .4em 0 .05em;
+  width: 0.9em; height: 0.9em; padding: 0;
+  /* 负左外边距 = 把复选框悬到标记栏外面，让待办文字与普通列表文字同列（列表缩进 2em；
+     悬出量 = 勾选框 0.9em + 右间距 0.4em + marked 勾选框后插的空格 ≈0.25em） */
+  margin: -0.15em .4em 0 -1.55em;
   vertical-align: middle;
   border: 1.5px solid var(--md-task-todo-color); border-radius: 3px;
   background: transparent;
@@ -6105,7 +6113,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.4';
+const APP_VER = 'v3.1.5';
 $('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
