@@ -871,7 +871,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         
         </ol>
         <br>
-        <h4>软件作者：张亮军（无锡·海岸城） &nbsp;&nbsp;&nbsp;更新日期：2026年9月23日</h4>
+        <h4>软件作者：张亮军（无锡·海岸城） &nbsp;&nbsp;&nbsp;<span id="welcomeVer"></span></h4>
       </div>
     </div>
     <div id="editView" class="hidden">
@@ -1362,6 +1362,7 @@ const LANG = (function () { try { const s = localStorage.getItem('wt-lang'); if 
 const EN = {
   /* 工具栏按钮 */
   '打开文件夹': 'Open Folder', '打开文件夹（先显示最近项目）': 'Open folder (shows recent projects first)', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
+  '版本': 'Version',
   /* 最近项目列表 */
   '最近项目': 'Recent projects', '打开新文件夹': 'Open New Folder',
   '点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。': 'Click an entry to open it in this tab; ♡ favorites it to a fixed spot (never pushed out, never reordered by use), ✕ removes it; up to 10 unfavorited entries are kept.',
@@ -1757,7 +1758,7 @@ const EN_HTML = {
         \
         </ol>\
         <br>\
-        <h4>Author: Zhang Liangjun (Wuxi, China) &nbsp;&nbsp;&nbsp;Updated: Sep 23, 2026</h4>',
+        <h4>Author: Zhang Liangjun (Wuxi, China) &nbsp;&nbsp;&nbsp;<span id="welcomeVer"></span></h4>',
   aboutBody: '<h4>What is this</h4>\
     txtBookWriteTool is a free, open-source local writing tool in a single HTML file: a plain folder is the book directory, .txt / .md files are written in Markdown, and everything can be merged into a book and exported as PDF / HTML / Markdown.\
     \
@@ -5779,31 +5780,29 @@ function updateToolbar() {
   $('btnRefresh').disabled = !hasRoot;
   $('btnHistory').disabled = !hasFile;
   document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
-  fitToolbar();   // 字号按钮的显隐与"放不下就收起来"统一在这里算
+  fitToolbar();   // 第一行放不下就按优先级收起按钮（字号三兄弟 → 说明 → 自动文件名 → 重新编号）
 }
-/* 字号三按钮：编辑模式要有打开的文件，预览/阅览/大纲要有项目；都没有时隐藏腾空间 */
-function fontSizeBtnsOn() { return !!current || (!!rootHandle && mode !== 'edit'); }
-/* 第一行放不下时按优先级收起按钮（字号三按钮 → 说明 → 自动文件名 → 重新编号），
-   收到不再溢出为止；窗口变宽 / 取消多选后自动恢复。
-   字号按钮被收起只影响入口，编辑器字号可在样式设置里调、整体缩放在样式设置里恢复默认 */
-const FONT_BTNS = ['btnFontDown', 'btnFontUp', 'btnFontReset'];
-const TAIL_BTNS = ['btnAbout', 'btnAutoName', 'btnRenumber'];
+/* 第一行放不下时按优先级收起按钮：字号三兄弟 → 说明 → 自动文件名 → 重新编号，收到不再溢出为止；
+   窗口变宽 / 取消多选后自动恢复（同一帧内"先全部恢复再逐组收"，不会闪动）。
+   只看宽度：不再按"有没有打开文件/项目"来隐藏字号按钮 */
+const TB_HIDE_GROUPS = [
+  ['btnFontDown', 'btnFontUp', 'btnFontReset'],
+  ['btnAbout'],
+  ['btnAutoName'],
+  ['btnRenumber']
+];
 function fitToolbar() {
   const sc = document.querySelector('.tb-scroll');
   if (!sc) return;
-  const fontOn = fontSizeBtnsOn();
-  // 先"全部恢复"（同一帧内完成，不会闪动）
-  FONT_BTNS.forEach(id => $(id).classList.toggle('hidden', !fontOn));
-  TAIL_BTNS.forEach(id => $(id).classList.remove('hidden'));
+  TB_HIDE_GROUPS.forEach(g => g.forEach(id => $(id).classList.remove('hidden')));
   if (sc.scrollWidth <= sc.clientWidth) return;
-  // 放不下：按优先级逐组收起，收到放得下就停
-  const groups = (fontOn ? [FONT_BTNS] : []).concat(TAIL_BTNS.map(id => [id]));
-  for (const g of groups) {
+  for (const g of TB_HIDE_GROUPS) {
     g.forEach(id => $(id).classList.add('hidden'));
     if (sc.scrollWidth <= sc.clientWidth) break;
   }
 }
 window.addEventListener('resize', fitToolbar);
+window.addEventListener('load', fitToolbar);   // 字体/布局稳定后再补量一次
 fitToolbar();
 // 两步：单击弹出最近项目（再点收起），再在里面「打开新文件夹」
 $('btnOpen').onclick = () => { recentVisible() ? hideRecentPop() : openRecentDlg(); };
@@ -5817,7 +5816,7 @@ async function pickFolder() {
 $('btnReconnect').onclick = async () => {
   try {
     const h = await idbGet('root');
-    if (h) { const prev = rootHandle; await useRoot(h); if (rootHandle && rootHandle !== prev) $('btnReconnect').classList.add('hidden'); }
+    if (h) await useRoot(h);   // 打开成功与否由 useRoot 内部处理（成功即隐藏本按钮）
   } catch (e) { toast(E('重连失败，请重新选择文件夹')); }
 };
 /* ---------- 最近项目（IndexedDB 'projects'：文件名+时间+句柄+置顶标记，库按本 HTML 隔离） ---------- */
@@ -6342,6 +6341,7 @@ $('btnLang').onclick = async () => {
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
 const APP_VER = 'v3.1.7';
 $('aboutVer').textContent = APP_VER;
+$('welcomeVer').textContent = E('版本') + ' ' + APP_VER;   // 欢迎页作者行末尾显示版本号
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
 
@@ -6766,9 +6766,10 @@ document.addEventListener('keydown', e => {
     const saved = await idbGet('root');
     if (saved && saved.name) {
       $('btnReconnect').classList.remove('hidden');
+      fitToolbar();   // 多出「继续上次」后要重新量一次，否则第一行会溢出
       // Chrome/Edge 122+ 持久授权静默恢复，无需点击
       const perm = await saved.queryPermission({ mode: 'readwrite' });
-      if (perm === 'granted') { await useRoot(saved); $('btnReconnect').classList.add('hidden'); return; }
+      if (perm === 'granted') { await useRoot(saved); return; }   // 成功后 useRoot 会隐藏「继续上次」
     }
   } catch (e) {}
 })();
