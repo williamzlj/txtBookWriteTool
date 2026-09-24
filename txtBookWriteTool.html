@@ -665,9 +665,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnUnsel" class="hidden" data-i18n data-i18n-title title="清空多选（Esc 同效）">取消选择</button>
   <button id="btnSplit" disabled data-i18n data-i18n-title title="拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）">拆分</button>
   <span class="sep"></span>
-  <button id="btnFontDown" data-i18n-title title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
-  <button id="btnFontUp" data-i18n-title title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
-  <button id="btnFontReset" data-i18n-title title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
+  <button id="btnFontDown" class="hidden" data-i18n-title title="减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A-</button>
+  <button id="btnFontUp" class="hidden" data-i18n-title title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
+  <button id="btnFontReset" class="hidden" data-i18n-title title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
   <button id="btnAbout" data-i18n data-i18n-title title="软件使用说明">说明</button>
   </div>
   <div class="tb-fixed">
@@ -5666,6 +5666,9 @@ function updateToolbar() {
   $('editor').placeholder = current ? '' : E('请先在左侧选择文件，或点击「新建txt」 / 「新建md」');
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('syncScrollBtn').classList.toggle('hidden', !current);
+  // 字号按钮：编辑模式要有打开的文件，预览/阅览/大纲要有项目；都没有时隐藏腾空间
+  const fsOn = !!current || (hasRoot && mode !== 'edit');
+  ['btnFontDown', 'btnFontUp', 'btnFontReset'].forEach(id => $(id).classList.toggle('hidden', !fsOn));
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
@@ -6101,7 +6104,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.2';
+const APP_VER = 'v3.1.3';
 $('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
