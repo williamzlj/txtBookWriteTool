@@ -2350,9 +2350,7 @@ function renderLivePreview() {
 let syncScrollOn = localStorage.getItem('wt-sync-scroll') !== '0';
 let pvMap = [];        // 锚点表：顶层块的源行号 ↔ 预览元素
 let syncLock = 0, fwdLockT = 0, revLockT = 0;
-let edLineTops = null, edMirror = null, edTopPad = 0;   // 编辑器镜像测量：源行→像素偏移
-// 手动校准：预览整体恒定偏下 ~30px（2026-09-23 实测），正向减、反向加，保持往返互逆；设 0 关闭
-const SYNC_NUDGE = -40;
+let edLineTops = null, edMirror = null, edTopPad = 0, edLineCount = 0;   // 编辑器镜像测量：源行→像素偏移
 // 建锚点表：marked.lexer 顶层 token（跳过 space/def）与渲染元素按序配对；
 // 数量不匹配（裸 HTML 块等）→ 清空，回落纯比例同步
 function buildPvMap(pvInner) {
@@ -2375,6 +2373,7 @@ function buildEditorMap() {
   const ed = $('editor');
   if (!current || !ed.value || ed.value.length > 4e6) { edLineTops = null; return; }
   const lines = ed.value.split('\n');
+  edLineCount = lines.length;
   if (lines.length > 5000) { edLineTops = null; return; }   // 超长文件回落比例同步
   if (!edMirror) {
     edMirror = document.createElement('div');
@@ -2405,98 +2404,102 @@ function buildEditorMap() {
   for (let i = 0; i < divs.length; i++) tops[i] = divs[i].offsetTop;
   edLineTops = tops;
 }
-// 首个可见源行（编辑器视口顶部，二分）
-function edFirstVisibleLine() {
+// 分数行号 → 编辑器空间偏移（有镜像=像素，无镜像=行号本身）
+function edSpaceY(l) {
   const t = edLineTops;
-  if (!t || !t.length) return null;
-  const target = $('editor').scrollTop - edTopPad;
-  if (target <= t[0]) return 0;
-  let lo = 0, hi = t.length - 1, idx = 0;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (t[mid] <= target) { idx = mid; lo = mid + 1; } else hi = mid - 1;
-  }
-  return idx;
-}
-// 分数行号 → 编辑器内容像素偏移
-function yAtLine(l) {
-  const t = edLineTops;
-  if (!t || !t.length) return 0;
+  if (!t || !t.length) return l;
   if (l <= 0) return t[0];
   if (l >= t.length - 1) return t[t.length - 1];
   const i = Math.floor(l);
   return t[i] + (l - i) * (t[i + 1] - t[i]);
 }
-// 编辑器滚动 → 预览（精确源行号 + 锚点插值）
+// 编辑器视口顶在编辑器空间里的位置（有镜像时负数=还在顶部 padding 里）
+function edViewTop() {
+  const ed = $('editor');
+  if (edLineTops) return ed.scrollTop - edTopPad;
+  const max = ed.scrollHeight - ed.clientHeight;
+  return max > 0 ? (ed.scrollTop / max) * Math.max(0, edLineCount - 1) : 0;
+}
+// 编辑器滚动 → 预览：锚点（源行 ↔ 元素）逐段线性映射
+// 锚点处行首与块首严丝合缝，段内按像素比例插值，两端与尾部按剩余比例补齐
 function syncPreviewFromEditor() {
   if (!syncScrollOn || mode !== 'edit' || !livePreviewOn || (syncLock & 2)) return;
-  const ed = $('editor'), pv = $('livePreview');
+  const ed = $('editor'), pv = $('livePreview'), m = pvMap;
   const total = current ? current.content.split('\n').length : 0;
   if (total < 2 || ed.scrollHeight <= ed.clientHeight + 4 || pv.scrollHeight <= pv.clientHeight + 4) return;
-  const r = ed.scrollTop / (ed.scrollHeight - ed.clientHeight);
-  const vl = edFirstVisibleLine();
-  const top = pvMap.length
-    ? pvTopForLine(vl !== null ? vl : r * (total - 1), pv, total)
-    : r * (pv.scrollHeight - pv.clientHeight);
+  const maxTop = pv.scrollHeight - pv.clientHeight;
+  let top = (ed.scrollTop / (ed.scrollHeight - ed.clientHeight)) * maxTop;   // 无锚点表时回落比例同步
+  if (m.length) {
+    const base = pv.offsetTop;
+    const y = edViewTop();
+    const firstTop = m[0].el.offsetTop - base;
+    const lo = edLineTops ? -edTopPad : 0;   // 编辑器空间下界：顶部 padding 也算一段
+    if (y <= lo) {
+      top = 0;
+    } else if (y < edSpaceY(m[0].ln)) {
+      // 文档开头：滚动编辑器顶部留白时，预览从容器顶推进到首块
+      top = ((y - lo) / Math.max(1e-6, edSpaceY(m[0].ln) - lo)) * firstTop;
+    } else {
+      const last = m.length - 1, lastTop = m[last].el.offsetTop - base;
+      if (y >= edSpaceY(m[last].ln)) {
+        // 末锚点之后：按剩余比例推进到预览底部，保证两端对齐
+        const yEnd = edLineTops ? edSpaceY(edLineCount - 1) : Math.max(1, edLineCount - 1);
+        const f = Math.min(1, (y - edSpaceY(m[last].ln)) / Math.max(1e-6, yEnd - edSpaceY(m[last].ln)));
+        top = lastTop + f * Math.max(0, maxTop - lastTop);
+      } else {
+        for (let i = 0; i < m.length - 1; i++) {
+          const ya = edSpaceY(m[i].ln), yb = edSpaceY(m[i + 1].ln);
+          if (y < yb) {
+            const ta = m[i].el.offsetTop - base, tb = m[i + 1].el.offsetTop - base;
+            top = ta + ((y - ya) / Math.max(1e-6, yb - ya)) * (tb - ta);
+            break;
+          }
+        }
+      }
+    }
+  }
   syncLock |= 1;   // 压掉预览的 scroll 事件，防回环
-  pv.scrollTop = Math.max(0, top - SYNC_NUDGE);   // 手动校准：预览上移
+  pv.scrollTop = Math.max(0, top);
   clearTimeout(fwdLockT); fwdLockT = setTimeout(() => { syncLock &= ~1; }, 140);
 }
-// 预览滚动 → 编辑器（锚点块内像素比例 → 镜像像素，精确回滚）
+// 预览滚动 → 编辑器：同一张锚点表反向插值，与正向互为逆运算
 function syncEditorFromPreview() {
   if (!syncScrollOn || mode !== 'edit' || !livePreviewOn || (syncLock & 1)) return;
-  const ed = $('editor'), pv = $('livePreview');
+  const ed = $('editor'), pv = $('livePreview'), m = pvMap;
   const total = current ? current.content.split('\n').length : 0;
   if (total < 2 || ed.scrollHeight <= ed.clientHeight + 4 || pv.scrollHeight <= pv.clientHeight + 4) return;
-  const st = pv.scrollTop + SYNC_NUDGE;   // 与正向 nudge 互逆
   const maxTop = pv.scrollHeight - pv.clientHeight;
-  let targetY = null;   // 编辑器内容像素目标（镜像坐标）
-  if (pvMap.length) {
-    const m = pvMap, base = pv.offsetTop;
-    const firstRel = m[0].el.offsetTop - base, lastRel = m[m.length - 1].el.offsetTop - base;
-    if (st <= firstRel) {
-      targetY = (firstRel > 0 ? Math.max(0, st / firstRel) : 1) * yAtLine(m[0].ln);
-    } else if (st >= lastRel) {
-      // 尾部锚点之外：按剩余滚动比例推进到末行，保证两端对齐
-      const f = Math.min(1, (st - lastRel) / Math.max(1, maxTop - lastRel));
-      const yL = yAtLine(m[m.length - 1].ln);
-      targetY = yL + f * (yAtLine(total - 1) - yL);
+  let y = null;   // 编辑器空间目标
+  if (m.length) {
+    const base = pv.offsetTop;
+    const st = Math.max(0, Math.min(maxTop, pv.scrollTop));
+    const firstTop = m[0].el.offsetTop - base, lastTop = m[m.length - 1].el.offsetTop - base;
+    const lo = edLineTops ? -edTopPad : 0;
+    if (st <= firstTop) {
+      // 首块之前：反过来把编辑器顶部留白按比例展开
+      const f = firstTop > 0 ? st / firstTop : 1;
+      y = lo + f * (edSpaceY(m[0].ln) - lo);
+    } else if (st >= lastTop) {
+      const yL = edSpaceY(m[m.length - 1].ln);
+      const yEnd = edLineTops ? edSpaceY(edLineCount - 1) : Math.max(1, edLineCount - 1);
+      y = yL + Math.min(1, (st - lastTop) / Math.max(1, maxTop - lastTop)) * (yEnd - yL);
     } else {
       for (let i = 0; i < m.length - 1; i++) {
         const a = m[i].el.offsetTop - base, b = m[i + 1].el.offsetTop - base;
         if (st < b) {
-          const f = (st - a) / Math.max(1, b - a);
-          targetY = yAtLine(m[i].ln) + f * (yAtLine(m[i + 1].ln) - yAtLine(m[i].ln));
+          const f = (st - a) / Math.max(1e-6, b - a);
+          const ya = edSpaceY(m[i].ln), yb = edSpaceY(m[i + 1].ln);
+          y = ya + f * (yb - ya);
           break;
         }
       }
-      if (targetY === null) targetY = yAtLine(m[m.length - 1].ln);
+      if (y === null) y = edSpaceY(m[m.length - 1].ln);
     }
   }
   syncLock |= 2;   // 压掉编辑器的 scroll 事件，防回环
-  ed.scrollTop = Math.max(0, (edLineTops && targetY !== null) ? edTopPad + targetY
-    : (pv.scrollTop / (pv.scrollHeight - pv.clientHeight)) * (ed.scrollHeight - ed.clientHeight));
+  ed.scrollTop = Math.max(0, (edLineTops && y !== null) ? edTopPad + y
+    : (pv.scrollTop / maxTop) * (ed.scrollHeight - ed.clientHeight));
   clearTimeout(revLockT); revLockT = setTimeout(() => { syncLock &= ~2; }, 140);
-}
-function pvTopForLine(estLine, pv, total) {
-  // 基准=滚动容器顶（含 .md-body 的 30px padding），否则预览恒定偏下
-  const m = pvMap, base = pv.offsetTop, maxTop = pv.scrollHeight - pv.clientHeight;
-  // 块内比例：有镜像时用编辑器视觉像素比例（折行实测），无镜像退回源行号比例
-  const frac = (l, la, lb) => {
-    if (!edLineTops) return (l - la) / Math.max(1, lb - la);
-    const y0 = yAtLine(la), y1 = yAtLine(lb);
-    return y1 > y0 ? Math.min(1, Math.max(0, (yAtLine(l) - y0) / (y1 - y0))) : 0;
-  };
-  if (estLine <= m[0].ln) return frac(estLine, 0, m[0].ln) * (m[0].el.offsetTop - base);
-  const last = m[m.length - 1], lastTop = last.el.offsetTop - base;
-  if (estLine >= last.ln) return lastTop + frac(estLine, last.ln, total - 1) * Math.max(0, maxTop - lastTop);
-  for (let i = 0; i < m.length - 1; i++) {
-    if (estLine < m[i + 1].ln) {
-      const a = m[i].el.offsetTop - base, b = m[i + 1].el.offsetTop - base;
-      return a + frac(estLine, m[i].ln, m[i + 1].ln) * (b - a);
-    }
-  }
-  return lastTop;
 }
 $('editor').addEventListener('scroll', syncPreviewFromEditor);
 $('livePreview').addEventListener('scroll', syncEditorFromPreview);
@@ -5133,6 +5136,8 @@ function updateTableBar() {
 /* ================= editor keys ================= */
 $('editor').addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); if (current) { clearTimeout(saveTimer); saveCurrent(); } return; }
+  if (e.altKey && e.key === 'ArrowUp' && !e.shiftKey) { e.preventDefault(); moveLineBlock(-1); return; }
+  if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); if (e.shiftKey) duplicateLineBlock(); else moveLineBlock(1); return; }
   if (e.key === 'Tab') { e.preventDefault(); insertAtCursor('  '); return; }
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) { listContinue(e); return; }
   if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', E('粗体')); return; }
@@ -5146,6 +5151,44 @@ function wrapInline(marker, ph) {
   const inner = sel || ph;
   editReplace(ed, s, e, marker + inner + marker);
   ed.setSelectionRange(s + marker.length, s + marker.length + inner.length);
+}
+// 光标（或选区）覆盖的行块：a/b 为块首行起点、块末行终点（不含换行），sel 为块内选区偏移
+function lineBlock() {
+  const ed = $('editor');
+  const v = ed.value, s = ed.selectionStart, e = ed.selectionEnd;
+  const a = v.lastIndexOf('\n', s - 1) + 1;
+  // 选区止于行首时块止于上一行末，避免把下一行也拖进来
+  let b = (e > s && v[e - 1] === '\n') ? e - 1 : v.indexOf('\n', e);
+  if (b < 0) b = v.length;
+  return { ed, v, a, b, sel: [s - a, e - a] };
+}
+// Alt+↑/↓：当前行（或选中多行）与相邻行块换位，选区随行块一起移动
+// 走 editReplace（execCommand）保留原生撤销栈，Ctrl+Z 可整体撤销
+function moveLineBlock(dir) {
+  const { ed, v, a, b, sel } = lineBlock();
+  const block = v.slice(a, b);
+  if (dir < 0) {
+    if (a === 0) return;
+    const pa = v.lastIndexOf('\n', a - 2) + 1;
+    editReplace(ed, pa, b, block + '\n' + v.slice(pa, a - 1));
+    // 换位后行块落在 pa，其前方没有前缀文本，偏移直接是 pa
+    ed.setSelectionRange(pa + sel[0], pa + sel[1]);
+  } else {
+    if (b === v.length) return;
+    const nb = v.indexOf('\n', b + 1);
+    const next = v.slice(b + 1, nb < 0 ? v.length : nb);
+    editReplace(ed, a, nb < 0 ? v.length : nb, next + '\n' + block);
+    const off = a + next.length + 1;
+    ed.setSelectionRange(off + sel[0], off + sel[1]);
+  }
+}
+// Alt+Shift+↓：把当前行（或选中多行）复制一份到下方，选区跟随副本
+function duplicateLineBlock() {
+  const { ed, v, a, b, sel } = lineBlock();
+  const block = v.slice(a, b);
+  editReplace(ed, a, b, block + '\n' + block);
+  const off = a + block.length + 1;
+  ed.setSelectionRange(off + sel[0], off + sel[1]);
 }
 // 对选区覆盖的各行做变换，完成后重新选中这些行
 function transformSelectedLines(fn) {
