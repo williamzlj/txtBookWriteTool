@@ -22,6 +22,8 @@ jobs:
         id: notes
         continue-on-error: true
         run: |
+          # checkout 之后本地未必有附注 tag 对象，先显式拉一次，否则 %(contents) 读不到注解
+          git fetch --force --tags --depth=1 origin >/dev/null 2>&1 || true
           {
             echo 'body<<RELEASE_NOTES_EOF'
             git tag -l --format='%(contents)' "$GITHUB_REF_NAME"
