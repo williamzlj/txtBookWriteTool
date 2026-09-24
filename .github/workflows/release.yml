@@ -13,7 +13,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 —— 必须取到附注 tag 的对象，否则读不到 tag 注解（浅克隆会退化成读提交信息）
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 读取 tag 注解作为发布说明
         id: notes
