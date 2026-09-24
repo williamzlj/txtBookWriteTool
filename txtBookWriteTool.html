@@ -291,7 +291,8 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
    （font-variant-numeric: lining-nums 在系统 Georgia 上无效，实测无变化）。
    这里用 unicode-range 只把数字换成等高（且等宽）数字字体，字母仍用系统 Georgia：
    同一 family 的多条 @font-face 都覆盖某字符时「后定义的胜出」，所以全字面的放前面、只管数字的放后面。
-   Cambria 与 Georgia 同为 Carter 设计、数字宽度接近（22.1 vs 21.9），所以优先用它。 */
+   数字字体候选顺序：Cambria（与 Georgia 同为 Carter 设计，数字宽度接近、观感统一；Times New Roman 偏细窄，
+   用户对比后选 Cambria）→ Times New Roman → Times → Liberation Serif → Georgia。 */
 @font-face { font-family: 'Georgia'; src: local('Georgia'); }
 @font-face {
   font-family: 'Georgia';
@@ -433,8 +434,6 @@ body.book-indent .md-body li.task-list-item p { text-indent: 0; }
   background: var(--bg-canvas, #f6f6f4); color: var(--md-muted-color); font-size: 11px; padding: 0 10px;
   white-space: nowrap;
 }
-body.book-has-cover .md-body > .book-title { display: none; }
-
 /* 首行缩进对所有内容区生效 */
 body.book-indent .md-body p { text-indent: 2em; }
 
@@ -470,7 +469,7 @@ style.css 成书版式区可覆盖。 */
   .md-body hr { margin: 1.2em 0; }
   .book-front { max-width: 100%; padding: 0; }
   .book-cover {
-    min-height: 297mm; box-sizing: border-box; margin: 0;
+    min-height: var(--paper-h, 297mm); box-sizing: border-box; margin: 0;
     /* 保留版式的封面上下留白：靠顶对齐的版式（如「现代」）依赖 --cover-pad-top，归零会导致书名贴页顶 */
     padding: var(--cover-pad-top, 50px) 26mm var(--cover-pad-bottom, 50px);
     border: none; page: cover; break-after: page;
@@ -515,6 +514,7 @@ dialog h3 { margin-bottom: 14px; font-size: 16px; }
 #dlgBook { width: min(820px, 92vw); max-height: 92vh; overflow: auto; }   /* 定宽：项目多的行在窄窗口换行而不是把对话框撑宽 */
 #dlgBook .row { flex-wrap: wrap; margin: 7px 0; }
 #dlgBook .bk-h { font-size: 13px; font-weight: 600; color: var(--text); margin: 12px 0 4px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
+#dlgBook .bk-unit { font-size: 12px; color: var(--muted); }
 #dlgBook .btns { position: sticky; bottom: -22px; background: var(--panel); margin: 12px -26px -22px; padding: 12px 26px 14px; border-top: 1px solid var(--border); }   /* 内容变长后按钮始终可见（同 #dlgStyle） */
 #dlgStyle h3 { margin-bottom: 8px; }
 #dlgStyle .stl-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
@@ -1047,6 +1047,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" data-i18n-ph placeholder="署名（可空）"></div>
   <div class="row"><label style="width:72px" data-i18n>成书日期</label><input id="bkDate" style="flex:1" data-i18n-ph placeholder="任意格式，如 2026-09-24 或 二〇二六年九月；留空则不显示"></div>
   <div class="bk-h" data-i18n>书籍排版</div>
+  <div class="row"><label style="width:72px" data-i18n>纸张</label>
+    <select id="bkPaper" style="width:150px">
+      <option value="A4">A4</option><option value="A5">A5</option><option value="Letter">Letter</option>
+      <option value="Mobile916" data-i18n>手机竖屏 9:16</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted);margin-left:6px" data-i18n>导出 PDF 的纸张尺寸</span>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>页边距</label>
+    <input type="number" id="bkMgTop" min="0" max="80" step="1" style="width:54px;padding:3px 4px" data-i18n-title title="上边距">
+    <input type="number" id="bkMgBottom" min="0" max="80" step="1" style="width:54px;padding:3px 4px" data-i18n-title title="下边距">
+    <input type="number" id="bkMgLeft" min="0" max="80" step="1" style="width:54px;padding:3px 4px" data-i18n-title title="左边距">
+    <input type="number" id="bkMgRight" min="0" max="80" step="1" style="width:54px;padding:3px 4px" data-i18n-title title="右边距">
+    <span style="font-size:12px;color:var(--muted);margin-left:6px" data-i18n>mm（上/下/左/右，留空跟随当前版式）</span>
+  </div>
   <div class="row"><label style="width:72px" data-i18n>PDF背景</label>
     <input type="color" id="bkPdfBg" style="width:34px;height:22px;padding:0;flex:none" data-i18n-title title="PDF 导出背景色（默认白色，很少需要修改）">
     <button type="button" id="bkPdfBgReset" data-i18n-title title="恢复默认（白色）">↺</button>
@@ -1055,6 +1069,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="row"><label style="width:72px" data-i18n>成书部分</label>
     <label data-i18n-block><input type="checkbox" id="bkCover"> 封面页</label>
     <label data-i18n-block><input type="checkbox" id="bkToc"> 目录页</label>
+    <label data-i18n-block><input type="checkbox" id="bkTitleBlock"> 作品标题块</label>
     <label data-i18n-block><input type="checkbox" id="bkBody"> 正文</label>
   </div>
   <div class="row"><label style="width:72px" data-i18n>正文排版</label>
@@ -1065,6 +1080,14 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="row"><label style="width:72px" data-i18n>标题编号</label>
     <label data-i18n-block><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
+  </div>
+  <div class="bk-h" data-i18n>页眉页脚字号</div>
+  <div class="row"><label style="width:72px" data-i18n>文字字号</label>
+    <input type="number" id="bpHfTextPt" min="5" max="30" step="0.5" style="width:58px;padding:3px 4px"> <span class="bk-unit">pt</span>
+    <span style="font-size:12px;color:var(--muted);margin-left:6px" data-i18n>页眉文本、页尾文本、日期</span>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>页码字号</label>
+    <input type="number" id="bpHfNumPt" min="5" max="30" step="0.5" style="width:58px;padding:3px 4px"> <span class="bk-unit">pt</span>
   </div>
   <div class="bk-h" data-i18n>页码编号</div>
   <div class="row"><label style="width:72px" data-i18n>编号范围</label>
@@ -1077,6 +1100,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <label data-i18n-block><input type="radio" name="pgPos" id="pgPosCenter" value="bottom-center"> 底部居中</label>
     <label data-i18n-block><input type="radio" name="pgPos" id="pgPosLeft" value="bottom-left"> 底部靠左</label>
     <label data-i18n-block><input type="radio" name="pgPos" id="pgPosRight" value="bottom-right"> 底部靠右</label>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>页码样式</label>
+    <input id="bpPageNumText" style="width:150px" placeholder="N">
+    <span style="font-size:12px;color:var(--muted);margin-left:6px" data-i18n>用 N 表示页码，如 - N - 、第 N 页</span>
   </div>
   <div class="bk-h" data-i18n>页眉文本</div>
   <div class="row"><label style="width:72px" data-i18n>内容</label>
@@ -1321,7 +1348,7 @@ const EN = {
   /* 排版设置 */
   '书名': 'Book title', '副标题': 'Subtitle', '作者': 'Author', '成书日期': 'Book date', '成书部分': 'Sections',
   '书籍信息': 'Book info', '书籍排版': 'Book layout',
-  '封面页': 'Cover page', '目录页': 'TOC page', '每章另起一页': 'New page per chapter',
+  '封面页': 'Cover page', '目录页': 'TOC page', '作品标题块': 'Title block', '每章另起一页': 'New page per chapter',
   '标题编号': 'Heading numbering',
   '自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）': 'Auto numbering (1, 1.1, 1.1.1…; works in PDF & HTML)',
   '正文排版': 'Body layout',
@@ -1330,13 +1357,19 @@ const EN = {
   '样式设置（style.css）': 'Style Settings (style.css)',
   '配色': 'Colors', '成书版式': 'Book Layout', '整体缩放': 'Zoom', '正文字体': 'Body font', '标题字体': 'Heading font',
   '背景色': 'Background', '预览背景': 'Preview', '编辑器背景': 'Editor', 'PDF背景': 'PDF background', '恢复默认（白色）': 'Reset to default (white)', '恢复为默认（跟随主题色）': 'Reset to default (follows theme)', '导出 PDF 的页面背景色': 'Page background color for PDF export',
-  /* 页眉页脚（页码编号 / 页眉文本 / 页尾文本 / PDF 导出日期） */
+  /* 纸张 / 页边距 / 页眉页脚（字号 / 页码编号 / 页眉文本 / 页尾文本 / PDF 导出日期） */
+  '纸张': 'Paper', '导出 PDF 的纸张尺寸': 'Paper size for PDF export', '手机竖屏 9:16': 'Phone portrait 9:16',
+  '页边距': 'Margins', '上边距': 'Top margin', '下边距': 'Bottom margin', '左边距': 'Left margin', '右边距': 'Right margin',
+  'mm（上/下/左/右，留空跟随当前版式）': 'mm (top/bottom/left/right; empty = follow current layout)',
+  '页眉页脚字号': 'Header/footer size', '文字字号': 'Text size', '页码字号': 'Page number size',
+  '页眉文本、页尾文本、日期': 'header text, footer text, date',
   '页码编号': 'Page numbering', '编号范围': 'Numbering range', '不显示页码': 'No page numbers',
   '从封面开始': 'From cover', '从目录开始': 'From TOC', '从正文开始': 'From body',
   '封面为第 1 页；封面/目录/正文都显示页码': 'Cover is page 1; numbers on cover, TOC and body',
   '目录为第 1 页；封面不显示页码': 'TOC is page 1; no number on cover',
   '正文第 1 页为第 1 页；封面/目录不显示页码': 'First body page is page 1; no numbers on cover/TOC',
   '显示位置': 'Position', '底部居中': 'Bottom center', '底部靠左': 'Bottom left', '底部靠右': 'Bottom right',
+  '页码样式': 'Page number style', '用 N 表示页码，如 - N - 、第 N 页': 'Use N for the page number, e.g. "- N -" or "Page N"',
   '页眉文本': 'Header text', '页尾文本': 'Footer text', 'PDF 导出日期': 'PDF export date', '日期文本': 'Date text',
   '内容': 'Content', '出现区域': 'Show on',
   '顶部靠左': 'Top left', '顶部居中': 'Top center', '顶部靠右': 'Top right',
@@ -2535,7 +2568,7 @@ const BOOK_THEMES = {
   modern: {
     name: '现代',
     vars: '--md-font-body: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-font-head: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;\n  --md-fs: 16px;\n  --md-lh: 1.85;\n  --md-h1-fs: 26px;',
-    cover: '--cover-halign: flex-start; --cover-valign: flex-start; --cover-text: left;\n  --cover-min-h: 520px; --cover-pad-top: 130px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 40px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 80px; --cover-meta-lh: 2.2;',
+    cover: '--cover-halign: flex-start; --cover-valign: flex-start; --cover-text: left;\n  --cover-min-h: 520px; --cover-pad-top: 200px; --cover-pad-bottom: 50px;\n  --cover-title-fs: 40px; --cover-title-lh: 1.35;\n  --cover-sub-fs: 18px; --cover-sub-top: 16px;\n  --cover-meta-fs: 18px; --cover-meta-top: 80px; --cover-meta-lh: 2.2;',
     toc: '--toc-h-fs: 18px; --toc-a-fs: 14px; --toc-a-lh: 2.05;',
     rules: 'body[data-book-theme="modern"] .md-body h1 { text-align: left; border-left: 4px solid var(--md-accent); padding-left: 12px; margin-top: 2em; }\nbody[data-book-theme="modern"] .md-body p { margin: 1em 0; }\nbody[data-book-theme="modern"] .book-toc .toc-h { font-size: var(--toc-h-fs); }\nbody[data-book-theme="modern"] .book-toc a { font-size: var(--toc-a-fs); line-height: var(--toc-a-lh); }'
   },
@@ -3429,16 +3462,18 @@ async function renderMerged() {
   const files = collectFiles(tree);
   if (!files.length) { body.innerHTML = E('<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>'); return; }
   body.innerHTML = '';
-  // 项目文件夹名作为作品标题，居中显示
-  const bt = document.createElement('div');
-  bt.className = 'book-title';
-  bt.textContent = rootHandle ? rootHandle.name : '';
-  body.appendChild(bt);
+  // 成书部分四个开关：封面页 / 目录页 / 作品标题块 / 正文
+  const withBody = bookCfg.body !== false;   // 不勾正文时只出封面/目录/标题块
+  if (bookCfg.titleBlock) {   // 作品标题块（内容 = 项目文件夹名），默认不显示
+    const bt = document.createElement('div');
+    bt.className = 'book-title';
+    bt.textContent = rootHandle ? rootHandle.name : '';
+    body.appendChild(bt);
+  }
   let idx = 0;
   const tocItems = [];
   // 目录由真实标题 h1-h4 生成；无标题文件仅作正文
   const headingEls = [];
-  const withBody = bookCfg.body !== false;   // 「成书部分」未勾选正文时只出封面/目录
   for (const f of files) {
     let text;
     try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
@@ -3497,10 +3532,13 @@ async function renderMerged() {
 // File System Access API 报 "Name is not allowed." 拒绝写入。
 const BOOK_CFG_NAME = 'settings.json';
 const BOOK_DEFAULT_CFG = {
-  theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, body: true,
+  theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, body: true, titleBlock: false,
   chapterBreak: true, headingNumber: false, indent: true, pdfBg: '#ffffff',
+  // 纸张与页边距（mm）：页边距留空 = 跟随版式默认（见 hfMargin）
+  paper: 'A4', mgTop: '', mgRight: '', mgBottom: '', mgLeft: '',
   // 页眉页脚：页码范围 + 四个元素（页码 / 页眉文本 / 页尾文本 / 导出日期），出现区域按封面/目录/正文
-  pageNum: 'body', pageNumPos: 'bottom-center',
+  pageNum: 'body', pageNumPos: 'bottom-center', pageNumText: '',   // 页码样式：N 为页码占位
+  hfTextPt: 10, hfNumPt: 12,   // 页眉页脚字号（pt，独立于正文字号）
   hdrText: '', hdrAlign: 'center', hdrAreas: { cover: false, toc: false, body: true },
   ftrText: '', ftrAlign: 'center', ftrAreas: { cover: false, toc: false, body: false },
   dateText: '', datePos: 'top-right', dateAreas: { cover: false, toc: false, body: false }
@@ -3561,7 +3599,6 @@ function bookTitle() { return (bookCfg.title || '').trim() || (rootHandle ? root
 function cssStr(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' '); }
 // 封面 + 目录（屏幕阅览与打印共用）
 function renderBookFront(body, tocItems) {
-  document.body.classList.toggle('book-has-cover', !!bookCfg.cover);
   body.querySelector('.book-front')?.remove();
   if (!bookCfg.cover && !bookCfg.toc) return;
   const front = document.createElement('div');
@@ -3603,11 +3640,45 @@ function renderBookFront(body, tocItems) {
    同一位置有两项内容时用 \A + white-space: pre-line 上下两行显示 */
 const HF_BOXES = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 const HF_AREA_RANK = { cover: 0, toc: 1, body: 2 };
+// 纸张尺寸（mm）：宽 × 高。改纸张要同步 --paper-h（封面高度用）与 @page size
+// Mobile916：手机竖屏 9:16，宽度与 A5 相同
+const PAPER_SIZES = { A4: [210, 297], A5: [148, 210], Letter: [215.9, 279.4], Mobile916: [148, 263.1] };
+// 纸张专属默认页边距（mm）：上/右/下/左；未列出的纸张跟随版式默认（hfMarginCss）
+const PAPER_MARGINS = { Mobile916: { top: 16, right: 12, bottom: 16, left: 12 } };
+function hfMarginDefaults(theme, paper) {
+  return PAPER_MARGINS[paper || bookCfg.paper] || hfMarginCss(theme);
+}
+function paperSize() {
+  const p = PAPER_SIZES[bookCfg.paper] || PAPER_SIZES.A4;
+  return { w: p[0], h: p[1] };
+}
+// 页边距（mm）：留空 = 跟随纸张/版式默认（见 hfMarginDefaults）
+function hfMargin(theme) {
+  const d = hfMarginDefaults(theme);
+  const num = (v, def) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) && n >= 0 ? Math.min(80, n) : def;
+  };
+  return {
+    top: num(bookCfg.mgTop, d.top), right: num(bookCfg.mgRight, d.right),
+    bottom: num(bookCfg.mgBottom, d.bottom), left: num(bookCfg.mgLeft, d.left)
+  };
+}
 // 标签页与页码显示位置 → 边距框名（radio 的 value 与后缀一致）
 function hfMarginCss(theme) {
   if (theme === 'modern') return { top: 20, right: 18, bottom: 18, left: 18 };
   if (theme === 'academic') return { top: 25, right: 24, bottom: 23, left: 24 };
   return { top: 24, right: 22, bottom: 22, left: 22 };   // classic（phone 打印沿用）
+}
+// 页码样式：N 为页码占位（如 "- N -"、"第 N 页"），空 = 纯数字
+function pageNumContent() {
+  const p = (bookCfg.pageNumText || '').trim() || 'N';
+  const out = [];
+  p.split('N').forEach((s, i) => {
+    if (i) out.push('counter(pg)');
+    if (s) out.push('"' + cssStr(s) + '"');
+  });
+  return out.join(' ');
 }
 // 页面组 → { 边距框名: [内容片段] }，顺序即上下两行时的先后
 function hfBoxesFor(area, showNum) {
@@ -3618,7 +3689,7 @@ function hfBoxesFor(area, showNum) {
   if (bookCfg.hdrAreas[area]) put('top-' + (bookCfg.hdrAlign || 'center'), { text: hdrText });
   if (bookCfg.ftrAreas[area] && ftrText) put('bottom-' + (bookCfg.ftrAlign || 'center'), { text: ftrText });
   if (bookCfg.dateAreas[area]) put(bookCfg.datePos || 'top-right', { text: hfDateText() });
-  if (showNum) put(bookCfg.pageNumPos || 'bottom-center', { counter: true });
+  if (showNum) put(bookCfg.pageNumPos || 'bottom-center', { counter: true, isNum: true });
   return boxes;
 }
 // 页眉页脚/页码字体 = 正文字体。@page 边距框只继承 :root，而版式区把 --md-font-body 定义在 body 上，
@@ -3629,15 +3700,21 @@ function hfFontStack(css) {
   const v = ((m && m[1]) || getComputedStyle(document.documentElement).getPropertyValue('--md-font-body') || '').trim();
   return v || 'Georgia, "Noto Serif SC", SimSun, serif';
 }
+// 页眉页脚字号：独立 pt 值，限 5–30，非法值回落默认
+function hfPt(v, def) {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? Math.min(30, Math.max(5, n)) : def;
+}
 function hfBoxesCss(boxes, fontStack) {
   let s = '';
   for (const box of HF_BOXES) {
     const items = boxes[box];
     if (!items) continue;
-    const hasText = items.some(i => !i.counter);   // 同框混排时按文本样式（含页码）
-    const content = items.map(i => (i.counter ? 'counter(pg)' : '"' + cssStr(i.text) + '"')).join(' "\\A " ');
-    s += '  @' + box + ' { content: ' + content + '; font: ' + (hasText ? '9pt' : '10pt') + ' ' + fontStack + '; color: ' + (hasText ? '#888' : '#555') + ';';
-    if (items.length > 1) s += ' white-space: pre-line;';
+    const onlyNum = items.every(i => i.isNum);   // 只有页码（含「第 N 页」这类修饰文本）时按页码样式
+    const content = items.map(i => (i.counter ? pageNumContent() : '"' + cssStr(i.text) + '"')).join(' "\\A " ');
+    const pt = onlyNum ? hfPt(bookCfg.hfNumPt, 12) : hfPt(bookCfg.hfTextPt, 10);
+    s += '  @' + box + ' { content: ' + content + '; font: ' + pt + 'pt ' + fontStack + '; color: ' + (onlyNum ? '#555' : '#888') + ';';
+    if (items.length > 1) s += ' white-space: pre-line; line-height: 1.4;';   // 同框两项时给点行间距（默认 normal≈1.2 太挤）
     s += ' }\n';
   }
   return s;
@@ -3655,9 +3732,11 @@ function todayStr() {
 }
 function hfDateText() { return cnDate((bookCfg.dateText || '').trim() || todayStr()); }
 function pageCssFor(theme, css) {
-  const m = hfMarginCss(theme);
+  const m = hfMargin(theme);
   const hfFont = hfFontStack(css);
-  const main = '@page {\n  size: A4;\n  margin: ' + m.top + 'mm ' + m.right + 'mm ' + m.bottom + 'mm ' + m.left + 'mm;\n}\n';
+  const p = paperSize();
+  // --paper-h 供 contentCss 的 .book-cover 打印高度使用（换纸张时封面高度跟着变）
+  const main = ':root { --paper-h: ' + p.h + 'mm; }\n@page {\n  size: ' + p.w + 'mm ' + p.h + 'mm;\n  margin: ' + m.top + 'mm ' + m.right + 'mm ' + m.bottom + 'mm ' + m.left + 'mm;\n}\n';
   const cover = '@page cover {\n  margin: 0;\n}\n';   // 封面满版；要画页眉页脚时下面再改回带边距
   const toc = '@page tocpage {\n}\n';
   const rangeRank = { none: 99, cover: 0, toc: 1, body: 2 }[bookCfg.pageNum];
@@ -3678,7 +3757,7 @@ function pageCssFor(theme, css) {
   // 封面页原本满版（margin: 0），要画页眉页脚就得改回带边距，并压缩封面高度避免溢出到第二页
   if (Object.keys(hfBoxesFor('cover', HF_AREA_RANK.cover >= rank)).length) {
     extra += '@page cover { margin: ' + m.top + 'mm ' + m.right + 'mm ' + m.bottom + 'mm ' + m.left + 'mm; }\n';
-    extra += '@media print { .book-cover { min-height: calc(297mm - ' + (m.top + m.bottom) + 'mm - 2mm); } }\n';
+    extra += '@media print { .book-cover { min-height: calc(' + p.h + 'mm - ' + (m.top + m.bottom) + 'mm - 2mm); } }\n';
   }
   return main + cover + toc + extra;
 }
@@ -3741,8 +3820,15 @@ async function exportMerged(single) {
     clone.querySelector('.book-front')?.remove();
   }
   const exportBase = single ? current.node.name.replace(/\.(md|markdown|txt)$/i, '') : rootHandle.name;
-  // 标题头：书名 + 作者/日期各一行（单文件导出无书名头，跳过）
-  const btEl = clone.querySelector('.book-title');
+  // 标题头：作品标题（文件夹名）+ 副标题 + 作者/日期各一行
+  // 与「成书部分 → 作品标题块」开关解耦：整体导出始终补上标题块（单文件导出无书名头，跳过）
+  let btEl = clone.querySelector('.book-title');
+  if (!btEl && !single) {
+    btEl = document.createElement('div');
+    btEl.className = 'book-title';
+    btEl.textContent = exportBase;
+    clone.insertBefore(btEl, clone.firstChild);
+  }
   if (btEl) {
     const metaEl = document.createElement('div');
     metaEl.className = 'exp-meta';
@@ -5789,13 +5875,24 @@ function openBookDlg() {
   $('bkCover').checked = bookCfg.cover;
   $('bkToc').checked = bookCfg.toc;
   $('bkBody').checked = bookCfg.body !== false;
+  $('bkTitleBlock').checked = !!bookCfg.titleBlock;
   $('bkBreak').checked = bookCfg.chapterBreak;
   $('bkNumber').checked = !!bookCfg.headingNumber;
   $('bkIndent').checked = bookCfg.indent !== false;
   $('bkPdfBg').value = bookCfg.pdfBg || '#ffffff';
+  // 纸张/页边距：边距留空跟随纸张默认，占位符显示该纸张/版式的默认值
+  $('bkPaper').value = PAPER_SIZES[bookCfg.paper] ? bookCfg.paper : 'A4';
+  setMgPlaceholders($('bkPaper').value);
+  $('bkMgTop').value = bookCfg.mgTop;
+  $('bkMgBottom').value = bookCfg.mgBottom;
+  $('bkMgLeft').value = bookCfg.mgLeft;
+  $('bkMgRight').value = bookCfg.mgRight;
   // 页眉页脚：单选用 name 分组，setRadio/getRadio 按 value 读写
   setRadio('pgRange', bookCfg.pageNum || 'body');
   setRadio('pgPos', bookCfg.pageNumPos || 'bottom-center');
+  $('bpPageNumText').value = bookCfg.pageNumText || '';
+  $('bpHfTextPt').value = hfPt(bookCfg.hfTextPt, 10);
+  $('bpHfNumPt').value = hfPt(bookCfg.hfNumPt, 12);
   $('bpHdrText').value = bookCfg.hdrText || '';
   setRadio('hdrAlign', bookCfg.hdrAlign || 'center');
   $('bpHdrCover').checked = !!bookCfg.hdrAreas.cover;
@@ -5816,6 +5913,12 @@ function openBookDlg() {
 function setRadio(name, val) {
   document.querySelectorAll('input[name="' + name + '"]').forEach(r => { r.checked = r.value === val; });
 }
+// 页边距占位符 = 当前纸张的默认值（输入留空即用它）
+function setMgPlaceholders(paper) {
+  const d = hfMarginDefaults(bookCfg.theme, paper);
+  $('bkMgTop').placeholder = d.top; $('bkMgBottom').placeholder = d.bottom;
+  $('bkMgLeft').placeholder = d.left; $('bkMgRight').placeholder = d.right;
+}
 function getRadio(name) {
   const el = document.querySelector('input[name="' + name + '"]:checked');
   return el ? el.value : '';
@@ -5829,13 +5932,22 @@ async function readBookDlg() {
   bookCfg.cover = $('bkCover').checked;
   bookCfg.toc = $('bkToc').checked;
   bookCfg.body = $('bkBody').checked;
+  bookCfg.titleBlock = $('bkTitleBlock').checked;
   bookCfg.chapterBreak = $('bkBreak').checked;
   bookCfg.headingNumber = $('bkNumber').checked;
   bookCfg.indent = $('bkIndent').checked;
   bookCfg.pdfBg = $('bkPdfBg').value || '#ffffff';
   document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg);
+  bookCfg.paper = PAPER_SIZES[$('bkPaper').value] ? $('bkPaper').value : 'A4';
+  // 页边距：留空（或非法）存 '' = 跟随版式
+  const mg = id => { const v = parseFloat($(id).value); return Number.isFinite(v) && v >= 0 ? String(Math.min(80, v)) : ''; };
+  bookCfg.mgTop = mg('bkMgTop'); bookCfg.mgBottom = mg('bkMgBottom');
+  bookCfg.mgLeft = mg('bkMgLeft'); bookCfg.mgRight = mg('bkMgRight');
   bookCfg.pageNum = getRadio('pgRange') || 'body';
   bookCfg.pageNumPos = getRadio('pgPos') || 'bottom-center';
+  bookCfg.pageNumText = $('bpPageNumText').value.trim();
+  bookCfg.hfTextPt = hfPt($('bpHfTextPt').value, 10);
+  bookCfg.hfNumPt = hfPt($('bpHfNumPt').value, 12);
   bookCfg.hdrText = $('bpHdrText').value.trim();
   bookCfg.hdrAlign = getRadio('hdrAlign') || 'center';
   bookCfg.hdrAreas = { cover: $('bpHdrCover').checked, toc: $('bpHdrToc').checked, body: $('bpHdrBody').checked };
@@ -5899,15 +6011,21 @@ $('bookThemeSel').onchange = async () => {
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
+$('bkPaper').onchange = () => setMgPlaceholders($('bkPaper').value);   // 换纸张时刷新页边距默认提示
 $('bkPdfBgReset').onclick = () => { $('bkPdfBg').value = '#ffffff'; };
 // 恢复默认：书名作者日期空，封面目录正文分页开，编号关缩进开，页眉页脚见 BOOK_DEFAULT_CFG
 $('bkReset').onclick = () => {
   $('bkTitle').value = ''; $('bkSub').value = ''; $('bkAuthor').value = '';
   $('bkDate').value = '';
-  $('bkCover').checked = true; $('bkToc').checked = true; $('bkBody').checked = true; $('bkBreak').checked = true;
+  $('bkCover').checked = true; $('bkToc').checked = true; $('bkBody').checked = true; $('bkTitleBlock').checked = false; $('bkBreak').checked = true;
   $('bkNumber').checked = false; $('bkIndent').checked = true;
   $('bkPdfBg').value = '#ffffff';
+  $('bkPaper').value = 'A4';
+  setMgPlaceholders('A4');
+  ['bkMgTop', 'bkMgBottom', 'bkMgLeft', 'bkMgRight'].forEach(id => { $(id).value = ''; });
   setRadio('pgRange', 'body'); setRadio('pgPos', 'bottom-center');
+  $('bpPageNumText').value = '';
+  $('bpHfTextPt').value = 10; $('bpHfNumPt').value = 12;
   $('bpHdrText').value = ''; setRadio('hdrAlign', 'center');
   $('bpHdrCover').checked = false; $('bpHdrToc').checked = false; $('bpHdrBody').checked = true;
   $('bpFtrText').value = ''; setRadio('ftrAlign', 'center');
