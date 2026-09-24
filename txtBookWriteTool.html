@@ -1367,6 +1367,7 @@ const EN = {
   '点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。': 'Click an entry to open it in this tab; ♡ favorites it to a fixed spot (never pushed out, never reordered by use), ✕ removes it; up to 10 unfavorited entries are kept.',
   '收藏（位置固定，不会被新记录挤掉）': 'Favorite to a fixed spot (never pushed out by new entries)', '取消收藏': 'Unfavorite',
   '清空列表': 'Clear list', '从列表移除': 'Remove from list',
+  '从最近项目列表移除「': 'Remove "', '」？\n（只移除这条记录，不会删除文件夹）': '" from recent projects?\n(Only this entry is removed — the folder itself is not deleted)',
   '还没有记录：用「打开文件夹」选一个书稿目录，之后会出现在这里': 'Nothing here yet — folders you open will show up in this list',
   '这条记录已失效，请用「打开文件夹」重新选择': 'This entry is no longer valid — pick the folder again with "Open Folder"',
   '列表已经是空的': 'The list is already empty',
@@ -5900,6 +5901,8 @@ async function renderRecent() {
     del.className = 'rc-del'; del.textContent = '✕'; del.title = E('从列表移除');
     del.onclick = async ev => {
       ev.stopPropagation();
+      // 防误删：移除单条记录前先确认（只删记录，不动文件夹本身）
+      if (!confirm(E('从最近项目列表移除「') + it.name + E('」？\n（只移除这条记录，不会删除文件夹）'))) return;
       const l = await loadRecent();
       await saveRecent(l.filter(x => !(x.at === it.at && x.name === it.name)));
       await renderRecent();
