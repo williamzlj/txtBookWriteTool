@@ -375,7 +375,7 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
   border-radius: 6px; color: var(--md-muted-color); font-size: 13px; font-family: var(--md-font-head); }
 .md-body blockquote {
   border-left: 3px solid var(--md-accent); background: var(--md-quote-bg);
-  margin: 1em 0; padding: 0.1em 1.9em; color: var(--md-muted-color); border-radius: 0 6px 6px 0;
+  margin: 1em 0; padding: 0.1em 1.9em; color: var(--md-body-color); border-radius: 0 6px 6px 0;
 }
 /* 套用首行缩进时，引用块内文字不缩进 */
 body.book-indent .md-body blockquote p { text-indent: 0; }
@@ -910,8 +910,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <label data-i18n-block><input type="radio" name="rpScope" value="file"> 仅当前文件</label>
     <label data-i18n-block><input type="radio" name="rpScope" value="project"> 整个项目（全部 md/txt）</label>
   </div>
-  <div class="row"><label style="width:64px">查找：</label><input id="rpFind" style="flex:1" data-i18n-ph placeholder="要查找的文字"></div>
-  <div class="row"><label style="width:64px">替换为：</label><input id="rpTo" style="flex:1" data-i18n-ph placeholder="替换为（留空即删除）"></div>
+  <div class="row"><label style="width:64px" data-i18n>查找：</label><input id="rpFind" style="flex:1" data-i18n-ph placeholder="要查找的文字"></div>
+  <div class="row"><label style="width:64px" data-i18n>替换为：</label><input id="rpTo" style="flex:1" data-i18n-ph placeholder="替换为（留空即删除）"></div>
   <div id="rpInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0"></div>
   <div class="btns">
     <button id="rpCancel" data-i18n>取消</button>
@@ -1044,9 +1044,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 <dialog id="dlgBook">
   <h3 data-i18n>排版设置</h3>
   <div class="bk-h" data-i18n>书籍信息</div>
-  <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" data-i18n-ph placeholder="留空则用项目文件夹名"></div>
-  <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" data-i18n-ph placeholder="如：卷一 / 修订版 v2（可空）"></div>
-  <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" data-i18n-ph placeholder="署名（可空）"></div>
+  <div class="row"><label style="width:72px" data-i18n>书名</label><input id="bkTitle" style="flex:1" data-i18n-ph placeholder="留空则用项目文件夹名"></div>
+  <div class="row"><label style="width:72px" data-i18n>副标题</label><input id="bkSub" style="flex:1" data-i18n-ph placeholder="如：卷一 / 修订版 v2（可空）"></div>
+  <div class="row"><label style="width:72px" data-i18n>作者</label><input id="bkAuthor" style="flex:1" data-i18n-ph placeholder="署名（可空）"></div>
   <div class="row"><label style="width:72px" data-i18n>成书日期</label><input id="bkDate" style="flex:1" data-i18n-ph placeholder="任意格式，如 2026-09-24 或 二〇二六年九月；留空则不显示"></div>
   <div class="bk-h" data-i18n>书籍排版</div>
   <div class="row"><label style="width:72px" data-i18n>纸张</label>
@@ -1163,9 +1163,9 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 6px;line-height:1.6"></div>
   <div class="stl-h" data-i18n>配色</div>
   <div id="stlColorGrid" class="stl-c-grid"></div>
-  <div class="stl-h" style="margin-top:12px" data-i18n>背景色<button type="button" id="btnStlResetCanvas" class="stl-sec-reset" data-i18n-title title="恢复为默认（跟随主题色）">↺ 恢复默认</button></div>
+  <div class="stl-h" style="margin-top:12px"><span data-i18n>背景色</span><button type="button" id="btnStlResetCanvas" class="stl-sec-reset" data-i18n data-i18n-title title="恢复为默认（跟随主题色）">↺ 恢复默认</button></div>
   <div id="stlCanvasGrid" class="stl-c-grid"></div>
-  <div class="stl-h" style="margin-top:12px">成书版式<button type="button" id="btnStlResetTheme" class="stl-sec-reset" data-i18n-title title="恢复为当前内置版式默认">↺ 恢复默认</button></div>
+  <div class="stl-h" style="margin-top:12px"><span data-i18n>成书版式</span><button type="button" id="btnStlResetTheme" class="stl-sec-reset" data-i18n data-i18n-title title="恢复为当前内置版式默认">↺ 恢复默认</button></div>
   <div class="row" style="margin-top:4px"><label style="width:72px;flex:none;color:var(--text)" data-i18n>整体缩放</label>
     <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
     <span id="stlZoomVal" style="width:40px;text-align:right;font-size:12px;color:var(--muted);margin-left:6px;flex:none"></span>
@@ -1358,7 +1358,7 @@ const EN = {
   /* 样式设置 */
   '样式设置（style.css）': 'Style Settings (style.css)',
   '配色': 'Colors', '成书版式': 'Book Layout', '整体缩放': 'Zoom', '正文字体': 'Body font', '标题字体': 'Heading font',
-  '背景色': 'Background', '预览背景': 'Preview', '编辑器背景': 'Editor', 'PDF背景': 'PDF background', '恢复默认（白色）': 'Reset to default (white)', '恢复为默认（跟随主题色）': 'Reset to default (follows theme)', '导出 PDF 的页面背景色': 'Page background color for PDF export',
+  '背景色': 'Background', '预览背景': 'Preview', '编辑器背景': 'Editor', 'PDF背景': 'PDF background', '恢复默认（白色）': 'Reset to default (white)', '恢复为默认（跟随主题色）': 'Reset to default (follows theme)', '导出 PDF 的页面背景色': 'Page background color for PDF export', 'PDF 导出背景色（默认白色，很少需要修改）': 'Page background color for PDF export (white by default, rarely needs changing)',
   /* 纸张 / 页边距 / 页眉页脚（字号 / 页码编号 / 页眉文本 / 页尾文本 / PDF 导出日期） */
   '纸张': 'Paper', '导出 PDF 的纸张尺寸': 'Paper size for PDF export', '手机竖屏 9:16': 'Phone portrait 9:16',
   '页边距': 'Margins', '上边距': 'Top margin', '下边距': 'Bottom margin', '左边距': 'Left margin', '右边距': 'Right margin',
@@ -2845,7 +2845,7 @@ async function openStyleDlg() {
   buildStyleThemeFields();
   refreshStyleZoomFromDraft();
   $('stlMsg').textContent = (disk === null ? E('项目中还没有 style.css，当前为默认样式预览；') : '')
-    + (styleDlgColorOk ? E('当前配色：') + styleDlgName + E(' · 调整实时预览，保存后写入 style.css')
+    + (styleDlgColorOk ? E('当前配色：') + E(styleDlgName) + E(' · 调整实时预览，保存后写入 style.css')
       : E('该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。'));
   $('dlgStyle').showModal();
   applyUserCss(styleDlgCss);   // 无文件时也能预览模板
@@ -3562,15 +3562,16 @@ function normalizeBookCfg(raw) {
 let bookCfg = BOOK_DEFAULT_CFG;
 try { bookCfg = normalizeBookCfg(JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
 document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
-// 从项目根目录的 settings.json 读取成书设置
+// 从项目根目录的 settings.json 读取成书设置；项目里没有这个文件就回到内置默认
+// （否则会沿用上一个项目留在 localStorage 缓存里的书名/作者/日期——多份副本共用一份 localStorage）
 async function loadBookCfgFile() {
   if (!rootHandle) return;
   try {
     const text = await (await (await rootHandle.getFileHandle(BOOK_CFG_NAME)).getFile()).text();
     bookCfg = normalizeBookCfg(JSON.parse(text));
-    localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
-    document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
-  } catch (e) { /* 无 settings.json：沿用 localStorage / 默认值 */ }
+  } catch (e) { bookCfg = normalizeBookCfg({}); }
+  localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
+  document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
 }
 // 保存成书设置：localStorage + 项目根 settings.json
 async function saveBookCfg() {
@@ -6104,7 +6105,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.3';
+const APP_VER = 'v3.1.4';
 $('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
