@@ -1,0 +1,40 @@
+# 打 tag（v*）即自动创建 GitHub Release，并把单文件工具作为可下载附件
+# 发布说明优先取「附注 tag 的注解」（git tag -a v1.0.0 -m "…"），取不到时用 GitHub 自动生成的更新记录
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 —— 必须取到附注 tag 的对象，否则读不到 tag 注解（浅克隆会退化成读提交信息）
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 读取 tag 注解作为发布说明
+        id: notes
+        continue-on-error: true
+        run: |
+          # checkout 之后本地未必有附注 tag 对象，先显式拉一次，否则 %(contents) 读不到注解
+          git fetch --force --tags --depth=1 origin >/dev/null 2>&1 || true
+          {
+            echo 'body<<RELEASE_NOTES_EOF'
+            git tag -l --format='%(contents)' "$GITHUB_REF_NAME"
+            echo 'RELEASE_NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 创建 Release 并上传附件
+        uses: softprops/action-gh-release@v2
+        with:
+          files: txtBookWriteTool.html
+          body: ${{ steps.notes.outputs.body }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
