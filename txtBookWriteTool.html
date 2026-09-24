@@ -582,6 +582,43 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 #dlgAbout .author .name { font-weight: 700; font-family: "Microsoft YaHei", sans-serif; }
 #dlgAbout .author .site { display: inline-block; color: var(--accent); text-decoration: none; font-family: Consolas, monospace; }
 #dlgAbout .author .ver { margin-top: 3px; color: var(--muted); font-family: Consolas, monospace; font-size: 12.5px; }
+/* ---------- 最近项目（悬停弹出面板 + 卡片式，一屏能放更多） ---------- */
+#recentPop {
+  position: fixed; z-index: 3000; width: min(680px, 94vw);
+  padding: 18px 20px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--panel); color: var(--text); box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+#recentPop h3 { margin-bottom: 10px; font-size: 16px; }
+#recentPop .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+#recentList {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 8px;
+  max-height: 56vh; overflow-y: auto; margin: 8px 0 2px; padding: 2px;
+}
+.recent-card {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+  min-height: 68px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--panel); cursor: pointer;
+}
+.recent-card:hover { border-color: var(--accent); }
+.recent-card.pinned { border-color: #e0526b; background: color-mix(in srgb, #e0526b 6%, var(--panel)); }
+.recent-card .rc-name {
+  font-size: 13.5px; line-height: 1.35; word-break: break-all;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.recent-card .rc-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.recent-card .rc-time { color: var(--muted); font-size: 11.5px; font-family: Consolas, monospace; }
+.recent-card .rc-acts { display: flex; gap: 2px; flex: none; }
+.recent-card .rc-pin, .recent-card .rc-del {
+  border: none; background: none; color: var(--muted); cursor: pointer;
+  padding: 1px 3px; border-radius: 4px; line-height: 1;
+}
+.recent-card .rc-del { font-size: 12px; }
+/* 收藏心形：比 ✕ 明显大一号，未收藏为空心 ♡、已收藏为实心 ♥ */
+.recent-card .rc-pin { font-size: 17px; padding: 0 3px; }
+.recent-card .rc-pin.on { color: #e0526b; }
+.recent-card .rc-pin:hover { background: var(--hover); color: #e0526b; }
+.recent-card .rc-del:hover { color: #fff; background: #c0392b; }
+.recent-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 16px 6px; }
 #palGrid { display: grid; grid-template-columns: repeat(8, 28px); gap: 8px; margin: 4px 0 10px; }
 #palGrid .sw { width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
 #palGrid .sw.on { border-color: var(--accent); transform: scale(1.12); }
@@ -655,8 +692,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 <header id="topbar">
  <div class="tb-row tb-row1">
   <div class="tb-scroll">
-  <button id="btnOpen" data-i18n>打开文件夹</button>
-  <button id="btnReconnect" class="hidden" data-i18n data-i18n-title title="继续上次打开的文件夹">继续上次</button>
+  <button id="btnOpen" data-i18n data-i18n-title title="打开文件夹（先显示最近项目）">打开文件夹</button>
+  <button id="btnReconnect" class="hidden" data-i18n data-i18n-title title="继续上次打开的文件夹（浏览器首次会弹一次授权框，选「每次访问都允许」后不再询问）">继续上次</button>
   <span class="sep"></span>
   <button id="btnNewTxt" class="primary" disabled data-i18n data-i18n-title title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
   <button id="btnNewMd" disabled data-i18n data-i18n-title title="新建 .md 文件，自动编号 +10">新建md</button>
@@ -830,6 +867,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
         <li>「编辑」模式 Markdown 编辑与预览；<br>「大纲」模式拖动调序；<br>「阅览」模式<b>合并成一本书</b>连续显示<br> </li>
         <li>文件名以 <b>_</b> 开头（如 _灵感.txt）时被视为草稿，不参与阅览和 PDF 导出<br> </li>
         <li>可把<b>文件夹</b>或 <b>.txt/.md 文件</b>直接拖入窗口打开；</li>
+        <li>「继续上次」需浏览器授权：弹框里选 <b>「每次访问都允许」</b>，之后启动会自动静默恢复<br> </li>
         
         </ol>
         <br>
@@ -1032,6 +1070,18 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
     <button id="trashClose" class="primary" data-i18n>关闭</button>
   </div>
 </dialog>
+<div id="recentPop" class="hidden">
+  <h3 data-i18n>最近项目</h3>
+  <div style="font-size:12.5px;color:var(--muted)" data-i18n>点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。</div>
+  <div id="recentList"></div>
+  <div class="btns" style="justify-content:space-between">
+    <button id="recentNew" class="primary" data-i18n>打开新文件夹</button>
+    <span style="display:flex;gap:8px">
+      <button id="recentClear" class="danger" data-i18n>清空列表</button>
+      <button id="recentClose" data-i18n>关闭</button>
+    </span>
+  </div>
+</div>
 <dialog id="dlgHistory">
   <h3 data-i18n-block>历史版本 · <span id="histFile" style="font-weight:400;color:var(--muted)"></span></h3>
   <div style="font-size:12.5px;color:var(--muted)" data-i18n>自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。</div>
@@ -1311,7 +1361,17 @@ window.onerror = function(msg, src, line) {
 const LANG = (function () { try { const s = localStorage.getItem('wt-lang'); if (s === 'en' || s === 'zh') return s; return (navigator.language || 'zh').toLowerCase().slice(0, 2) === 'zh' ? 'zh' : 'en'; } catch (e) { return 'zh'; } })();
 const EN = {
   /* 工具栏按钮 */
-  '打开文件夹': 'Open Folder', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
+  '打开文件夹': 'Open Folder', '打开文件夹（先显示最近项目）': 'Open folder (shows recent projects first)', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
+  /* 最近项目列表 */
+  '最近项目': 'Recent projects', '打开新文件夹': 'Open New Folder',
+  '点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。': 'Click an entry to open it in this tab; ♡ favorites it to a fixed spot (never pushed out, never reordered by use), ✕ removes it; up to 10 unfavorited entries are kept.',
+  '收藏（位置固定，不会被新记录挤掉）': 'Favorite to a fixed spot (never pushed out by new entries)', '取消收藏': 'Unfavorite',
+  '清空列表': 'Clear list', '从列表移除': 'Remove from list',
+  '还没有记录：用「打开文件夹」选一个书稿目录，之后会出现在这里': 'Nothing here yet — folders you open will show up in this list',
+  '这条记录已失效，请用「打开文件夹」重新选择': 'This entry is no longer valid — pick the folder again with "Open Folder"',
+  '列表已经是空的': 'The list is already empty',
+  '清空最近项目列表？（下次启动不再自动打开上次的项目）': 'Clear the recent projects list? (Next launch will not reopen the last project)',
+  '已清空最近项目': 'Recent projects cleared',
   '新建文件夹': 'New Folder', '重命名': 'Rename', '自动文件名': 'Auto Name', '重新编号': 'Renumber',
   '隐藏文件': 'Hide', '复制': 'Copy', '删除': 'Delete', '回收站': 'Trash', '合并': 'Merge',
   '取消选择': 'Deselect', '拆分': 'Split', '说明': 'Help', '编辑': 'Edit', '预览': 'Preview',
@@ -1393,7 +1453,7 @@ const EN = {
   '拖入文件夹＝作为书稿项目打开': 'Drop a folder to open it as your book project',
   '拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）': 'Drop .md / .txt files to edit directly (writes back to the files)',
   /* 工具栏 title 提示 */
-  '继续上次打开的文件夹': 'Reopen the last folder',
+  '继续上次打开的文件夹（浏览器首次会弹一次授权框，选「每次访问都允许」后不再询问）': 'Reopen the last folder (the browser asks once — choose "Allow on every visit" to stop being asked)',
   '新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10': 'New .txt file (parsed as Markdown), auto-numbered +10',
   '新建 .md 文件，自动编号 +10': 'New .md file, auto-numbered +10',
   '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 columns, ASCII = 0.5)',
@@ -1692,6 +1752,7 @@ const EN_HTML = {
         <li>"Edit" mode: Markdown editing with live preview;<br>"Outline" mode: drag to reorder;<br>"Read" mode: all <b>merged into one book</b><br> </li>\
         <li>Names starting with <b>_</b> (e.g. _idea.txt) are drafts, excluded from Read and PDF export<br> </li>\
         <li>Drag a <b>folder</b> or <b>.txt/.md file</b> into the window to open it;</li>\
+        <li>"Reopen Last" needs browser permission: pick <b>"Allow on every visit"</b> in the prompt, then later starts restore silently<br> </li>\
         \
         </ol>\
         <br>\
@@ -1908,6 +1969,7 @@ async function useRoot(handle) {
   }
   rootHandle = handle;
   await idbSet('root', handle);
+  await pushRecent(handle);   // 记入「最近项目」列表
   // 标签页标题=文件夹名，过长按显示宽度截断
   document.title = clipByWidth(handle.name, 10) + ' - txtBookWriteTool';
   await loadBookCfgFile();   // 从 settings.json 读取成书设置
@@ -5717,8 +5779,9 @@ function updateToolbar() {
   $('btnHistory').disabled = !hasFile;
   document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
 }
-$('btnOpen').onclick = pickFolder;
-$('btnOpen2').onclick = pickFolder;
+// 两步：单击弹出最近项目（再点收起），再在里面「打开新文件夹」
+$('btnOpen').onclick = () => { recentVisible() ? hideRecentPop() : openRecentDlg(); };
+$('btnOpen2').onclick = pickFolder;     // 欢迎页里的按钮保持直接选目录
 async function pickFolder() {
   try {
     const h = await showDirectoryPicker({ mode: 'readwrite' });
@@ -5730,6 +5793,142 @@ $('btnReconnect').onclick = async () => {
     const h = await idbGet('root');
     if (h) { const prev = rootHandle; await useRoot(h); if (rootHandle && rootHandle !== prev) $('btnReconnect').classList.add('hidden'); }
   } catch (e) { toast(E('重连失败，请重新选择文件夹')); }
+};
+/* ---------- 最近项目（IndexedDB 'projects'：文件名+时间+句柄+置顶标记，库按本 HTML 隔离） ---------- */
+const RECENT_MAX = 10;   // 未置顶记录的上限；置顶的始终保留
+async function loadRecent() {
+  try { const v = await idbGet('projects'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+}
+// 保存：置顶的全留，未置顶只留最近 RECENT_MAX 条（数组约定：置顶在前）
+async function saveRecent(list) {
+  const keep = [];
+  let n = 0;
+  for (const it of list) {
+    if (it.pin) keep.push(it);
+    else if (n++ < RECENT_MAX) keep.push(it);
+  }
+  try { await idbSet('projects', keep); } catch (e) {}
+}
+const sameHandle = async (a, b) => {
+  if (!a || !b) return false;
+  try { if (a.isSameEntry) return await a.isSameEntry(b); } catch (e) { return false; }
+  return a === b || a.name === b.name;   // 无 isSameEntry 时退化为按名字比较（同名的不同目录在界面上也区分不了）
+};
+// 打开项目时记一笔：同一目录只留一条、只更新时间。
+// **置顶项原位不动**（常用文件夹位置固定）；未置顶项按最近使用排到未置顶区最前
+async function pushRecent(handle) {
+  if (!handle) return;
+  const list = await loadRecent(), out = [];
+  let old = null, at = 0;
+  for (const it of list) { if (await sameHandle(it.handle, handle)) { old = it; at = out.length; } else out.push(it); }
+  const rec = { name: handle.name, at: Date.now(), handle, pin: !!(old && old.pin) };
+  if (old && old.pin) {
+    out.splice(at, 0, rec);   // 原位：不重排置顶区
+  } else {
+    const i = out.findIndex(x => !x.pin);   // 未置顶区最前
+    out.splice(i < 0 ? out.length : i, 0, rec);
+  }
+  await saveRecent(out);
+  if (recentVisible()) await renderRecent();
+}
+function fmtRecentTime(t) {
+  const d = new Date(t || 0), p = n => String(n).padStart(2, '0');
+  return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+async function renderRecent() {
+  const box = $('recentList'), list = await loadRecent();
+  box.innerHTML = '';
+  if (!list.length) {
+    box.innerHTML = '<div class="recent-empty">' + esc(E('还没有记录：用「打开文件夹」选一个书稿目录，之后会出现在这里')) + '</div>';
+    return;
+  }
+  list.forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'recent-card' + (it.pin ? ' pinned' : '');
+    const nm = document.createElement('div');
+    nm.className = 'rc-name'; nm.textContent = it.name; nm.title = it.name;
+    const tm = document.createElement('span');
+    tm.className = 'rc-time'; tm.textContent = fmtRecentTime(it.at);
+    const pin = document.createElement('button');
+    pin.className = 'rc-pin' + (it.pin ? ' on' : '');
+    pin.textContent = it.pin ? '♥' : '♡';
+    pin.title = E(it.pin ? '取消收藏' : '收藏（位置固定，不会被新记录挤掉）');
+    pin.onclick = async ev => {
+      ev.stopPropagation();
+      const l = await loadRecent();
+      const i = l.findIndex(x => x.at === it.at && x.name === it.name);
+      if (i < 0) return;
+      const [entry] = l.splice(i, 1);
+      entry.pin = !entry.pin;
+      if (entry.pin) {
+        // 追加到置顶区末尾：已有置顶项的位置保持不变
+        l.splice(l.filter(x => x.pin).length, 0, entry);
+      } else {
+        // 回到未置顶区最前（也算"刚用过"，避免立刻被 10 条上限挤掉）
+        const j = l.findIndex(x => !x.pin);
+        l.splice(j < 0 ? l.length : j, 0, entry);
+      }
+      await saveRecent(l);
+      await renderRecent();
+    };
+    const del = document.createElement('button');
+    del.className = 'rc-del'; del.textContent = '✕'; del.title = E('从列表移除');
+    del.onclick = async ev => {
+      ev.stopPropagation();
+      const l = await loadRecent();
+      await saveRecent(l.filter(x => !(x.at === it.at && x.name === it.name)));
+      await renderRecent();
+    };
+    const acts = document.createElement('span');
+    acts.className = 'rc-acts';
+    acts.append(pin, del);
+    const foot = document.createElement('div');
+    foot.className = 'rc-foot';
+    foot.append(tm, acts);
+    card.append(nm, foot);
+    card.onclick = () => openRecent(it);
+    box.appendChild(card);
+  });
+}
+// 在当前标签页打开该项目（先落盘当前文件；权限由 useRoot 处理，必要时会弹授权）
+async function openRecent(it) {
+  hideRecentPop();
+  if (!it || !it.handle) { toast(E('这条记录已失效，请用「打开文件夹」重新选择')); return; }
+  try { await flushSave(); } catch (e) {}
+  await useRoot(it.handle);
+}
+$('recentNew').onclick = () => { hideRecentPop(); pickFolder(); };
+$('recentClose').onclick = () => hideRecentPop();
+/* 单击展开、点面板外/Escape 收起（不用定时器，无头测试也能跑） */
+function recentVisible() { return !$('recentPop').classList.contains('hidden'); }
+function hideRecentPop() { $('recentPop').classList.add('hidden'); }
+async function showRecentPop() {
+  const list = await loadRecent();
+  if (!list.length) { hideRecentPop(); return; }   // 没有记录就不弹（直接把点击让给系统选择器）
+  await renderRecent();
+  const pop = $('recentPop'), b = $('btnOpen').getBoundingClientRect();
+  pop.classList.remove('hidden');
+  const w = pop.offsetWidth || 680;
+  pop.style.left = Math.max(8, Math.min(b.left, window.innerWidth - w - 8)) + 'px';
+  pop.style.top = Math.round(b.bottom) + 2 + 'px';
+}
+const inRecentArea = t => !!(t && ($('recentPop').contains(t) || $('btnOpen').contains(t)));
+document.addEventListener('click', e => { if (recentVisible() && !inRecentArea(e.target)) hideRecentPop(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && recentVisible()) hideRecentPop(); });
+// 「打开文件夹」：单击展开 / 再单击收起；无记录时直接走系统选择器
+async function openRecentDlg() {
+  const list = await loadRecent();
+  if (!list.length) { pickFolder(); return; }
+  await showRecentPop();
+}
+$('recentClear').onclick = async () => {
+  if (!(await loadRecent()).length) { toast(E('列表已经是空的')); return; }
+  if (!confirm(E('清空最近项目列表？（下次启动不再自动打开上次的项目）'))) return;
+  await saveRecent([]);
+  try { await idbSet('root', null); await idbSet('lastFile', null); } catch (e) {}
+  $('btnReconnect').classList.add('hidden');
+  renderRecent();
+  toast(E('已清空最近项目'));
 };
 // 外部标签「打开所在文件夹」：选目录后定位
 $('btnExtDir').onclick = async () => {
@@ -6113,7 +6312,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.5';
+const APP_VER = 'v3.1.6';
 $('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
