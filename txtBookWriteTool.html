@@ -573,6 +573,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 #dlgAbout .author { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--border); text-align: center; font-size: 13.5px; line-height: 1.9; }
 #dlgAbout .author .name { font-weight: 700; font-family: "Microsoft YaHei", sans-serif; }
 #dlgAbout .author .site { display: inline-block; color: var(--accent); text-decoration: none; font-family: Consolas, monospace; }
+#dlgAbout .author .ver { margin-top: 3px; color: var(--muted); font-family: Consolas, monospace; font-size: 12.5px; }
 #palGrid { display: grid; grid-template-columns: repeat(8, 28px); gap: 8px; margin: 4px 0 10px; }
 #palGrid .sw { width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
 #palGrid .sw.on { border-color: var(--accent); transform: scale(1.12); }
@@ -647,7 +648,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
  <div class="tb-row tb-row1">
   <div class="tb-scroll">
   <button id="btnOpen" data-i18n>打开文件夹</button>
-  <button id="btnReconnect" class="hidden" data-i18n-title title="继续上次打开的文件夹">继续上次</button>
+  <button id="btnReconnect" class="hidden" data-i18n data-i18n-title title="继续上次打开的文件夹">继续上次</button>
   <span class="sep"></span>
   <button id="btnNewTxt" class="primary" disabled data-i18n data-i18n-title title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
   <button id="btnNewMd" disabled data-i18n data-i18n-title title="新建 .md 文件，自动编号 +10">新建md</button>
@@ -867,7 +868,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </div>
 
 <footer id="statusbar">
-  <span id="stPath"></span><button id="btnExtDir" class="hidden" data-i18n-title title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
+  <span id="stPath"></span><button id="btnExtDir" class="hidden" data-i18n data-i18n-title title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
   <span class="flex"></span>
   <span id="stCount"></span>
   <span id="stSave"></span>
@@ -961,6 +962,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="author">
       <div class="name" data-i18n>张亮军　无锡·海岸城</div>
       <a class="site" href="https://www.zhangliangjun.cn" target="_blank" rel="noopener">www.zhangliangjun.cn</a>
+      <div class="ver" id="aboutVer"></div>
   </div>
   <div class="ab-body" data-i18n-html>
     <h4>这是什么</h4>
@@ -6098,6 +6100,9 @@ $('btnLang').onclick = async () => {
   try { await idbSet('lang', v); } catch (e) {}
   location.reload();
 };
+/* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
+const APP_VER = 'v3.1.2';
+$('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
 
