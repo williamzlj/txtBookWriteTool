@@ -5740,9 +5740,6 @@ function updateToolbar() {
   $('editor').placeholder = current ? '' : E('请先在左侧选择文件，或点击「新建txt」 / 「新建md」');
   $('pvToggleBtn').classList.toggle('hidden', !current);
   $('syncScrollBtn').classList.toggle('hidden', !current);
-  // 字号按钮：编辑模式要有打开的文件，预览/阅览/大纲要有项目；都没有时隐藏腾空间
-  const fsOn = !!current || (hasRoot && mode !== 'edit');
-  ['btnFontDown', 'btnFontUp', 'btnFontReset'].forEach(id => $(id).classList.toggle('hidden', !fsOn));
   $('btnReplace').disabled = !hasRoot;
   $('btnPrev').disabled = !hasRoot;
   $('btnNext').disabled = !hasRoot;
@@ -5781,7 +5778,32 @@ function updateToolbar() {
   $('btnRefresh').disabled = !hasRoot;
   $('btnHistory').disabled = !hasFile;
   document.querySelectorAll('.tabs button').forEach(b => b.disabled = !hasRoot);
+  fitToolbar();   // 字号按钮的显隐与"放不下就收起来"统一在这里算
 }
+/* 字号三按钮：编辑模式要有打开的文件，预览/阅览/大纲要有项目；都没有时隐藏腾空间 */
+function fontSizeBtnsOn() { return !!current || (!!rootHandle && mode !== 'edit'); }
+/* 第一行放不下时按优先级收起按钮（字号三按钮 → 说明 → 自动文件名 → 重新编号），
+   收到不再溢出为止；窗口变宽 / 取消多选后自动恢复。
+   字号按钮被收起只影响入口，编辑器字号可在样式设置里调、整体缩放在样式设置里恢复默认 */
+const FONT_BTNS = ['btnFontDown', 'btnFontUp', 'btnFontReset'];
+const TAIL_BTNS = ['btnAbout', 'btnAutoName', 'btnRenumber'];
+function fitToolbar() {
+  const sc = document.querySelector('.tb-scroll');
+  if (!sc) return;
+  const fontOn = fontSizeBtnsOn();
+  // 先"全部恢复"（同一帧内完成，不会闪动）
+  FONT_BTNS.forEach(id => $(id).classList.toggle('hidden', !fontOn));
+  TAIL_BTNS.forEach(id => $(id).classList.remove('hidden'));
+  if (sc.scrollWidth <= sc.clientWidth) return;
+  // 放不下：按优先级逐组收起，收到放得下就停
+  const groups = (fontOn ? [FONT_BTNS] : []).concat(TAIL_BTNS.map(id => [id]));
+  for (const g of groups) {
+    g.forEach(id => $(id).classList.add('hidden'));
+    if (sc.scrollWidth <= sc.clientWidth) break;
+  }
+}
+window.addEventListener('resize', fitToolbar);
+fitToolbar();
 // 两步：单击弹出最近项目（再点收起），再在里面「打开新文件夹」
 $('btnOpen').onclick = () => { recentVisible() ? hideRecentPop() : openRecentDlg(); };
 $('btnOpen2').onclick = pickFolder;     // 欢迎页里的按钮保持直接选目录
@@ -6315,7 +6337,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.6';
+const APP_VER = 'v3.1.7';
 $('aboutVer').textContent = APP_VER;
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
 $('aboutOk').onclick = () => $('dlgAbout').close();
