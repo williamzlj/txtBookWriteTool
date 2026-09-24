@@ -43,17 +43,20 @@ button.danger { color: #c0392b; border-color: #e3a8a0; }
   background: var(--toolbar); border-bottom: 1px solid var(--border);
 }
 #topbar button { padding: 4px 9px; }
-#topbar #btnLang { position: relative; display: inline-flex; align-items: center; padding: 4px 2px; border-radius: 999px; overflow: hidden; }
-#topbar #btnLang::before { content: ''; position: absolute; top: 2px; bottom: 2px; left: 2px; width: 24px; border-radius: 999px; background: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .18s; }
-#topbar #btnLang.en::before { transform: translateX(24px); }
-#topbar #btnLang .lg { position: relative; width: 24px; text-align: center; color: var(--text); font-weight: 700; }
+#topbar #btnLang { position: relative; display: inline-flex; align-items: center; padding: 4px 3px; border-radius: 999px; overflow: hidden; }
+#topbar #btnLang::before { content: ''; position: absolute; top: 2px; bottom: 2px; left: 3px; width: 40px; border-radius: 999px; background: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .18s; }
+#topbar #btnLang.en::before { transform: translateX(40px); }
+#topbar #btnLang .lg { position: relative; width: 40px; text-align: center; color: var(--text); font-weight: 700; }
 #topbar #btnLang:not(.en) .lg-zh, #topbar #btnLang.en .lg-en { color: #fff; font-weight: 700; }
 .tb-row { display: flex; align-items: center; gap: 5px; }
-.tb-row1 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
-.tb-row1 > * { flex: none; }
-.tb-row1 #btnOpen {margin-left: 10px;}
-.tb-row1::-webkit-scrollbar, .tb-row2::-webkit-scrollbar { height: 6px; }
-.tb-row1::-webkit-scrollbar-thumb, .tb-row2::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* 第一行：左侧按钮横向滚动，右侧「明暗/语言」固定不随滚动移动 */
+.tb-row1 { flex-wrap: nowrap; }
+.tb-scroll { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 5px; overflow-x: auto; overflow-y: hidden; }
+.tb-scroll > * { flex: none; }
+.tb-scroll #btnOpen {margin-left: 10px;}
+.tb-fixed { flex: none; display: flex; align-items: center; gap: 5px; margin-left: 6px; align-self: flex-start; }
+.tb-scroll::-webkit-scrollbar, .tb-row2::-webkit-scrollbar { height: 6px; }
+.tb-scroll::-webkit-scrollbar-thumb, .tb-row2::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .tb-row2 { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; border-top: 1px solid var(--border); padding-top: 6px; }
 .tb-row2 > * { flex: none; }
 .tb-row2 .tabs { margin-left: 10px;margin-right: 6px; }
@@ -184,13 +187,13 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
 
 /* ---------- editor ---------- */
 #editView { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
-#editRow { flex: 1; display: flex; min-width: 0; min-height: 0; background: var(--panel); }
+#editRow { flex: 1; display: flex; min-width: 0; min-height: 0; background: var(--md-editor-bg, var(--panel)); }
 /* textarea 百分比 padding 的参照系，滚动条贴边 */
 #editorWrap { flex: 1; min-width: 0; }
 #editor {
   display: block; width: 100%; height: 100%;
   border: none; outline: none; resize: none;
-  background: var(--panel); color: var(--text);
+  background: var(--md-editor-bg, var(--panel)); color: var(--text);
   font-family: Consolas, "Microsoft YaHei", monospace;
   font-size: var(--fs-editor, 15px); line-height: 1.75;
   /* 宽屏左右=50%-450 居中文字列，窄屏回落 50 */
@@ -199,19 +202,26 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
 }
 #livePreview {
   width: 46%; min-width: 220px; flex: none; overflow: auto;
-  background: var(--bg);
+  background: var(--md-canvas-bg, var(--bg));
 }
 /* 宽屏时预览文字列居中限 870px，窄预览自然占满 */
 #livePreview .pv-inner, #singlePreview .pv-inner { max-width: 750px; margin-inline: auto; }
-#previewView { flex: 1; overflow: auto; background: var(--bg); }
+#previewView { flex: 1; overflow: auto; background: var(--md-canvas-bg, var(--bg)); }
 
 /* ---------- read (merged) view ---------- */
-#readView { flex: 1; display: flex; min-width: 0; }
-#outlineView { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#readView { flex: 1; display: flex; min-width: 0; background: var(--md-canvas-bg, var(--bg)); }
+#outlineView { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--md-canvas-bg, var(--bg)); }
 #outlineView.hidden { display: none; }
 #outlineBar { flex: none; padding: 11px 11px; border-bottom: 1px solid var(--border); font-size: 13.5px; display: flex; align-items: baseline; gap: 14px; }
 #outlineBar .ol-hint { color: var(--muted); font-size: 12px; }
 #outlineScroll { flex: 1; overflow-y: auto; padding: 16px 22px 60px; }
+/* 暗色主题：忽略自定义的预览/编辑器背景，统一回主题色（浅色背景在暗色下突兀） */
+[data-theme="dark"] #livePreview,
+[data-theme="dark"] #previewView,
+[data-theme="dark"] #readView,
+[data-theme="dark"] #outlineView { background: var(--bg); }
+[data-theme="dark"] #editRow,
+[data-theme="dark"] #editor { background: var(--panel); }
 #outlineCards { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
 .ol-card {
   position: relative; border: 1px solid var(--border); border-radius: 9px; background: var(--panel);
@@ -262,10 +272,14 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
 /* ---------- print (chrome: hide UI + baseline page) ---------- */
 @media print {
   * { box-sizing: border-box; }
-  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #sideExpandBtn, #pvToggleBtn { display: none !important; }
+  #topbar, #sidebar, .vdiv, #statusbar, #tocPanel, #editView, #previewView, #outlineView, #welcome, #toast, #tableBar, #toTop, #sideExpandBtn, #pvToggleBtn, #edMirror { display: none !important; }   /* #edMirror 为滚动同步的动态测量层，visibility:hidden 仍占位会撑出空白页 */
   #main, #workarea, #readView, #readMain, #mergedWrap { display: block !important; position: static; overflow: visible; height: auto; width: 100%; }
-  @page { size: A4; margin: 24mm 20mm 22mm; }
-  body { margin: 0; overflow: visible; background: #fff; }
+  /* 清掉界面容器背景（预览/编辑器色），否则会以版心宽度盖住根元素的 PDF 背景色 */
+  #main, #workarea, #readView, #readMain, #mergedWrap, #mergedBody, .book-front, .md-body { background: transparent !important; }
+  @page { size: A4; margin: 24mm 20mm 22mm; background: var(--md-pdf-bg, #fff); }   /* 页边距也上色（浏览器不支持则忽略） */
+  /* 根元素背景会铺满画布每一页；body 须透明，否则只画在自身盒子上（表现为只有一小块有色） */
+  html { background: var(--md-pdf-bg, #fff) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; overflow: visible; background: transparent !important; }
 }
 </style>
 
@@ -273,6 +287,17 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
      编辑实时预览、单文件预览、成书阅览共用本表；
      导出 HTML 时直接序列化本表，不再维护第二套。 -->
 <style id="contentCss">
+/* Georgia 自带「旧式数字」：0/1/2 只有 x 高、3/4/5/7/9 带降部、6/8 带升部，且宽度不等，看起来高低不齐
+   （font-variant-numeric: lining-nums 在系统 Georgia 上无效，实测无变化）。
+   这里用 unicode-range 只把数字换成等高（且等宽）数字字体，字母仍用系统 Georgia：
+   同一 family 的多条 @font-face 都覆盖某字符时「后定义的胜出」，所以全字面的放前面、只管数字的放后面。
+   Cambria 与 Georgia 同为 Carter 设计、数字宽度接近（22.1 vs 21.9），所以优先用它。 */
+@font-face { font-family: 'Georgia'; src: local('Georgia'); }
+@font-face {
+  font-family: 'Georgia';
+  src: local('Cambria'), local('Times New Roman'), local('Times'), local('Liberation Serif'), local('Georgia');
+  unicode-range: U+0030-0039;
+}
 :root {
   /* 字体 */
   --md-font-body: Georgia, "Noto Serif SC", "Source Han Serif SC", SimSun, serif;
@@ -436,7 +461,7 @@ style.css 成书版式区可覆盖。 */
 
 /* ---------- print: 内容相关 ---------- */
 @media print {
-  .md-body { color: #000; background: #fff; padding: 0; max-width: 100%; }
+  .md-body { color: #000; background: transparent; padding: 0; max-width: 100%; }   /* 透明：让根元素的 PDF 背景色铺满整页 */
   .md-body p, .md-body li, .md-body h1, .md-body h2, .md-body h3, .md-body h4 { overflow-wrap: anywhere; word-break: break-word; }
   #mergedBody { width: 100%; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
   .md-body .book-title { text-align: center !important; font-size: 28px; margin: 0 0 30px !important; }
@@ -445,7 +470,9 @@ style.css 成书版式区可覆盖。 */
   .md-body hr { margin: 1.2em 0; }
   .book-front { max-width: 100%; padding: 0; }
   .book-cover {
-    min-height: 297mm; box-sizing: border-box; margin: 0; padding: 0 26mm;
+    min-height: 297mm; box-sizing: border-box; margin: 0;
+    /* 保留版式的封面上下留白：靠顶对齐的版式（如「现代」）依赖 --cover-pad-top，归零会导致书名贴页顶 */
+    padding: var(--cover-pad-top, 50px) 26mm var(--cover-pad-bottom, 50px);
     border: none; page: cover; break-after: page;
   }
   .book-toc { border: none; margin: 0; padding: 0; page: tocpage; break-after: page; }
@@ -485,6 +512,10 @@ dialog {
 dialog::backdrop { background: rgba(0,0,0,.35); }
 dialog h3 { margin-bottom: 14px; font-size: 16px; }
 #dlgStyle { width: min(720px, 96vw); max-height: 95vh; overflow: auto; }
+#dlgBook { width: min(820px, 92vw); max-height: 92vh; overflow: auto; }   /* 定宽：项目多的行在窄窗口换行而不是把对话框撑宽 */
+#dlgBook .row { flex-wrap: wrap; margin: 7px 0; }
+#dlgBook .bk-h { font-size: 13px; font-weight: 600; color: var(--text); margin: 12px 0 4px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
+#dlgBook .btns { position: sticky; bottom: -22px; background: var(--panel); margin: 12px -26px -22px; padding: 12px 26px 14px; border-top: 1px solid var(--border); }   /* 内容变长后按钮始终可见（同 #dlgStyle） */
 #dlgStyle h3 { margin-bottom: 8px; }
 #dlgStyle .stl-h { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1px solid var(--border); }
 #dlgStyle .stl-c-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 20px; }
@@ -614,6 +645,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 
 <header id="topbar">
  <div class="tb-row tb-row1">
+  <div class="tb-scroll">
   <button id="btnOpen" data-i18n>打开文件夹</button>
   <button id="btnReconnect" class="hidden" data-i18n-title title="继续上次打开的文件夹">继续上次</button>
   <span class="sep"></span>
@@ -636,8 +668,11 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <button id="btnFontUp" data-i18n-title title="增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区">A+</button>
   <button id="btnFontReset" data-i18n-title title="重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）">↺</button>
   <button id="btnAbout" data-i18n data-i18n-title title="软件使用说明">说明</button>
+  </div>
+  <div class="tb-fixed">
   <button id="btnTheme" data-i18n-title title="切换明暗主题">🌙</button>
-  <button id="btnLang" data-i18n-title title="切换界面语言"><span class="lg lg-zh">中</span><span class="lg lg-en">EN</span></button>
+  <button id="btnLang" data-i18n-title title="切换界面语言"><span class="lg lg-zh">中文</span><span class="lg lg-en">EN</span></button>
+  </div>
  </div>
  <div class="tb-row tb-row2">
    <div class="tabs">
@@ -929,25 +964,25 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="ab-body" data-i18n-html>
     <h4>这是什么</h4>
-    txtBookWriteTool 是一款免费开源的本地写作工具。它以一个普通文件夹作为书稿目录，用 .txt / .md 文件按 Markdown 语法写作，最终可合并成书、导出 PDF / HTML / Markdown。
+    txtBookWriteTool 是一款免费开源的本地写作工具：以普通文件夹为书稿目录，用 .txt / .md 按 Markdown 写作，可合并成书、导出 PDF / HTML / Markdown。
     
     <h4>编号与排序</h4>
     <ul>
-      <li><b>文件三位数字编号</b>:（<code>举例：110.txt</code>），新建文件会在已有编号基础上自动+10。</li>
-      <li><b>文件夹也可编号</b>:，与文件统一排序，无编号的文件夹排最前。</li>
-      <li><b>自动重新编号</b>：所在文件夹统一重排、文字保留。</li>
+      <li><b>文件编号</b>：三位数字（<code>举例：110.txt</code>），新建文件在已有编号上自动 +10。</li>
+      <li><b>文件夹编号</b>：与文件统一排序，无编号的排最前。</li>
+      <li><b>自动重新编号</b>：所在文件夹统一重排，文字保留。</li>
       <li><b>自动命名</b>：<code>110.txt</code> → <code>110-第一行文字.txt</code>（超 16 字截断）。</li>
     </ul>
     <h4>草稿 / 素材</h4>
     <ul>
-      <li>名字以 <code>_</code> 开头（兼容 <code>[草稿]</code>、<code>draft-</code>）即被视为草稿：草稿可编辑可搜索，但不参与阅览导出；</li>
-      <li>点击隐藏文件按钮快速切换状态。</li>
+      <li>名字以 <code>_</code> 开头（兼容 <code>[草稿]</code>、<code>draft-</code>）即为草稿：可编辑可搜索，但不参与阅览导出；</li>
+      <li>点隐藏文件按钮可快速切换此状态。</li>
     </ul>
     <h4>四种模式</h4>
     <ul>
-      <li><b>编辑</b>：左写右预览，自动保存；</li><li><b>预览</b>：单独预览当前文件。</li>
+      <li><b>编辑</b>：左写右预览，自动保存；</li><li><b>预览</b>：仅预览当前文件。</li>
       <li><b>阅览</b>：全文件夹合并成书，左侧目录先文件名、再文内标题。</li>
-      <li><b>大纲</b>：卡片纵览全书，拖卡片调序/移入文件夹，编号自动重排。</li>
+      <li><b>大纲</b>：卡片纵览全书，拖动调序/移入文件夹，编号自动重排。</li>
     </ul>
     <h4>写作辅助</h4>
     <ul>
@@ -955,20 +990,20 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>◀/▶</b>：按目录顺序切换文件（草稿除外）；</li><li><b>搜索</b>：全文查找，点结果跳转，Esc 或 ✕ 清空。</li>
       <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
       <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
-      <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏均按组操作。</li>
-      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件保留原名存前半，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（排序原文件在前）；目标名已占用时编号自动顺延并确认后创建；目录树可拖动移动，拖到项目名=移到根目录。</li>
+      <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏按组操作。</li>
+      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件存前半并保留原名，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（原文件排前）；目标名被占用时编号自动顺延、确认后创建；目录树可拖动，拖到项目名=移到根目录。</li>
     </ul>
     <h4>输出</h4>
     <ul>
       <li><b>导出 PDF</b>：阅览预览后点导出，打印目标选「另存为 PDF」。</li>
-      <li><b>导出 MD</b>：合并为一个 Markdown 下载（名带日期），可在 Typora 转 PDF。</li>
-      <li><b>导出 HTML</b>：单文件含左侧目录和自定义样式（名带日期），双击即可浏览器阅读。</li>
+      <li><b>导出 MD</b>：合并为一个 Markdown 下载（名带日期），可用 Typora 转 PDF。</li>
+      <li><b>导出 HTML</b>：单文件含左侧目录与自定义样式（名带日期），双击即可浏览器阅读。</li>
     </ul>
     <h4>回收站与历史</h4>
     <ul>
       <li>删除/合并的文件进项目内 <code>.trash</code>，可恢复或清空；</li>
       <li>自动保存有变化时旧内容存 <code>.history</code>（按路径镜像），每文件留 20 版，可查看恢复；</li>
-      <li>重命名/移动时历史自动跟随，恢复重名加「(恢复 n)」后缀；批量替换前自动留档。</li>
+      <li>重命名/移动时历史跟随，恢复重名加「(恢复 n)」后缀；批量替换前自动留档。</li>
       <li>移入回收站历史保留；彻底删除/清空回收站才连历史清除、不可恢复，普通删除可找回。</li>
       <li><code>.trash</code>/<code>.history</code> 文件夹在工具内自动隐藏。</li>
       <li>建议定期复制整个项目文件夹备份。</li>
@@ -1006,22 +1041,88 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <dialog id="dlgBook">
   <h3 data-i18n>排版设置</h3>
+  <div class="bk-h" data-i18n>书籍信息</div>
   <div class="row"><label style="width:72px">书名</label><input id="bkTitle" style="flex:1" data-i18n-ph placeholder="留空则用项目文件夹名"></div>
   <div class="row"><label style="width:72px">副标题</label><input id="bkSub" style="flex:1" data-i18n-ph placeholder="如：卷一 / 修订版 v2（可空）"></div>
   <div class="row"><label style="width:72px">作者</label><input id="bkAuthor" style="flex:1" data-i18n-ph placeholder="署名（可空）"></div>
-  <div class="row"><label style="width:72px" data-i18n-block>成书日期</label><input type="date" id="bkDate"></div>
+  <div class="row"><label style="width:72px" data-i18n>成书日期</label><input id="bkDate" style="flex:1" data-i18n-ph placeholder="任意格式，如 2026-09-24 或 二〇二六年九月；留空则不显示"></div>
+  <div class="bk-h" data-i18n>书籍排版</div>
+  <div class="row"><label style="width:72px" data-i18n>PDF背景</label>
+    <input type="color" id="bkPdfBg" style="width:34px;height:22px;padding:0;flex:none" data-i18n-title title="PDF 导出背景色（默认白色，很少需要修改）">
+    <button type="button" id="bkPdfBgReset" data-i18n-title title="恢复默认（白色）">↺</button>
+    <span style="font-size:12px;color:var(--muted);margin-left:6px" data-i18n>导出 PDF 的页面背景色</span>
+  </div>
   <div class="row"><label style="width:72px" data-i18n>成书部分</label>
     <label data-i18n-block><input type="checkbox" id="bkCover"> 封面页</label>
     <label data-i18n-block><input type="checkbox" id="bkToc"> 目录页</label>
+    <label data-i18n-block><input type="checkbox" id="bkBody"> 正文</label>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>正文排版</label>
+    <label data-i18n-block><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF、HTML、编辑预览统一生效）</label>
+  </div>
+  <div class="row"><label style="width:72px"></label>
     <label data-i18n-block><input type="checkbox" id="bkBreak"> 每章另起一页</label>
   </div>
   <div class="row"><label style="width:72px" data-i18n>标题编号</label>
     <label data-i18n-block><input type="checkbox" id="bkNumber"> 自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）</label>
   </div>
-  <div class="row"><label style="width:72px" data-i18n>正文排版</label>
-    <label data-i18n-block><input type="checkbox" id="bkIndent"> 首行缩进 2 字符（PDF、HTML、编辑预览统一生效）</label>
+  <div class="bk-h" data-i18n>页码编号</div>
+  <div class="row"><label style="width:72px" data-i18n>编号范围</label>
+    <label data-i18n-block><input type="radio" name="pgRange" id="pgRangeNone" value="none"> 不显示页码</label>
+    <label data-i18n-block data-i18n-title title="封面为第 1 页；封面/目录/正文都显示页码"><input type="radio" name="pgRange" id="pgRangeCover" value="cover"> 从封面开始</label>
+    <label data-i18n-block data-i18n-title title="目录为第 1 页；封面不显示页码"><input type="radio" name="pgRange" id="pgRangeToc" value="toc"> 从目录开始</label>
+    <label data-i18n-block data-i18n-title title="正文第 1 页为第 1 页；封面/目录不显示页码"><input type="radio" name="pgRange" id="pgRangeBody" value="body"> 从正文开始</label>
   </div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7" data-i18n>说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。</div>
+  <div class="row"><label style="width:72px" data-i18n>显示位置</label>
+    <label data-i18n-block><input type="radio" name="pgPos" id="pgPosCenter" value="bottom-center"> 底部居中</label>
+    <label data-i18n-block><input type="radio" name="pgPos" id="pgPosLeft" value="bottom-left"> 底部靠左</label>
+    <label data-i18n-block><input type="radio" name="pgPos" id="pgPosRight" value="bottom-right"> 底部靠右</label>
+  </div>
+  <div class="bk-h" data-i18n>页眉文本</div>
+  <div class="row"><label style="width:72px" data-i18n>内容</label>
+    <input id="bpHdrText" style="flex:1" data-i18n-ph placeholder="留空则用书名">
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>对齐</label>
+    <label data-i18n-block><input type="radio" name="hdrAlign" id="bpHdrAlignCenter" value="center"> 居中</label>
+    <label data-i18n-block><input type="radio" name="hdrAlign" id="bpHdrAlignLeft" value="left"> 左对齐</label>
+    <label data-i18n-block><input type="radio" name="hdrAlign" id="bpHdrAlignRight" value="right"> 右对齐</label>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>出现区域</label>
+    <label data-i18n-block><input type="checkbox" id="bpHdrCover"> 封面</label>
+    <label data-i18n-block><input type="checkbox" id="bpHdrToc"> 目录</label>
+    <label data-i18n-block><input type="checkbox" id="bpHdrBody"> 正文</label>
+  </div>
+  <div class="bk-h" data-i18n>页尾文本</div>
+  <div class="row"><label style="width:72px" data-i18n>内容</label>
+    <input id="bpFtrText" style="flex:1" data-i18n-ph placeholder="可留空">
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>对齐</label>
+    <label data-i18n-block><input type="radio" name="ftrAlign" id="bpFtrAlignCenter" value="center"> 居中</label>
+    <label data-i18n-block><input type="radio" name="ftrAlign" id="bpFtrAlignLeft" value="left"> 左对齐</label>
+    <label data-i18n-block><input type="radio" name="ftrAlign" id="bpFtrAlignRight" value="right"> 右对齐</label>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>出现区域</label>
+    <label data-i18n-block><input type="checkbox" id="bpFtrCover"> 封面</label>
+    <label data-i18n-block><input type="checkbox" id="bpFtrToc"> 目录</label>
+    <label data-i18n-block><input type="checkbox" id="bpFtrBody"> 正文</label>
+  </div>
+  <div class="bk-h" data-i18n>PDF 导出日期</div>
+  <div class="row"><label style="width:72px" data-i18n>日期文本</label>
+    <input id="bpDateText" style="flex:1" data-i18n-ph placeholder="默认今天">
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>出现区域</label>
+    <label data-i18n-block><input type="checkbox" id="bpDateCover"> 封面</label>
+    <label data-i18n-block><input type="checkbox" id="bpDateToc"> 目录</label>
+    <label data-i18n-block><input type="checkbox" id="bpDateBody"> 正文</label>
+  </div>
+  <div class="row"><label style="width:72px" data-i18n>显示位置</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateTopLeft" value="top-left"> 顶部靠左</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateTopCenter" value="top-center"> 顶部居中</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateTopRight" value="top-right"> 顶部靠右</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateBottomLeft" value="bottom-left"> 底部靠左</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateBottomCenter" value="bottom-center"> 底部居中</label>
+    <label data-i18n-block><input type="radio" name="datePos" id="bpDateBottomRight" value="bottom-right"> 底部靠右</label>
+  </div>
   <div class="btns">
     <button id="bkReset" type="button" data-i18n>恢复默认</button>
     <button id="bkCancel" data-i18n>取消</button>
@@ -1033,6 +1134,8 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div id="stlMsg" style="font-size:12px;color:var(--muted);margin:2px 0 6px;line-height:1.6"></div>
   <div class="stl-h" data-i18n>配色</div>
   <div id="stlColorGrid" class="stl-c-grid"></div>
+  <div class="stl-h" style="margin-top:12px" data-i18n>背景色<button type="button" id="btnStlResetCanvas" class="stl-sec-reset" data-i18n-title title="恢复为默认（跟随主题色）">↺ 恢复默认</button></div>
+  <div id="stlCanvasGrid" class="stl-c-grid"></div>
   <div class="stl-h" style="margin-top:12px">成书版式<button type="button" id="btnStlResetTheme" class="stl-sec-reset" data-i18n-title title="恢复为当前内置版式默认">↺ 恢复默认</button></div>
   <div class="row" style="margin-top:4px"><label style="width:72px;flex:none;color:var(--text)" data-i18n>整体缩放</label>
     <input type="range" id="stlZoom" min="13" max="26" step="1" style="flex:1;padding:0">
@@ -1187,7 +1290,7 @@ const EN = {
   '←插入列': '← Col left', '→插入列': '→ Col right', '删除列': 'Delete col',
   '光标放在表格任意单元格内即可编辑': 'Click any cell in the table to edit it',
   '目 录': 'Contents', '全书大纲': 'Book Outline',
-  '拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑': 'Drag cards to reorder chapters (renumbers 110/120… automatically); drop onto the middle of a folder card to move into it; click a file card to edit',
+  '拖动卡片调整章节顺序（自动重排编号 110/120…）；拖到文件夹卡片中段＝移入该文件夹；点文件卡片开始编辑': 'Drag cards to reorder chapters (renumbers 110/120…); drop on a folder card middle to move in; click a file card to edit',
   /* 通用按钮 */
   '取消': 'Cancel', '插入': 'Insert', '替换': 'Replace', '保存': 'Save', '关闭': 'Close',
   '确认插入': 'Insert', '恢复默认': 'Reset', '知道了': 'Got it', '保留我的': 'Keep mine', '重新加载': 'Reload',
@@ -1208,47 +1311,59 @@ const EN = {
   /* 外部修改 */
   '文件已被外部修改': 'File changed outside the editor',
   /* 回收站 / 历史 */
-  '删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。': 'Deleted/merged files go to the .trash folder in the project first and can be restored; emptied items are gone for good.',
+  '删除或合并的文件先移到项目内 .trash 目录，可恢复；清空后不可找回。': 'Deleted/merged files go to the project .trash folder first and can be restored; emptying is permanent.',
   '清空回收站': 'Empty Trash',
   '历史版本 ·': 'History ·',
-  '自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。': 'Old versions are kept automatically on change (latest 20 per file, in the .history folder of the project).',
+  '自动保存有变化时旧版本自动留存（每文件最近 20 个，存于项目内 .history 目录）。': 'Old versions are kept on change (latest 20 per file, in the project .history folder).',
   '点击左侧版本查看内容': 'Click a version on the left to view it',
   '恢复此版本': 'Restore this version',
   '清空当前文件历史': 'Clear this file\'s history', '清空全部文件历史': 'Clear ALL history',
   /* 排版设置 */
   '书名': 'Book title', '副标题': 'Subtitle', '作者': 'Author', '成书日期': 'Book date', '成书部分': 'Sections',
+  '书籍信息': 'Book info', '书籍排版': 'Book layout',
   '封面页': 'Cover page', '目录页': 'TOC page', '每章另起一页': 'New page per chapter',
   '标题编号': 'Heading numbering',
   '自动编号（1、1.1、1.1.1…，PDF 与 HTML 均生效）': 'Auto numbering (1, 1.1, 1.1.1…; works in PDF & HTML)',
   '正文排版': 'Body layout',
   '首行缩进 2 字符（PDF、HTML、编辑预览统一生效）': 'Indent first line 2 chars (PDF, HTML & preview alike)',
-  '说明：目录按“文件＝章、标题＝节”自动生成，不含页码；页眉的书名与页脚页码由模板自动生成，需 Chrome/Edge 131 或更新版本。': 'Note: the TOC is generated as "file = chapter, heading = section" without page numbers; running head and page numbers come from the template, requires Chrome/Edge 131+.',
   /* 样式设置 */
   '样式设置（style.css）': 'Style Settings (style.css)',
   '配色': 'Colors', '成书版式': 'Book Layout', '整体缩放': 'Zoom', '正文字体': 'Body font', '标题字体': 'Heading font',
-  '↺ 恢复默认': '↺ Reset', '说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。': 'Note: changes preview live but are only written when you click "Save"; empty heading sizes fall back to built-in defaults; header/footer are set in "Book Layout".',
+  '背景色': 'Background', '预览背景': 'Preview', '编辑器背景': 'Editor', 'PDF背景': 'PDF background', '恢复默认（白色）': 'Reset to default (white)', '恢复为默认（跟随主题色）': 'Reset to default (follows theme)', '导出 PDF 的页面背景色': 'Page background color for PDF export',
+  /* 页眉页脚（页码编号 / 页眉文本 / 页尾文本 / PDF 导出日期） */
+  '页码编号': 'Page numbering', '编号范围': 'Numbering range', '不显示页码': 'No page numbers',
+  '从封面开始': 'From cover', '从目录开始': 'From TOC', '从正文开始': 'From body',
+  '封面为第 1 页；封面/目录/正文都显示页码': 'Cover is page 1; numbers on cover, TOC and body',
+  '目录为第 1 页；封面不显示页码': 'TOC is page 1; no number on cover',
+  '正文第 1 页为第 1 页；封面/目录不显示页码': 'First body page is page 1; no numbers on cover/TOC',
+  '显示位置': 'Position', '底部居中': 'Bottom center', '底部靠左': 'Bottom left', '底部靠右': 'Bottom right',
+  '页眉文本': 'Header text', '页尾文本': 'Footer text', 'PDF 导出日期': 'PDF export date', '日期文本': 'Date text',
+  '内容': 'Content', '出现区域': 'Show on',
+  '顶部靠左': 'Top left', '顶部居中': 'Top center', '顶部靠右': 'Top right',
+  '留空则用书名': 'Empty = book title', '可留空': 'Optional', '默认今天': 'Defaults to today',
+  '↺ 恢复默认': '↺ Reset', '说明：调整时实时预览但不写盘，点「保存」才生效；标题字号留空则回退内置默认；页眉页脚在「排版设置」中调整。': 'Note: changes preview live, written only on "Save"; empty heading sizes fall back to built-in defaults; header/footer are set in "Book Layout".',
   '源码编辑': 'Edit CSS',
   /* 欢迎页 / 拖放 / 状态栏 */
   '一款用txt写作的小工具': 'A small writing tool that works with plain txt files',
   '使用说明': 'User Guide',
   '松开以打开': 'Drop to open',
   '拖入文件夹＝作为书稿项目打开': 'Drop a folder to open it as your book project',
-  '拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）': 'Drop .md / .txt files to open and edit directly (writes back to the files)',
+  '拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）': 'Drop .md / .txt files to edit directly (writes back to the files)',
   /* 工具栏 title 提示 */
   '继续上次打开的文件夹': 'Reopen the last folder',
   '新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10': 'New .txt file (parsed as Markdown), auto-numbered +10',
   '新建 .md 文件，自动编号 +10': 'New .md file, auto-numbered +10',
-  '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 display columns, ASCII counts 0.5)',
-  '统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）': 'Renumber files and numbered subfolders in this folder as 110, 120, 130… (drafts excluded, text kept, missing numbers filled)',
-  '隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏': 'Hide = prefix filename with _ (excluded from Read/PDF/export); click again to unhide',
-  '复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）': 'Copy in the same folder with -copy1 suffix (-copy2, -copy3 on conflicts)',
+  '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 columns, ASCII = 0.5)',
+  '统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）': 'Renumber files and numbered subfolders here as 110, 120, 130… (drafts excluded, text kept, gaps filled)',
+  '隐藏＝文件名前加 _（不参与阅览/PDF/导出）；再点取消隐藏': 'Hide = prefix name with _ (excluded from Read/PDF/export); click again to show',
+  '复制到同一目录，名称后加 -copy1（同名时依次 -copy2、-copy3）': 'Copy in place with a -copy1 suffix (-copy2, -copy3 on conflicts)',
   '回收站：删除/合并的文件移到这里，可恢复': 'Trash: deleted/merged files go here, restorable',
-  'Ctrl+点击多选；内容写入第一个文件，其余删除': 'Ctrl+click to multi-select; content merges into the first file, the rest are deleted',
+  'Ctrl+点击多选；内容写入第一个文件，其余删除': 'Ctrl+click to multi-select; merged into the first file, the rest deleted',
   '清空多选（Esc 同效）': 'Clear multi-selection (Esc works too)',
-  '拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）': 'Split by cursor/heading/keyword; first half keeps the original name, rest become base_2.md, base_3.md… (original sorts first)',
-  '减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Smaller: editor font in edit mode (browser-remembered); layout zoom in preview/read (written to style.css)',
-  '增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Larger: editor font in edit mode (browser-remembered); layout zoom in preview/read (written to style.css)',
-  '重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）': 'Reset: editor back to 15px in edit mode; layout back to 100% zoom in preview/read',
+  '拆分：光标/标题/关键词，原文件保留原名存前半，后续 base_2.md、base_3.md…（排序原文件在前）': 'Split by cursor/heading/keyword; the original keeps the first half, rest become base_2.md, base_3.md… (original first)',
+  '减小字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Smaller: editor font in edit mode (remembered); layout zoom in preview/read (written to style.css)',
+  '增大字号：编辑模式调编辑器（浏览器记忆），预览/阅览写入 style.css 缩放区': 'Larger: editor font in edit mode (remembered); layout zoom in preview/read (written to style.css)',
+  '重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）': 'Reset: editor to 15px in edit mode; layout to 100% zoom in preview/read',
   '软件使用说明': 'User guide',
   '切换明暗主题': 'Toggle light/dark theme',
   '上一个文件': 'Previous file', '下一个文件': 'Next file',
@@ -1262,10 +1377,10 @@ const EN = {
   '英文大小写循环：首字母大写 → 全大写 → 全小写': 'Cycle case: Capitalize → ALL CAPS → all lower',
   '无序列表（再点取消）': 'Bullet list (click again to remove)',
   '有序列表（再点取消）': 'Numbered list (click again to remove)',
-  '任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换': 'Task list: cycle current line between todo (- [ ]), done (- [x]) and none',
+  '任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换': 'Task list: cycle the line between todo (- [ ]), done (- [x]) and none',
   '插入分隔线': 'Insert horizontal rule',
   '插入中文全角空格，用于中文排版': 'Insert a full-width space for CJK typography',
-  'HTML 注释：选中则包成 \x3C!--注释-->，未选中则插入模板；仅写作时可见，阅览导出不显示': 'HTML comment: wraps selection in \x3C!-- --> or inserts a template; visible only while editing, hidden in Read/export',
+  'HTML 注释：选中则包成 \x3C!--注释-->，未选中则插入模板；仅写作时可见，阅览导出不显示': 'HTML comment: wraps selection in \x3C!-- --> or inserts a template; editing-only, hidden in Read/export',
   '插入当前日期时间（含星期），如 2026-09-19 23:45 星期六': 'Insert current date/time with weekday, e.g. 2026-09-19 23:45 Saturday',
   '引用块（再点取消）': 'Blockquote (click again to remove)',
   '行内代码': 'Inline code',
@@ -1273,16 +1388,16 @@ const EN = {
   '调色盘：选择颜色，确认后把色值插入光标处': 'Palette: pick a color and insert the hex at the cursor',
   '插入链接（选中网址可直接包裹）': 'Insert link (wraps a selected URL)',
   '插入锚点（页内跳转标记 \x3Ca id="name">）': 'Insert anchor (in-page jump target \x3Ca id="name">)',
-  '插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right': 'Insert image (paste/drop works too); syntax: ![](path =600x400 center), width or height may be omitted, align center/left/right',
+  '插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right': 'Insert image (paste/drop too); syntax ![](path =600x400 center); width/height optional; align center/left/right',
   '查找替换：可在当前文件或整个项目中进行': 'Find & replace in the current file or the whole project',
   '当前文件的自动保存历史（每个文件保留最近 20 个版本，可预览、恢复）': 'Auto-save history of the current file (latest 20 versions, preview & restore)',
-  '可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css': 'Visually set colors, fonts, sizes…; source editing inside; saved to style.css',
-  '选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容': 'Pick a built-in color scheme (replaces the color section of style.css); fine-tune via "Edit Style"',
-  '成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调': 'Book layout: replaces the layout & header/footer sections of style.css (fonts/sizes/leading/align/@page); fine-tune via "Edit Style"',
-  '填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号': 'Set title/subtitle/author/date; toggle cover, TOC, page breaks, indent, heading numbering',
-  '打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件': 'Print / Save as PDF: whole book in Read mode, current file only in Preview mode',
-  '导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件': 'Export single-file HTML (with TOC & custom styles): whole book in Read mode, current file only in Preview mode',
-  '导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件': 'Export .md: merged in TOC order in Read mode, current file only in Preview mode',
+  '可视化设置配色、字体、字号等；对话框内可进入源码编辑，保存后写入 style.css': 'Set colors, fonts, sizes visually; edit CSS source; saved to style.css',
+  '选择内置配色：成套替换 style.css 配色区，点“样式”可微调任意内容': 'Pick a built-in color scheme (replaces the style.css color section); fine-tune via "Edit Style"',
+  '成书版式：替换 style.css 版式区与页眉页脚区（字体/字号/行距/对齐/@page），点“样式”可微调': 'Book layout: replaces the style.css layout & header/footer sections; fine-tune via "Edit Style"',
+  '填写书名/副标题/作者/日期，开关封面页、目录页、分页、缩进、标题编号': 'Set title/subtitle/author/date; toggle cover, TOC, page breaks, indent, numbering',
+  '打印 / 另存为 PDF：阅览模式导出全书，预览模式仅导出当前文件': 'Print / Save as PDF: whole book in Read mode, current file only in Preview',
+  '导出单文件 HTML（含目录、自定义样式）：阅览模式导出全书，预览模式仅导出当前文件': 'Export single-file HTML (with TOC & styles): whole book in Read mode, current file only in Preview',
+  '导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件': 'Export .md: merged in TOC order in Read mode, current file only in Preview',
   '折叠文件目录（腾出编辑空间）': 'Collapse file tree (more editing room)',
   '折叠文件目录': 'Collapse file tree',
   '在项目全部文件中搜索，Enter 搜索': 'Search across all files in the project, Enter to search',
@@ -1290,7 +1405,7 @@ const EN = {
   '展开文件目录': 'Expand file tree',
   '隐藏右侧预览，专心编辑': 'Hide the preview pane to focus on editing',
   '同步滚动：编辑与预览互相跟随': 'Sync scroll: editor and preview follow each other',
-  '选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）': 'Pick the file\'s folder as the book project (the file opens automatically)',
+  '选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）': 'Use the file\'s folder as the book project (opens that file)',
   '自定义颜色': 'Custom color',
   '返回顶部': 'Back to top', '切换界面语言': 'Toggle UI language',
   '张亮军　无锡·海岸城': 'Zhang Liangjun · Wuxi, China',
@@ -1321,7 +1436,7 @@ const EN = {
   '（光标行起）</div>': ' (from the cursor line)</div>',
   '（第一个拆分块）\n': ' (first split block)\n', '（第一个拆分块）<br>': ' (first split block)<br>',
   '，原文件保留前 ': '; the original keeps the first ', '，后续 ': '; then ',
-  '其余 ': 'the remaining ', ' 著': '', ' 著</div>': '</div>',
+  '其余 ': 'the remaining ',
   '（设置仍已暂存浏览器，关闭会丢失）': ' (settings only staged in the browser, lost on close)',
   '（无标题）': ' (untitled)', '（可直接写回）': ' (writes back to the original)',
   '（临时名以 .wttmp 开头，可手动改回）': ' (temp names start with .wttmp; rename them back manually)',
@@ -1333,19 +1448,19 @@ const EN = {
   '」吗？\n（替换前内容会自动存入「历史」，可恢复）': '"?\n(The old content is saved to History first; restorable)',
   '」吗？\n（替换前各文件旧内容会自动存入「历史」，可恢复）': '"?\n(Old content of each file is saved to History first; restorable)',
   '请输入查找内容': 'Enter text to find', '请输入关键词': 'Enter a keyword',
-  '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）': 'Scans all md/txt files in the project (excluding style.css and images; drafts included)',
+  '将扫描项目内全部 md/txt 文件（不含 style.css 和图片，草稿也包含）': 'Scans all project md/txt files (except style.css and images; drafts included)',
   /* ── 新建 / 打开 / 拖放 ── */
   '已打开：': 'Opened: ', '已打开外部文件：': 'Opened external file: ',
   '已打开文件夹，其余拖入项已忽略': 'Folder opened; other dropped items ignored',
-  '仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入': 'Only folders or .md / .txt files can be opened; drop images while editing a project file',
+  '仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入': 'Only folders or .md / .txt files can be opened; drop images inside a project file',
   '📄 外部文件：': '📄 External file: ',
   '[图]': '[image]',
   '> 读取失败: ': '> Failed to read: ',
   '已恢复上次编辑：': 'Reopened last edit: ',
   '已创建 ': 'Created: ', '已创建 style.css 并应用配色：': 'Created style.css and applied colors: ',
   '已在项目根目录创建 style.css': 'Created style.css in the project root',
-  '目标务必选内置「另存为 PDF」（会自动填文件名 ': 'For the printer, be sure to choose the built-in "Save as PDF" (it fills in the file name ',
-  '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）': '); do not choose "Microsoft Print to PDF" — its file name would always be empty (a known Win11 limitation)',
+  '目标务必选内置「另存为 PDF」（会自动填文件名 ': 'For the printer, choose the built-in "Save as PDF" (it fills the file name ',
+  '）；不要选「Microsoft Print to PDF」，其文件名必为空（Win11 已知限制）': '); not "Microsoft Print to PDF", whose file name is always empty (a known Win11 limitation)',
   /* ── 文件操作 toasts ── */
   '已移动 ': 'Moved ', '已移动到：': 'Moved to: ', '根目录': 'Root',
   '已复制 ': 'Copied ', '已复制：': 'Copied: ',
@@ -1365,23 +1480,23 @@ const EN = {
   '副本数量过多': 'Too many copies',
   /* ── 删除 / 移动 / 重命名确认 ── */
   '确定删除「': 'Delete "', '确定删除所选 ': 'Delete the selected ',
-  '」？该文件/文件夹及其历史版本都将被清除，不可恢复': '"? The file/folder and its history versions will all be removed. This cannot be undone',
+  '」？该文件/文件夹及其历史版本都将被清除，不可恢复': '"? The file/folder and its history will all be removed. This cannot be undone',
   '及其全部内容': ' and everything inside it',
   '彻底删除': 'Delete permanently', '彻底删除「': 'Permanently delete "',
   '？\n（移入回收站，可在「回收站」中恢复）': '?\n(Moved to Trash; restore from the Trash)',
   '？不可恢复。': '? This cannot be undone.',
-  '清空回收站？其中所有文件/文件夹将彻底删除，不可恢复': 'Empty the Trash? Everything in it will be permanently deleted. This cannot be undone.',
+  '清空回收站？其中所有文件/文件夹将彻底删除，不可恢复': 'Empty the Trash? All contents are permanently deleted and cannot be recovered.',
   '回收站已空': 'Trash is empty', '回收站已清空': 'Trash emptied',
   '」，其余文件移入回收站（可恢复）。确定继续？': '"; the rest go to the Trash (restorable). Continue?',
   '，其余文件在回收站': '; the rest are in the Trash',
   '将把所选 ': 'The selected ',
   '将对文件夹「': 'Will renumber the files and numbered subfolders in "',
   '」内的文件和带编号子文件夹统一重新编号为 110、120、130…\n共 ': '" as 110, 120, 130…\nTotal: ',
-  ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n': ' items).\nSubfolders are not renumbered recursively; unnumbered folders stay at the top untouched.\nOnly numbers change; text is kept, missing numbers are filled in.\n\nExample:\n',
+  ' 个）。\n不递归处理子文件夹内部；不带编号的文件夹保持在最前不动。\n只改数字编号，文字部分保留；没有编号的文件补上。\n\n示例：\n': ' items).\nSubfolders are not renumbered recursively; unnumbered folders stay on top.\nOnly numbers change; text is kept, missing numbers filled in.\n\nExample:\n',
   '」内没有可编号的文件或带编号文件夹': '" has no files or numbered folders to renumber',
   '重新编号中断：': 'Renumbering aborted: ',
   '名称已符合格式': 'Names already match the format',
-  '不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）': 'Folders without a number always sort first and cannot take a numbered slot (drag them into another folder instead)',
+  '不编号文件夹固定排在最前，不能插入编号位置（可拖入其他文件夹内）': 'Unnumbered folders always sort first and cannot take a numbered slot (drag them into another folder)',
   '不能移动到自身内部': 'Cannot move into itself',
   '没有可移动的项目（重名或已在目标位置）': 'Nothing to move (duplicates or already in place)',
   '已在目标位置': 'Already at the destination',
@@ -1391,7 +1506,7 @@ const EN = {
   '\n\n此操作直接修改文件/文件夹名，确定继续？': '\n\nThis renames the file/folder directly. Continue?',
   '\n\n仍按以上名称创建吗？': '\n\nCreate with the name(s) above anyway?',
   '-新文件夹': '-New Folder',
-  '文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：': 'Folder name (a number prefix like "120-Text" joins sorting; without one it always sorts before files):',
+  '文件夹名（带编号如 120-正文 可参与排序，不带编号则固定排在文件前）：': 'Folder name (a prefix like "120-Text" joins sorting; without one it sorts before files):',
   '新名称（文件无后缀自动补 .txt）：': 'New name (.txt is appended automatically if missing):',
   '文件': 'file', '文件夹': 'folder',
   '拖动文件/文件夹到这里可移动': 'Drag files/folders here to move them',
@@ -1414,14 +1529,14 @@ const EN = {
   '该文件没有历史版本': 'No versions for this file', '项目中没有历史版本': 'No versions in this project',
   /* ── 外部修改 / 保存冲突 ── */
   '外部有新版本': 'Newer version on disk', '原文件已不存在': 'The original file no longer exists',
-  '原文件已被外部删除或改名，无法保存；请新建文件后把内容转存过去': 'The original file was deleted or renamed outside the editor; cannot save. Create a new file and move the content over',
+  '原文件已被外部删除或改名，无法保存；请新建文件后把内容转存过去': 'The original file was deleted or renamed outside; cannot save. Create a new file to move the content over',
   '文件已被外部删除或改名': 'The file was deleted or renamed outside the editor',
-  '文件刚被其它编辑器修改，保存将覆盖其改动。\n仍要保存吗？': 'The file was just changed by another editor; saving will overwrite those changes.\nSave anyway?',
-  '文件已被其它编辑器修改，保存将覆盖磁盘上的新版本。\n仍要保存吗？': 'The file was changed by another editor; saving will overwrite the newer version on disk.\nSave anyway?',
+  '文件刚被其它编辑器修改，保存将覆盖其改动。\n仍要保存吗？': 'The file was just changed by another editor; saving will overwrite it.\nSave anyway?',
+  '文件已被其它编辑器修改，保存将覆盖磁盘上的新版本。\n仍要保存吗？': 'Another editor changed the file; saving overwrites the newer disk version.\nSave anyway?',
   '已保留你的版本；之后保存时会再确认一次': 'Your version was kept; you\'ll be asked again on the next save',
   '已加载磁盘版本': 'Disk version loaded', '未保存…': 'Unsaved…',
-  '</b>」已被其它编辑器改动。<br>选「重新加载」将放弃本页面未保存的改动、载入磁盘新版本；选「保留我的」则暂不加载，之后保存时还会再确认一次。': '</b>" was changed by another editor.<br>"Reload" discards unsaved changes on this page and loads the disk version; "Keep mine" keeps yours for now — you\'ll be asked again on save.',
-  '</b>」在磁盘上已不存在（可能被其它编辑器删除、改名或移动）。<br>窗口里的内容仍保留，但已无法保存回原位置；请在目录中新建文件后把内容转存过去。': '</b>" no longer exists on disk (deleted, renamed or moved by another editor).<br>The content stays in the window but can no longer be saved to the original path; create a new file in the tree and move the content over.',
+  '</b>」已被其它编辑器改动。<br>选「重新加载」将放弃本页面未保存的改动、载入磁盘新版本；选「保留我的」则暂不加载，之后保存时还会再确认一次。': '</b>" was changed by another editor.<br>"Reload" discards unsaved edits and loads the disk version; "Keep mine" keeps yours and asks again on save.',
+  '</b>」在磁盘上已不存在（可能被其它编辑器删除、改名或移动）。<br>窗口里的内容仍保留，但已无法保存回原位置；请在目录中新建文件后把内容转存过去。': '</b>" no longer exists on disk (deleted, renamed or moved elsewhere).<br>The content stays in the window but can no longer be saved to the original path; create a new file to move the content over.',
   '<b style="color:#c0392b">当前浏览器不支持文件系统访问。</b><br>请使用 Edge 或 Chrome 打开本文件（双击 txtBookWriteTool.html）。': '<b style="color:#c0392b">This browser does not support File System Access.</b><br>Please open this file with Edge or Chrome (double-click txtBookWriteTool.html).',
   /* ── 前置提示 ── */
   '请先打开文件': 'Open a file first', '请先打开文件夹': 'Open a folder first',
@@ -1435,7 +1550,7 @@ const EN = {
   '选中内容中没有英文字母': 'No English letters in the selection', '第一行没有可用文字': 'No usable text on the first line',
   '所选文件夹中没有该文件': 'The file is not in the selected folder',
   '所选文件已不存在，请重新选择': 'The selected files no longer exist; select again',
-  '所选文件已不存在，请重新选择（Esc 或「取消选择」清空）': 'The selected files no longer exist; select again (Esc or "Deselect" clears)',
+  '所选文件已不存在，请重新选择（Esc 或「取消选择」清空）': 'The selected files no longer exist; select again (Esc/"Deselect" clears)',
   '作用于当前文件：': 'Applies to: ',
   /* ── 编辑器功能 ── */
   '请输入链接地址：': 'Enter the link URL:', '链接文字': 'Link text',
@@ -1456,24 +1571,24 @@ const EN = {
   '<span style="color:#b0741a">[草稿] </span>': '<span style="color:#b0741a">[Draft] </span>',
   '草稿': 'Draft',
   '<div class="ol-empty">文件夹为空</div>': '<div class="ol-empty">Folder is empty</div>',
-  'Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动': 'Ctrl+click to multi-select/deselect (for merge/move/delete/copy/hide; Esc or "Deselect" clears); drag moves the whole group',
-  'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n': 'style.css stylesheet: controls heading/body styles; not used in Read/export (edit via "Edit Style" on the toolbar)\n',
-  ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n': ' book settings: stores title/author/date/template…; not used in Read/export (edit via "Cover & Book Settings" on the toolbar)\n',
-  '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n': 'Draft/asset: editable and searchable but excluded from Read/export (remove the leading _ to restore)\n',
+  'Ctrl+点击 多选/取消（合并/移动/删除/复制/隐藏用，Esc 或「取消选择」清空）；拖动可整组移动': 'Ctrl+click to multi-select (merge/move/delete/copy/hide; Esc or "Deselect" clears); drag moves the whole group',
+  'style.css 样式表：控制标题/正文样式，不参与阅览和导出（点工具栏「样式」编辑）\n': 'style.css stylesheet: controls heading/body styles; not used in Read/export (edit via "Edit Style")\n',
+  ' 成书设置：保存书名/作者/日期/模板等，不参与阅览和导出（点工具栏「封面与成书设置」编辑）\n': ' book settings: title/author/date/template…; not used in Read/export (edit via "Cover & Book Settings")\n',
+  '草稿/素材：可编辑、可搜索，但不参与阅览和导出（去掉名称前的 _ 即恢复）\n': 'Draft/asset: editable and searchable but excluded from Read/export (remove the leading _)\n',
   '隐藏：名称前加 _，不参与阅览/PDF/导出': 'Hide: prefix the name with _ (excluded from Read/PDF/export)',
   '取消隐藏': 'Unhide', '取消隐藏：去掉名称前的 _（恢复参与阅览/PDF/导出）': 'Unhide: remove the leading _ (restore Read/PDF/export)',
   /* ── 回收站 / 历史对话框内 ── */
   '<div class="trash-empty">回收站为空</div>': '<div class="trash-empty">Trash is empty</div>',
   '<div class="trash-empty">读取中…</div>': '<div class="trash-empty">Loading…</div>',
   '<div class="trash-empty">读取失败：': '<div class="trash-empty">Failed to load: ',
-  '<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>': '<div class="trash-empty">No versions yet<br>Old versions appear here automatically after you edit and save</div>',
+  '<div class="trash-empty">暂无历史版本<br>文件修改并保存后，旧版本会自动出现在这里</div>': '<div class="trash-empty">No versions yet<br>Old versions appear here after you edit and save</div>',
   '<div style="color:var(--muted)">未选择文件</div>': '<div style="color:var(--muted)">No file selected</div>',
   '<div style="color:var(--muted)">文件夹中没有 .md / .txt 文件</div>': '<div style="color:var(--muted)">No .md / .txt files in this folder</div>',
   '<div style="color:var(--muted)">正在合并…</div>': '<div style="color:var(--muted)">Merging…</div>',
   '<div class="s-empty">没有找到包含「': '<div class="s-empty">Nothing contains "',
   '」的内容</div>': '"</div>',
   '清空「': 'Clear "', '」的全部历史版本': '" — all its history versions',
-  '清空本项目【所有文件】的历史版本？.history 目录将整个删除，不可恢复。': 'Clear history of ALL files in this project? The whole .history folder will be deleted. This cannot be undone.',
+  '清空本项目【所有文件】的历史版本？.history 目录将整个删除，不可恢复。': 'Clear history of ALL files? The whole .history folder will be deleted and cannot be recovered.',
   /* ── 样式设置 ── */
   '当前配色：': 'Current colors: ', ' · 调整实时预览，保存后写入 style.css': ' · changes preview live and are written to style.css on save',
   '自定义': 'Custom', '自定义…': 'Customize…', '默': 'D', '原值': 'orig',
@@ -1496,18 +1611,18 @@ const EN = {
   '恢复为「': 'Reset to "', '」': '" ', '封面': 'Cover ', '目录': 'Contents ', '」版式默认': '" layout defaults',
   '配色「': 'Color scheme "', '」已写入配色区（点“样式”可微调）': '" written to the color section (fine-tune via "Edit Style")',
   '成书设置已保存': 'Book settings saved',
-  '有尚未保存的调整，确定放弃并进入源码编辑吗？': 'There are unsaved adjustments; discard them and open the CSS source editor?',
+  '有尚未保存的调整，确定放弃并进入源码编辑吗？': 'Unsaved adjustments exist; discard them and open the CSS editor?',
   '项目中还没有 style.css，当前为默认样式预览；': 'No style.css in this project yet; showing a default-style preview. ',
-  '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。': 'This style.css has no color section yet: pick a built-in color scheme once on the toolbar to enable the palette; layout and zoom are unaffected.',
-  '当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？': 'The color section of style.css has been customized; switching to a built-in scheme will overwrite it. Continue?',
-  '当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？': 'The layout section of style.css has been customized; switching to a built-in layout will overwrite it. Continue?',
+  '该 style.css 还没有配色分区：先在工具栏选择一次内置配色即可启用色板；版式与缩放不受影响。': 'No color section in this style.css yet: pick a built-in scheme once on the toolbar to enable the palette; layout/zoom unaffected.',
+  '当前 style.css 配色区已被自定义修改，切换内置配色将覆盖这些内容。是否继续？': 'The style.css color section is customized; switching to a built-in scheme overwrites it. Continue?',
+  '当前 style.css 版式区已被自定义修改，切换内置版式将覆盖这些内容。是否继续？': 'The style.css layout section is customized; switching to a built-in layout overwrites it. Continue?',
   '封面<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ 恢复默认</button>': 'Cover<button type="button" class="stl-sec-reset" data-sec-reset="cover">↺ Reset</button>',
   '目录<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ 恢复默认</button>': 'Contents<button type="button" class="stl-sec-reset" data-sec-reset="toc">↺ Reset</button>',
   ' (恢复': ' (restored', ' (恢复)': ' (restored)',
   /* ── 拆分对话框 ── */
   '找到 ': 'Found ', '将拆为 2 份：<div class="sp-names">· ': 'Will split into 2 parts: <div class="sp-names">· ',
   '恢复到 ': 'Restore the version from ',
-  ' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。': '? The current content will be kept as a new version first — you can still go back.',
+  ' 的版本？\n当前内容会先自动留存为一个新版本，仍可反悔。': '? The current content is kept as a new version first — still reversible.',
   /* ── 静态标记补漏 ── */
   'txtBookWriteTool · 使用说明': 'txtBookWriteTool · User Guide',
   '恢复为当前内置版式默认': 'Restore built-in layout defaults',
@@ -1518,6 +1633,7 @@ const EN = {
   '留空则用项目文件夹名': 'Empty = use project folder name',
   '如：卷一 / 修订版 v2（可空）': 'e.g. Volume 1 / Rev.2 (optional)',
   '署名（可空）': 'Author name (optional)',
+  '任意格式，如 2026-09-24 或 二〇二六年九月；留空则不显示': 'Any format, e.g. 2026-09-24 or Sept 2026; empty = no date',
   '字体栈，如 Georgia, SimSun, serif': 'Font stack, e.g. Georgia, SimSun, serif'
 };
 
@@ -1528,58 +1644,58 @@ const EN_HTML = {
         <br><br>\
         <b>User Guide</b><br>\
         <ol class="list" style="font-size:14px;text-align:left;">\
-        <li>Please use <b>Edge</b> or <b>Chrome</b>; other browsers may be supported later</li>\
-        <li>Pick a <b>local folder</b> as the book directory; <b>.txt/.md</b> files in it are managed as a tree<br> </li>\
-        <li>"Edit" mode: Markdown editing with live preview;<br>"Outline" mode: drag to reorder;<br>"Read" mode: everything <b>merged into one book</b><br> </li>\
-        <li>Filenames starting with <b>_</b> (e.g. _idea.txt) are drafts, excluded from Read and PDF export<br> </li>\
+        <li>Use <b>Edge</b> or <b>Chrome</b>; other browsers may come later</li>\
+        <li>Pick a <b>local folder</b> as the book directory; its <b>.txt/.md</b> files are managed as a tree<br> </li>\
+        <li>"Edit" mode: Markdown editing with live preview;<br>"Outline" mode: drag to reorder;<br>"Read" mode: all <b>merged into one book</b><br> </li>\
+        <li>Names starting with <b>_</b> (e.g. _idea.txt) are drafts, excluded from Read and PDF export<br> </li>\
         <li>Drag a <b>folder</b> or <b>.txt/.md file</b> into the window to open it;</li>\
         \
         </ol>\
         <br>\
         <h4>Author: Zhang Liangjun (Wuxi, China) &nbsp;&nbsp;&nbsp;Updated: Sep 23, 2026</h4>',
   aboutBody: '<h4>What is this</h4>\
-    txtBookWriteTool is a free, open-source local writing tool that consists of a single HTML file. It uses a plain folder as the book directory and .txt / .md files written in Markdown; you can merge every txt/md into a book and export PDF / HTML / Markdown.\
+    txtBookWriteTool is a free, open-source local writing tool in a single HTML file: a plain folder is the book directory, .txt / .md files are written in Markdown, and everything can be merged into a book and exported as PDF / HTML / Markdown.\
     \
     <h4>Numbering &amp; sorting</h4>\
     <ul>\
       <li><b>3-digit file numbers</b> (e.g. <code>110.txt</code>): new files auto-increment by 10.</li>\
-      <li><b>Folders can be numbered</b> too, sorted together with files; unnumbered folders sort first.</li>\
-      <li><b>Auto renumber</b>: renumbers the whole folder in one pass, text preserved.</li>\
+      <li><b>Folders can be numbered</b> too, sorted with files; unnumbered folders sort first.</li>\
+      <li><b>Auto renumber</b>: whole folder renumbered in one pass, text preserved.</li>\
       <li><b>Auto naming</b>: <code>110.txt</code> → <code>110-first line.txt</code> (cut at 16 columns).</li>\
     </ul>\
     <h4>Drafts / material</h4>\
     <ul>\
-      <li>Names starting with <code>_</code> (also <code>[草稿]</code>, <code>draft-</code>) count as drafts: editable and searchable, but excluded from Read/export;</li>\
-      <li>Use the hide-files button to toggle quickly.</li>\
+      <li>Names starting with <code>_</code> (also <code>[草稿]</code>, <code>draft-</code>) are drafts: editable and searchable, but excluded from Read/export;</li>\
+      <li>Toggle quickly with the hide-files button.</li>\
     </ul>\
     <h4>Four modes</h4>\
     <ul>\
       <li><b>Edit</b>: write left, preview right, auto-save; </li><li><b>Preview</b>: preview the current file alone.</li>\
       <li><b>Read</b>: the whole folder merged into one book; the TOC lists files first, then in-file headings.</li>\
-      <li><b>Outline</b>: cards for the whole book; drag to reorder or move into folders, numbers rearranged automatically.</li>\
+      <li><b>Outline</b>: cards for the whole book; drag to reorder or move into folders, numbers auto-rearranged.</li>\
     </ul>\
     <h4>Writing aids</h4>\
     <ul>\
-      <li><b>Images</b>: paste/drop auto-saves to assets and inserts; syntax <code>![](path =600x400 center)</code>, width or height may be omitted; </li><li><b>Tables</b>: floating toolbar adds/removes rows &amp; columns;</li><li> <b>Palette</b>: pick a color and insert it; </li><li><b>Full-width space</b>: inserts a CJK space.</li>\
+      <li><b>Images</b>: paste/drop auto-saves to assets and inserts; syntax <code>![](path =600x400 center)</code>, width or height optional; </li><li><b>Tables</b>: floating bar adds/removes rows &amp; columns;</li><li> <b>Palette</b>: pick a color and insert it; </li><li><b>Full-width space</b>: inserts a CJK space.</li>\
       <li><b>◀/▶</b>: switch files in TOC order (drafts skipped); </li><li><b>Search</b>: full-text search, click a result to jump, Esc or ✕ clears.</li>\
-      <li><b>Replace</b>: single file or whole project md/txt (drafts need confirmation); a history version is archived before replacing.</li>\
-      <li><b>Comments</b>: <code>&lt;!--comments--&gt;</code> visible only while editing, hidden in Read/PDF/HTML export (kept in MD export).</li>\
-      <li><b>Merge</b>: Ctrl+click to select multiple files; content goes into the first, the rest are deleted; after multi-select, drag/delete/copy/hide work on the whole group.</li>\
-      <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original sorts first); taken names auto-skip with a confirmation; the tree supports drag-moving, drop on the project name = move to root.</li>\
+      <li><b>Replace</b>: one file or the whole project md/txt (drafts need confirmation); a history version is archived first.</li>\
+      <li><b>Comments</b>: <code>&lt;!--comments--&gt;</code> shown only while editing, hidden in Read/PDF/HTML export (kept in MD export).</li>\
+      <li><b>Merge</b>: Ctrl+click to select multiple files; content goes into the first, the rest deleted; after multi-select, drag/delete/copy/hide act on the whole group.</li>\
+      <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original first); taken names skip ahead after confirmation; drag in the tree, drop on the project name = move to root.</li>\
     </ul>\
     <h4>Output</h4>\
     <ul>\
-      <li><b>Export PDF</b>: click export in Read/Preview, choose "Save as PDF" in the print dialog.</li>\
+      <li><b>Export PDF</b>: export from Read/Preview, choose "Save as PDF" in the print dialog.</li>\
       <li><b>Export MD</b>: downloads one merged Markdown (dated name); convert to PDF in Typora.</li>\
-      <li><b>Export HTML</b>: single file with left TOC and custom styles (dated name), double-click to read in a browser.</li>\
+      <li><b>Export HTML</b>: one file with left TOC and custom styles (dated name), double-click to read in a browser.</li>\
     </ul>\
     <h4>Trash &amp; history</h4>\
     <ul>\
-      <li>Deleted/merged files go to <code>.trash</code> in the project, restorable or clearable;</li>\
+      <li>Deleted/merged files go to the project <code>.trash</code>, restorable or clearable;</li>\
       <li>Auto-save keeps old content in <code>.history</code> (mirrored by path), 20 versions per file, view &amp; restore;</li>\
       <li>Rename/move carries history along; restored name conflicts get a "(restore n)" suffix; bulk replace archives first.</li>\
-      <li>Moving to trash keeps history; only deleting for good / emptying trash clears history too—ordinary deletion is recoverable.</li>\
-      <li><code>.trash</code>/<code>.history</code> folders are hidden inside the tool.</li>\
+      <li>Moving to trash keeps history; only permanent delete / emptying the trash clears history too — ordinary deletion is recoverable.</li>\
+      <li><code>.trash</code>/<code>.history</code> folders are hidden in the tool.</li>\
       <li>Back up the whole project folder regularly.</li>\
     </ul>'
 };
@@ -2229,6 +2345,7 @@ function buildEditorMap() {
   if (lines.length > 5000) { edLineTops = null; return; }   // 超长文件回落比例同步
   if (!edMirror) {
     edMirror = document.createElement('div');
+    edMirror.id = 'edMirror';
     edMirror.setAttribute('aria-hidden', 'true');
     document.body.appendChild(edMirror);
   }
@@ -2379,9 +2496,9 @@ async function resolveImg(src, baseDirPath) {
 /* ================= 自定义CSS ================= */
 /* ================= style.css 分区管理 =================
    四个程序管理分区 + 自定义区：配色区/成书版式区/
-   页眉页脚区/缩放区。各操作只替换自己的分区，
+   页眉页脚区/缩放区/背景色区。各操作只替换自己的分区，
    分区外的规则程序永不改动。 */
-const SEC_COLOR = '配色区', SEC_THEME = '成书版式区', SEC_PAGE = '页眉页脚区', SEC_ZOOM = '缩放区';
+const SEC_COLOR = '配色区', SEC_THEME = '成书版式区', SEC_PAGE = '页眉页脚区', SEC_ZOOM = '缩放区', SEC_CANVAS = '背景色区';
 function secMark(label, end) { return '/* ═══ ' + label + (end ? ' END ═══ */' : ' START ═══ */'); }
 function buildSection(label, content) { return secMark(label) + '\n' + content.trim() + '\n' + secMark(label, true); }
 // 取分区内容；无 START 标记返回 null（视为纯自定义文件，程序不写入）
@@ -2473,17 +2590,26 @@ function colorSectionCss(p) {
   if (p.h) p.h.forEach((c, i) => { if (c) s += '  --md-h' + (i + 1) + '-color: ' + c + ';\n'; });
   return s + '}';
 }
+// 背景色区：预览/HTML 共用背景 + 编辑器画布背景（浅色专用，暗色主题回退 --bg / --panel）
+function canvasSectionCss(p) {
+  let s = ':root:not([data-theme="dark"]) {\n  /* 背景色：预览背景（预览/HTML 共用）与编辑器画布（暗色主题自动回退，未改时不声明） */\n';
+  if (p.canvas) s += '  --md-canvas-bg: ' + p.canvas + ';\n';
+  if (p.editor) s += '  --md-editor-bg: ' + p.editor + ';\n';
+  return s + '}';
+}
 function styleTemplate(theme) {
   const t = BOOK_THEMES[theme] ? theme : 'classic';
+  const themeBlock = buildSection(SEC_THEME, TOC_BASE_CSS + '\n' + themeSectionCss(t));
   return '/* ═══════════ txtBookWriteTool 项目样式 style.css ═══════════\n' +
     '   保存即生效；阅览、打印 PDF、导出 HTML 共用本文件。\n' +
     '   四个 ═══ 分区由程序管理（内置配色 / 成书版式 / 页眉页脚 / A+A- 缩放），\n' +
     '   分区内的参数可自由修改（程序更新时会被对应功能覆盖），\n' +
     '   分区外的规则程序永不改动。 */\n\n' +
     buildSection(SEC_COLOR, colorSectionCss(PRESETS[0])) + '\n\n' +
-    buildSection(SEC_THEME, TOC_BASE_CSS + '\n' + themeSectionCss(t)) + '\n\n' +
-    buildSection(SEC_PAGE, pageCssFor(t, bookTitle(), bookCfg.subtitle || '')) + '\n\n' +
+    themeBlock + '\n\n' +
+    buildSection(SEC_PAGE, pageCssFor(t, themeBlock)) + '\n\n' +
     buildSection(SEC_ZOOM, ':root { --md-zoom: 1; } /* A+ / A- 自动更新此值（相对版式正文字号的倍率） */') + '\n\n' +
+    buildSection(SEC_CANVAS, canvasSectionCss({})) + '\n\n' +
     '/* ═══════ 自定义区：程序永不修改，把你的规则写在这里 ═══════ */\n';
 }
 async function readStyleCssText() {
@@ -2617,6 +2743,15 @@ const STYLE_SPEC = {
       ['--toc-a-lh', E('条目行距'), '', 0.05],
     ],
   },
+
+  // ---------- 背景色（预览/导出 与 编辑器画布） ----------
+  canvas: {
+    // [字段key, 中文标签, CSS变量名, 默认回落的 CSS 变量名]
+    fields: [
+      ['canvas', E('预览背景'), '--md-canvas-bg', '--bg'],
+      ['editor', E('编辑器背景'), '--md-editor-bg', '--panel'],
+    ],
+  },
 };
 
 /* ---- 向后兼容：保留旧常量名指向 STYLE_SPEC 子表 ---- */
@@ -2626,12 +2761,14 @@ const STYLE_THEME_NUM_FIELDS = STYLE_SPEC.theme.numFields;
 const STYLE_COVER_NUM_FIELDS = STYLE_SPEC.cover.numFields;
 const STYLE_COVER_ENUM_FIELDS = STYLE_SPEC.cover.enumFields;
 const STYLE_TOC_NUM_FIELDS = STYLE_SPEC.toc.numFields;
+const STYLE_CANVAS_FIELDS = STYLE_SPEC.canvas.fields;
 let styleDlgSavedCss = null;   // 打开时磁盘上的 style.css（null=文件不存在）
 let styleDlgCss = null;        // 内存草稿，实时预览基于它
 let styleDlgName = E('自定义');   // 配色区注释里的配色名
 let styleDlgOrig = {};         // 打开时解析到的各颜色变量原值（text 兜底 / 空值还原）
 let styleDlgColorOk = false;   // 配色区是否存在（纯自定义文件时色板禁用）
 let styleDlgBasePreset = null; // 打开时配色区精确命中的内置预设（恢复默认的基础）；未命中=null=经典黑
+let styleDlgCanvasOrig = {};   // 打开时解析到的背景色变量原值
 let styleDlgThemeOk = false;   // 版式区是否存在
 let styleDlgBaseTheme = 'classic'; // 恢复默认的基础版式（精确匹配内置主题，否则回落 bookCfg.theme）
 let styleDlgAccepted = false;  // 本次打开是否点了保存（close 事件据此决定放弃还是提交）
@@ -2666,6 +2803,7 @@ async function openStyleDlg() {
   styleDlgCss = disk === null ? styleTemplate(bookCfg.theme) : disk;  // 无文件：用模板做草稿，保存时才真正创建
   styleDlgAccepted = false;
   buildStyleColorGrid();
+  buildStyleCanvasGrid();
   buildStyleThemeFields();
   refreshStyleZoomFromDraft();
   $('stlMsg').textContent = (disk === null ? E('项目中还没有 style.css，当前为默认样式预览；') : '')
@@ -2767,6 +2905,50 @@ function collectStyleColors() {
     if (key.startsWith('h')) obj.h[+key.slice(1)] = v; else obj[key] = v;
   }
   return obj;
+}
+// ---- 背景色字段 ----
+// 默认值=跟随主题色 --bg（用户未改时不声明 --md-canvas-bg，预览/HTML 回落 var(--bg)）
+function buildStyleCanvasGrid() {
+  const sec = getSection(styleDlgCss, SEC_CANVAS);
+  styleDlgCanvasOrig = {};
+  const grid = $('stlCanvasGrid');
+  grid.innerHTML = '';
+  if (sec !== null) {
+    for (const [key, , varName] of STYLE_CANVAS_FIELDS) {
+      const m = new RegExp(varName.replace(/[-]/g, '\\$&') + '\\s*:\\s*([^;]+);').exec(sec);
+      styleDlgCanvasOrig[key] = m ? m[1].trim() : null;
+    }
+  }
+  for (const [key, label, , defVar] of STYLE_CANVAS_FIELDS) {
+    let v = styleDlgCanvasOrig[key];
+    let state = 'custom';
+    const defHex = resolveVarHex(defVar) || '#f6f6f4';
+    // undefined/null = 未声明：显示默认回落色，未改动不落盘
+    if (v == null) { v = defHex; state = 'default'; }
+    if (!isHexColor(v)) v = defHex;   // 手改为非 hex（如 var(--bg)）时回落
+    const item = document.createElement('div');
+    item.className = 'stl-c-item';
+    const defTitle = E('默认');
+    const resetBtn = state === 'default'
+      ? '<button type="button" class="stl-c-reset is-default" data-k="' + key + '" data-grid="canvas" title="' + defTitle + '">' + E('默') + '</button>'
+      : '<button type="button" class="stl-c-reset" data-k="' + key + '" data-grid="canvas" title="' + E('恢复默认') + '">↺</button>';
+    item.innerHTML = '<input type="color" data-k="' + key + '" data-grid="canvas" data-state="' + state + '" value="' + hex6(v) + '" title="' + label + '">'
+      + resetBtn + '<span class="stl-c-lab">' + label + '</span>';
+    // 无背景色区也可编辑，保存时自动追加分区（不禁用）
+    grid.appendChild(item);
+  }
+}
+// 汇总背景色字段到 canvasSectionCss
+function collectStyleCanvas() {
+  const p = {};
+  for (const [key] of STYLE_CANVAS_FIELDS) {
+    const inp = $('stlCanvasGrid').querySelector('input[data-k="' + key + '"]');
+    if (inp.dataset.state === 'default') continue;   // 未覆盖：不声明变量，回落 --bg
+    let v = inp.value.trim();
+    if (!v) v = styleDlgCanvasOrig[key] || '#f6f6f4';
+    p[key] = v;
+  }
+  return p;
 }
 // ---- 成书版式字段 ----
 function buildStyleThemeFields() {
@@ -3004,6 +3186,39 @@ $('stlColorGrid').addEventListener('click', e => {
   styleDlgCss = upsertSection(styleDlgCss, SEC_COLOR, colorSectionCss(collectStyleColors()));
   styleDlgPreview();
 });
+// 背景色：input 触发草稿刷新；click 处理字段级恢复默认（默认=跟随主题色，不声明变量）
+$('stlCanvasGrid').addEventListener('input', e => {
+  const changed = e.target.closest && e.target.closest('input[data-state="default"]');
+  if (changed) {
+    changed.dataset.state = 'custom';
+    const btn = $('stlCanvasGrid').querySelector('button.stl-c-reset[data-k="' + changed.dataset.k + '"]');
+    if (btn) { btn.textContent = '↺'; btn.title = E('恢复默认'); btn.classList.remove('is-default'); }
+  }
+  styleDlgCss = upsertSection(styleDlgCss, SEC_CANVAS, canvasSectionCss(collectStyleCanvas()));
+  styleDlgPreview();
+});
+$('stlCanvasGrid').addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('button.stl-c-reset');
+  if (!btn || btn.disabled) return;
+  e.preventDefault();
+  const key = btn.dataset.k;
+  const inp = $('stlCanvasGrid').querySelector('input[data-k="' + key + '"]');
+  if (!inp || inp.dataset.state === 'default') return;
+  // 默认=不声明变量，回落各自默认色（预览 --bg / 编辑器 --panel）
+  const defVar = (STYLE_CANVAS_FIELDS.find(f => f[0] === key) || [])[3] || '--bg';
+  inp.dataset.state = 'default';
+  inp.value = resolveVarHex(defVar) || '#f6f6f4';   // 色块同步回默认色
+  btn.textContent = E('默');
+  btn.title = E('默认');
+  btn.classList.add('is-default');
+  styleDlgCss = upsertSection(styleDlgCss, SEC_CANVAS, canvasSectionCss(collectStyleCanvas()));
+  styleDlgPreview();
+});
+$('btnStlResetCanvas').onclick = () => {
+  styleDlgCss = removeSection(styleDlgCss, SEC_CANVAS);
+  buildStyleCanvasGrid();
+  styleDlgPreview();
+};
 function applyThemeDraft() {
   if (!styleDlgThemeOk) return;
   let sec = getSection(styleDlgCss, SEC_THEME);
@@ -3084,8 +3299,10 @@ $('stlZoom').addEventListener('change', () => {
 // 保存：草稿落盘（文件不存在时由此创建）
 $('stlSave').onclick = async () => {
   try {
-    await saveStyleCss(styleDlgCss);
-    syncPresetSel(styleDlgCss);
+    // 页眉页脚区的字体取正文字体（字面值），改字体后顺带重生成该分区
+    const css = upsertSection(styleDlgCss, SEC_PAGE, pageCssFor(bookCfg.theme, styleDlgCss));
+    await saveStyleCss(css);
+    syncPresetSel(css);
     await refreshTree();
     styleDlgAccepted = true;
     $('dlgStyle').close();
@@ -3221,24 +3438,28 @@ async function renderMerged() {
   const tocItems = [];
   // 目录由真实标题 h1-h4 生成；无标题文件仅作正文
   const headingEls = [];
+  const withBody = bookCfg.body !== false;   // 「成书部分」未勾选正文时只出封面/目录
   for (const f of files) {
     let text;
     try { text = (await (await f.handle.getFile()).text()).replace(/^\uFEFF/, ''); }
     catch (e) { text = E('> 读取失败: ') + e.message; }
-    if (idx > 0) {
-      const hr = document.createElement('hr'); hr.className = 'file-boundary';
-      hr.innerHTML = '<span>' + esc(f.path) + '</span>';
-      body.appendChild(hr);
-    }
     const sec = document.createElement('div'); sec.id = 'sec-' + idx;
     if (bookCfg.chapterBreak) sec.classList.add('book-chapter');
     sec.innerHTML = mdToHtml(text);
-    body.appendChild(sec);
+    if (withBody) {
+      if (idx > 0) {
+        const hr = document.createElement('hr'); hr.className = 'file-boundary';
+        hr.innerHTML = '<span>' + esc(f.path) + '</span>';
+        body.appendChild(hr);
+      }
+      body.appendChild(sec);
+      await fixImages(sec, parentPath(f.path));
+    }
+    // 标题仍解析（供目录页用），但正文不渲染时这些元素不入 DOM
     for (const h of sec.querySelectorAll('h1,h2,h3,h4')) {
       h.id = 'h-' + idx + '-' + headingEls.length;
       headingEls.push(h);
     }
-    await fixImages(sec, parentPath(f.path));
     idx++;
   }
   // 标题自动编号（PDF 与 HTML 共用）
@@ -3275,16 +3496,37 @@ async function renderMerged() {
 // 不用 .ini/.cfg/.local：Chromium Windows 划为 DANGEROUS，
 // File System Access API 报 "Name is not allowed." 拒绝写入。
 const BOOK_CFG_NAME = 'settings.json';
-const BOOK_DEFAULT_CFG = { theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, chapterBreak: true, headingNumber: false, indent: true };
+const BOOK_DEFAULT_CFG = {
+  theme: 'classic', title: '', subtitle: '', author: '', date: '', cover: true, toc: true, body: true,
+  chapterBreak: true, headingNumber: false, indent: true, pdfBg: '#ffffff',
+  // 页眉页脚：页码范围 + 四个元素（页码 / 页眉文本 / 页尾文本 / 导出日期），出现区域按封面/目录/正文
+  pageNum: 'body', pageNumPos: 'bottom-center',
+  hdrText: '', hdrAlign: 'center', hdrAreas: { cover: false, toc: false, body: true },
+  ftrText: '', ftrAlign: 'center', ftrAreas: { cover: false, toc: false, body: false },
+  dateText: '', datePos: 'top-right', dateAreas: { cover: false, toc: false, body: false }
+};
+// 旧字段（hdrBook/ftrDate/ftrPage/hfCover/hfToc/hfBody/noHfXxx）已被上面四个元素取代，读入时丢弃
+const HF_OLD_KEYS = ['hdrBook', 'ftrDate', 'ftrPage', 'hfCover', 'hfToc', 'hfBody', 'noHfCover', 'noHfToc'];
+function normalizeBookCfg(raw) {
+  const cfg = Object.assign({}, raw);
+  for (const k of HF_OLD_KEYS) delete cfg[k];
+  const out = Object.assign({}, BOOK_DEFAULT_CFG, cfg);
+  for (const k of ['hdrAreas', 'ftrAreas', 'dateAreas']) {
+    out[k] = Object.assign({ cover: false, toc: false, body: false }, BOOK_DEFAULT_CFG[k], cfg[k] || {});
+  }
+  return out;
+}
 let bookCfg = BOOK_DEFAULT_CFG;
-try { bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
+try { bookCfg = normalizeBookCfg(JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
+document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
 // 从项目根目录的 settings.json 读取成书设置
 async function loadBookCfgFile() {
   if (!rootHandle) return;
   try {
     const text = await (await (await rootHandle.getFileHandle(BOOK_CFG_NAME)).getFile()).text();
-    bookCfg = Object.assign({}, BOOK_DEFAULT_CFG, JSON.parse(text));
+    bookCfg = normalizeBookCfg(JSON.parse(text));
     localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
+    document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
   } catch (e) { /* 无 settings.json：沿用 localStorage / 默认值 */ }
 }
 // 保存成书设置：localStorage + 项目根 settings.json
@@ -3312,11 +3554,8 @@ async function saveBookCfg() {
   }
 }
 function bookDate() {
-  const d = new Date();
-  const fmt = (y, m, day) => y + E(' 年 ') + m + E(' 月 ') + day + E(' 日');
-  if (!bookCfg.date) return fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
-  const mt = bookCfg.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  return mt ? fmt(+mt[1], +mt[2], +mt[3]) : bookCfg.date;
+  // 成书日期为自由文本：留空则不显示日期
+  return cnDate(bookCfg.date);
 }
 function bookTitle() { return (bookCfg.title || '').trim() || (rootHandle ? rootHandle.name : E('未命名作品')); }
 function cssStr(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, ' '); }
@@ -3333,8 +3572,9 @@ function renderBookFront(body, tocItems) {
     let html = '<div class="bc-title">' + esc(bookTitle()) + '</div>';
     if (bookCfg.subtitle.trim()) html += '<div class="bc-sub">' + esc(bookCfg.subtitle.trim()) + '</div>';
     const metaParts = [];
-    if (bookCfg.author.trim()) metaParts.push(esc(bookCfg.author.trim()) + E(' 著'));
-    metaParts.push(esc(bookDate()));
+    const bd = bookDate();
+    if (bookCfg.author.trim()) metaParts.push(esc(bookCfg.author.trim()));
+    if (bd) metaParts.push(esc(bd));   // 日期留空则整行不显示
     html += '<div class="bc-meta">' + metaParts.join('<br>') + '</div>';
     c.innerHTML = html;
     front.appendChild(c);
@@ -3356,120 +3596,91 @@ function renderBookFront(body, tocItems) {
   }
   body.insertBefore(front, body.firstChild);
 }
-// @page：页眉页脚随版式设置变化（Chrome 131+）
-// 多行缩进，便于手改
-function pageCssFor(theme, title, sub) {
-  const t = cssStr(title), s = cssStr(sub);
+/* @page 页眉页脚（Chrome 131+ 支持边距框）
+   三个页面组（封面 cover / 目录 tocpage / 正文 默认页）× 四个元素（页码 / 页眉文本 / 页尾文本 / 导出日期）
+   页码用自定义计数器 pg：只在显示页码的页面组递增 → 编号范围之前的页面不占号
+   （page 计数器由分页引擎自增，元素上的 counter-reset 无效，@page 内的才生效）
+   同一位置有两项内容时用 \A + white-space: pre-line 上下两行显示 */
+const HF_BOXES = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+const HF_AREA_RANK = { cover: 0, toc: 1, body: 2 };
+// 标签页与页码显示位置 → 边距框名（radio 的 value 与后缀一致）
+function hfMarginCss(theme) {
+  if (theme === 'modern') return { top: 20, right: 18, bottom: 18, left: 18 };
+  if (theme === 'academic') return { top: 25, right: 24, bottom: 23, left: 24 };
+  return { top: 24, right: 22, bottom: 22, left: 22 };   // classic（phone 打印沿用）
+}
+// 页面组 → { 边距框名: [内容片段] }，顺序即上下两行时的先后
+function hfBoxesFor(area, showNum) {
+  const boxes = {};
+  const put = (box, item) => { (boxes[box] = boxes[box] || []).push(item); };
+  const hdrText = (bookCfg.hdrText || '').trim() || bookTitle();
+  const ftrText = (bookCfg.ftrText || '').trim();
+  if (bookCfg.hdrAreas[area]) put('top-' + (bookCfg.hdrAlign || 'center'), { text: hdrText });
+  if (bookCfg.ftrAreas[area] && ftrText) put('bottom-' + (bookCfg.ftrAlign || 'center'), { text: ftrText });
+  if (bookCfg.dateAreas[area]) put(bookCfg.datePos || 'top-right', { text: hfDateText() });
+  if (showNum) put(bookCfg.pageNumPos || 'bottom-center', { counter: true });
+  return boxes;
+}
+// 页眉页脚/页码字体 = 正文字体。@page 边距框只继承 :root，而版式区把 --md-font-body 定义在 body 上，
+// 所以取版式区里的字面值写死（改字体后由样式设置/排版设置重写本分区），未声明时用 :root 当前值
+function hfFontStack(css) {
+  const sec = css ? getSection(css, SEC_THEME) : null;
+  const m = sec ? /--md-font-body:\s*([^;]+);/.exec(sec) : null;
+  const v = ((m && m[1]) || getComputedStyle(document.documentElement).getPropertyValue('--md-font-body') || '').trim();
+  return v || 'Georgia, "Noto Serif SC", SimSun, serif';
+}
+function hfBoxesCss(boxes, fontStack) {
+  let s = '';
+  for (const box of HF_BOXES) {
+    const items = boxes[box];
+    if (!items) continue;
+    const hasText = items.some(i => !i.counter);   // 同框混排时按文本样式（含页码）
+    const content = items.map(i => (i.counter ? 'counter(pg)' : '"' + cssStr(i.text) + '"')).join(' "\\A " ');
+    s += '  @' + box + ' { content: ' + content + '; font: ' + (hasText ? '9pt' : '10pt') + ' ' + fontStack + '; color: ' + (hasText ? '#888' : '#555') + ';';
+    if (items.length > 1) s += ' white-space: pre-line;';
+    s += ' }\n';
+  }
+  return s;
+}
+// 留空用今天；YYYY-MM-DD 转「2026 年 9 月 24 日」，其余原样
+function cnDate(v0) {
+  const v = (v0 || '').trim();
+  if (!v) return '';
+  const mt = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return mt ? mt[1] + E(' 年 ') + (+mt[2]) + E(' 月 ') + (+mt[3]) + E(' 日') : v;
+}
+function todayStr() {
   const d = new Date();
-  const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  let main, cover, toc;
-  if (theme === 'modern') {
-    main =
-`@page {
-  size: A4;
-  margin: 20mm 18mm 18mm;
-  @top-left {
-    content: "${t}";
-    font: 8.5pt "Microsoft YaHei", sans-serif;
-    color: #999;
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function hfDateText() { return cnDate((bookCfg.dateText || '').trim() || todayStr()); }
+function pageCssFor(theme, css) {
+  const m = hfMarginCss(theme);
+  const hfFont = hfFontStack(css);
+  const main = '@page {\n  size: A4;\n  margin: ' + m.top + 'mm ' + m.right + 'mm ' + m.bottom + 'mm ' + m.left + 'mm;\n}\n';
+  const cover = '@page cover {\n  margin: 0;\n}\n';   // 封面满版；要画页眉页脚时下面再改回带边距
+  const toc = '@page tocpage {\n}\n';
+  const rangeRank = { none: 99, cover: 0, toc: 1, body: 2 }[bookCfg.pageNum];
+  const rank = rangeRank === undefined ? HF_AREA_RANK.body : rangeRank;
+  const noneAll =
+    '  @top-left { content: none; }\n  @top-center { content: none; }\n  @top-right { content: none; }\n' +
+    '  @bottom-left { content: none; }\n  @bottom-center { content: none; }\n  @bottom-right { content: none; }\n';
+  let extra = '';
+  const groupCss = (sel, area) => {
+    const on = HF_AREA_RANK[area] >= rank;   // 该页面组是否显示页码
+    let s = '@page ' + (sel ? sel + ' ' : '') + '{\n';
+    if (bookCfg.pageNum !== 'none') s += '  counter-increment: pg ' + (on ? 1 : 0) + ';\n';
+    return s + noneAll + hfBoxesCss(hfBoxesFor(area, on), hfFont) + '}\n';
+  };
+  extra += groupCss('cover', 'cover');
+  extra += groupCss('tocpage', 'toc');
+  extra += groupCss('', 'body');
+  // 封面页原本满版（margin: 0），要画页眉页脚就得改回带边距，并压缩封面高度避免溢出到第二页
+  if (Object.keys(hfBoxesFor('cover', HF_AREA_RANK.cover >= rank)).length) {
+    extra += '@page cover { margin: ' + m.top + 'mm ' + m.right + 'mm ' + m.bottom + 'mm ' + m.left + 'mm; }\n';
+    extra += '@media print { .book-cover { min-height: calc(297mm - ' + (m.top + m.bottom) + 'mm - 2mm); } }\n';
   }
-  @top-right {
-    content: "${date}";
-    font: 8.5pt "Microsoft YaHei", sans-serif;
-    color: #999;
-  }
-  @bottom-right {
-    content: counter(page);
-    font: 9pt "Microsoft YaHei", sans-serif;
-    color: #666;
-  }
-}`;
-    cover =
-`@page cover {
-  margin: 0;
-  @top-left { content: none; }
-  @top-right { content: none; }
-  @bottom-right { content: none; }
-}`;
-    toc =
-`@page tocpage {
-  @top-left { content: none; }
-  @top-right { content: none; }
-}`;
-  } else if (theme === 'academic') {
-    const topRight = s
-      ? `  @top-right {\n    content: "${s}";\n    font: 8.5pt SimSun, serif;\n    color: #666;\n  }\n`
-      : '';
-    main =
-`@page {
-  size: A4;
-  margin: 25mm 24mm 23mm;
-  @top-left {
-    content: "${t}";
-    font: 8.5pt SimSun, serif;
-    color: #666;
-  }
-${topRight}  @bottom-left {
-    content: "${date}";
-    font: 9pt SimSun, serif;
-    color: #444;
-  }
-  @bottom-center {
-    content: "${E('第 ')}" counter(page) "${E(' 页')}";
-    font: 9pt SimSun, serif;
-    color: #444;
-  }
-}`;
-    cover =
-`@page cover {
-  margin: 0;
-  @top-left { content: none; }
-  @top-right { content: none; }
-  @bottom-left { content: none; }
-  @bottom-center { content: none; }
-}`;
-    toc =
-`@page tocpage {
-  @top-left { content: none; }
-  @top-right { content: none; }
-  @bottom-left { content: none; }
-}`;
-  } else {
-    // classic（默认；phone 屏幕主题打印时沿用）
-    main =
-`@page {
-  size: A4;
-  margin: 24mm 22mm 22mm;
-  @top-center {
-    content: "${t}";
-    font: 9pt Georgia, "Noto Serif SC", SimSun, serif;
-    color: #777;
-    letter-spacing: .2em;
-  }
-  @bottom-left {
-    content: "${date}";
-    font: 9pt Georgia, "Noto Serif SC", SimSun, serif;
-    color: #777;
-  }
-  @bottom-center {
-    content: counter(page);
-    font: 10pt Georgia, serif;
-    color: #444;
-  }
-}`;
-    cover =
-`@page cover {
-  margin: 0;
-  @top-center { content: none; }
-  @bottom-left { content: none; }
-  @bottom-center { content: none; }
-}`;
-    toc =
-`@page tocpage {
-  @top-center { content: none; }
-}`;
-  }
-  return [main, cover, toc].join('\n');
+  return main + cover + toc + extra;
 }
 function applyBookTheme() {
   document.body.dataset.bookTheme = bookCfg.theme;
@@ -3489,7 +3700,7 @@ function serializeStyle(el) {
   return el.textContent || '';
 }
 const EXPORT_SHELL_CSS = `
-body{margin:0;background:#fbfaf7;}
+body{margin:0;background:var(--md-canvas-bg, var(--bg));}
 .wrap{display:flex;align-items:flex-start;gap:40px;max-width:1080px;margin:0 auto;padding:56px 40px 120px 32px;}
 .book{flex:1;min-width:0;max-width:760px;}
 /* 副标题字号引用内容变量 */
@@ -3506,8 +3717,8 @@ body[data-book-theme=...] .book-toc a 规则按特异性覆盖，倍率不生效
 #toTop{position:fixed;right:26px;bottom:30px;width:40px;height:40px;border:none;border-radius:50%;background:var(--md-accent);color:#fff;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toTop.show{opacity:.85;pointer-events:auto}#toTop:hover{opacity:1}
 @media (max-width:900px){.wrap{display:block;padding:30px 24px 80px}.book{max-width:none}.toc.book-toc{position:static;width:auto;margin-bottom:30px;max-height:none}}
-@media print{#toTop{display:none}.toc.book-toc{display:none!important}.book-toc{border-bottom:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}.book-title{margin-top:0!important;padding-top:60mm;padding-bottom:120mm;font-size:44px!important;}}   /* book-title 用 padding 下移至页面上中部（margin 会被打印分页截断，40mm 可调） */
-@page{size:A4;margin:24mm 20mm 22mm}
+@media print{#toTop{display:none}.toc.book-toc{display:none!important}.book-toc{border-bottom:none!important}.wrap{display:block;max-width:none;padding:0}.book{max-width:100%}.book-title{margin-top:0!important;padding-top:60mm;padding-bottom:120mm;font-size:44px!important;}html{background:var(--md-canvas-bg, var(--bg))!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}body{background:transparent!important;}}   /* book-title 用 padding 下移至页面上中部（margin 会被打印分页截断，40mm 可调） */
+@page{size:A4;margin:24mm 20mm 22mm;background:var(--md-canvas-bg, var(--bg))}
 `;
 async function exportMerged(single) {
   if (!rootHandle) return;
@@ -3536,8 +3747,9 @@ async function exportMerged(single) {
     const metaEl = document.createElement('div');
     metaEl.className = 'exp-meta';
     let metaHtml = '';
-    if (bookCfg.author.trim()) metaHtml += '<div class="exp-author">' + esc(bookCfg.author.trim()) + E(' 著</div>');
-    metaHtml += '<div class="exp-date">' + esc(bookDate()) + '</div>';
+    const bd = bookDate();
+    if (bookCfg.author.trim()) metaHtml += '<div class="exp-author">' + esc(bookCfg.author.trim()) + '</div>';
+    if (bd) metaHtml += '<div class="exp-date">' + esc(bd) + '</div>';   // 日期留空则整行不显示
     metaEl.innerHTML = metaHtml;
     btEl.after(metaEl);
     if (bookCfg.subtitle.trim()) {
@@ -5568,22 +5780,45 @@ $('btnExportPdf').onclick = async () => {
 $('btnExportHtml').onclick = () => exportMerged(mode === 'preview');
 
 /* ---------- 成书设置 ---------- */
-function todayInput() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
 function openBookDlg() {
   // 书名默认空（留空则用文件夹名），不预填
   $('bkTitle').value = bookCfg.title || '';
   $('bkSub').value = bookCfg.subtitle;
   $('bkAuthor').value = bookCfg.author;
-  $('bkDate').value = bookCfg.date || todayInput();
+  $('bkDate').value = bookCfg.date || '';
   $('bkCover').checked = bookCfg.cover;
   $('bkToc').checked = bookCfg.toc;
+  $('bkBody').checked = bookCfg.body !== false;
   $('bkBreak').checked = bookCfg.chapterBreak;
   $('bkNumber').checked = !!bookCfg.headingNumber;
   $('bkIndent').checked = bookCfg.indent !== false;
+  $('bkPdfBg').value = bookCfg.pdfBg || '#ffffff';
+  // 页眉页脚：单选用 name 分组，setRadio/getRadio 按 value 读写
+  setRadio('pgRange', bookCfg.pageNum || 'body');
+  setRadio('pgPos', bookCfg.pageNumPos || 'bottom-center');
+  $('bpHdrText').value = bookCfg.hdrText || '';
+  setRadio('hdrAlign', bookCfg.hdrAlign || 'center');
+  $('bpHdrCover').checked = !!bookCfg.hdrAreas.cover;
+  $('bpHdrToc').checked = !!bookCfg.hdrAreas.toc;
+  $('bpHdrBody').checked = !!bookCfg.hdrAreas.body;
+  $('bpFtrText').value = bookCfg.ftrText || '';
+  setRadio('ftrAlign', bookCfg.ftrAlign || 'center');
+  $('bpFtrCover').checked = !!bookCfg.ftrAreas.cover;
+  $('bpFtrToc').checked = !!bookCfg.ftrAreas.toc;
+  $('bpFtrBody').checked = !!bookCfg.ftrAreas.body;
+  $('bpDateText').value = bookCfg.dateText || todayStr();   // 默认今天
+  setRadio('datePos', bookCfg.datePos || 'top-right');
+  $('bpDateCover').checked = !!bookCfg.dateAreas.cover;
+  $('bpDateToc').checked = !!bookCfg.dateAreas.toc;
+  $('bpDateBody').checked = !!bookCfg.dateAreas.body;
   $('dlgBook').showModal();
+}
+function setRadio(name, val) {
+  document.querySelectorAll('input[name="' + name + '"]').forEach(r => { r.checked = r.value === val; });
+}
+function getRadio(name) {
+  const el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : '';
 }
 async function readBookDlg() {
   // 空值由 bookTitle() 渲染/导出时回落文件夹名
@@ -5593,9 +5828,23 @@ async function readBookDlg() {
   bookCfg.date = $('bkDate').value || '';
   bookCfg.cover = $('bkCover').checked;
   bookCfg.toc = $('bkToc').checked;
+  bookCfg.body = $('bkBody').checked;
   bookCfg.chapterBreak = $('bkBreak').checked;
   bookCfg.headingNumber = $('bkNumber').checked;
   bookCfg.indent = $('bkIndent').checked;
+  bookCfg.pdfBg = $('bkPdfBg').value || '#ffffff';
+  document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg);
+  bookCfg.pageNum = getRadio('pgRange') || 'body';
+  bookCfg.pageNumPos = getRadio('pgPos') || 'bottom-center';
+  bookCfg.hdrText = $('bpHdrText').value.trim();
+  bookCfg.hdrAlign = getRadio('hdrAlign') || 'center';
+  bookCfg.hdrAreas = { cover: $('bpHdrCover').checked, toc: $('bpHdrToc').checked, body: $('bpHdrBody').checked };
+  bookCfg.ftrText = $('bpFtrText').value.trim();
+  bookCfg.ftrAlign = getRadio('ftrAlign') || 'center';
+  bookCfg.ftrAreas = { cover: $('bpFtrCover').checked, toc: $('bpFtrToc').checked, body: $('bpFtrBody').checked };
+  bookCfg.dateText = $('bpDateText').value.trim();
+  bookCfg.datePos = getRadio('datePos') || 'top-right';
+  bookCfg.dateAreas = { cover: $('bpDateCover').checked, toc: $('bpDateToc').checked, body: $('bpDateBody').checked };
   await saveBookCfg();
 }
 async function applyBookCfgAndRender() {
@@ -5616,7 +5865,7 @@ async function syncStyleSections(updateTheme) {
   const created = css === null;
   if (created) css = styleTemplate(bookCfg.theme);
   else if (updateTheme) css = upsertSection(css, SEC_THEME, themeSectionCss(bookCfg.theme));
-  css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, bookTitle(), bookCfg.subtitle || ''));
+  css = upsertSection(css, SEC_PAGE, pageCssFor(bookCfg.theme, css));
   await saveStyleCss(css);
   syncPresetSel(css);
   syncThemeSel(css);
@@ -5650,17 +5899,26 @@ $('bookThemeSel').onchange = async () => {
   await applyBookCfgAndRender();
 };
 $('bkCancel').onclick = () => $('dlgBook').close();
-// 恢复默认：书名作者空、日期今天，封面目录分页开，编号关缩进开
+$('bkPdfBgReset').onclick = () => { $('bkPdfBg').value = '#ffffff'; };
+// 恢复默认：书名作者日期空，封面目录正文分页开，编号关缩进开，页眉页脚见 BOOK_DEFAULT_CFG
 $('bkReset').onclick = () => {
   $('bkTitle').value = ''; $('bkSub').value = ''; $('bkAuthor').value = '';
-  $('bkDate').value = todayInput();
-  $('bkCover').checked = true; $('bkToc').checked = true; $('bkBreak').checked = true;
+  $('bkDate').value = '';
+  $('bkCover').checked = true; $('bkToc').checked = true; $('bkBody').checked = true; $('bkBreak').checked = true;
   $('bkNumber').checked = false; $('bkIndent').checked = true;
+  $('bkPdfBg').value = '#ffffff';
+  setRadio('pgRange', 'body'); setRadio('pgPos', 'bottom-center');
+  $('bpHdrText').value = ''; setRadio('hdrAlign', 'center');
+  $('bpHdrCover').checked = false; $('bpHdrToc').checked = false; $('bpHdrBody').checked = true;
+  $('bpFtrText').value = ''; setRadio('ftrAlign', 'center');
+  $('bpFtrCover').checked = false; $('bpFtrToc').checked = false; $('bpFtrBody').checked = false;
+  $('bpDateText').value = todayStr(); setRadio('datePos', 'top-right');
+  $('bpDateCover').checked = false; $('bpDateToc').checked = false; $('bpDateBody').checked = false;
 };
 $('bkSave').onclick = async () => {
   await readBookDlg();
   $('dlgBook').close();
-  try { await syncStyleSections(false); } catch (e) {}   // 书名/副标题/日期进 @page 页眉页脚；版式区不动
+  try { await syncStyleSections(false); } catch (e) {}   // 页眉页脚/页码写进 style.css 的页眉页脚区；版式区不动
   await refreshTree();
   await applyBookCfgAndRender();
   toast(E('成书设置已保存'));
