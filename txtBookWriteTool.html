@@ -600,6 +600,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   background: var(--panel); cursor: pointer;
 }
 .recent-card:hover { border-color: var(--accent); }
+.recent-card:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 1px; border-color: var(--accent); }
 .recent-card.pinned { border-color: #e0526b; background: color-mix(in srgb, #e0526b 6%, var(--panel)); }
 .recent-card .rc-name {
   font-size: 13.5px; line-height: 1.35; word-break: break-all;
@@ -692,13 +693,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 <header id="topbar">
  <div class="tb-row tb-row1">
   <div class="tb-scroll">
-  <button id="btnOpen" data-i18n data-i18n-title title="打开文件夹（先显示最近项目）">打开文件夹</button>
+  <button id="btnOpen" data-i18n data-i18n-title title="打开文件夹（先显示最近项目，Alt+O）">打开文件夹</button>
   <button id="btnReconnect" class="hidden" data-i18n data-i18n-title title="继续上次打开的文件夹（浏览器首次会弹一次授权框，选「每次访问都允许」后不再询问）">继续上次</button>
   <span class="sep"></span>
-  <button id="btnNewTxt" class="primary" disabled data-i18n data-i18n-title title="新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10">新建txt</button>
+  <button id="btnNewTxt" class="primary" disabled data-i18n data-i18n-title title="新建 .txt 文件（按 Markdown 解析，自动编号，每次数值 +10；Alt+N）">新建txt</button>
   <button id="btnNewMd" disabled data-i18n data-i18n-title title="新建 .md 文件，自动编号 +10">新建md</button>
   <button id="btnNewDir" disabled data-i18n>新建文件夹</button>
-  <button id="btnRename" disabled data-i18n>重命名</button>
+  <button id="btnRename" disabled data-i18n data-i18n-title title="重命名（F2）">重命名</button>
   <button id="btnAutoName" disabled data-i18n data-i18n-title title="按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）">自动文件名</button>
   <button id="btnRenumber" disabled data-i18n data-i18n-title title="统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）">重新编号</button>
   <span class="sep"></span>
@@ -722,25 +723,25 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
  </div>
  <div class="tb-row tb-row2">
    <div class="tabs">
-     <button data-mode="edit" class="active" disabled data-i18n>编辑</button>
-     <button data-mode="preview" disabled data-i18n>预览</button>     
-     <button data-mode="outline" disabled data-i18n>大纲</button>
-     <button data-mode="read" disabled data-i18n>阅览</button>
+     <button data-mode="edit" class="active" disabled data-i18n data-i18n-title title="编辑模式（Alt+1）">编辑</button>
+     <button data-mode="preview" disabled data-i18n data-i18n-title title="预览模式（Alt+2）">预览</button>
+     <button data-mode="outline" disabled data-i18n data-i18n-title title="大纲模式（Alt+3）">大纲</button>
+     <button data-mode="read" disabled data-i18n data-i18n-title title="阅览模式（Alt+4）">阅览</button>
    </div>
    <button id="btnRefresh" disabled data-i18n-title title="刷新">↻</button>
    <span class="sep"></span>
-   <button id="btnPrev" disabled data-i18n-title title="上一个文件">◀</button>
-   <button id="btnNext" disabled data-i18n-title title="下一个文件">▶</button>
+   <button id="btnPrev" disabled data-i18n-title title="上一个文件（Ctrl+Alt+←）">◀</button>
+   <button id="btnNext" disabled data-i18n-title title="下一个文件（Ctrl+Alt+→）">▶</button>
    <span class="sep"></span>
    <!-- 编辑模式：编辑工具组 -->
    <div class="mode-edit">
     <!-- 标题 H1-H6 -->
-     <button class="ic tb-h needs-file md-h" data-h="1" disabled data-i18n-title title="一级标题（再点取消）">H1</button>
-     <button class="ic tb-h needs-file md-h" data-h="2" disabled data-i18n-title title="二级标题（再点取消）">H2</button>
-     <button class="ic tb-h needs-file md-h" data-h="3" disabled data-i18n-title title="三级标题（再点取消）">H3</button>
-     <button class="ic tb-h needs-file md-h" data-h="4" disabled data-i18n-title title="四级标题（再点取消）">H4</button>
-     <button class="ic tb-h needs-file md-h" data-h="5" disabled data-i18n-title title="五级标题（再点取消）">H5</button>
-     <button class="ic tb-h needs-file md-h" data-h="6" disabled data-i18n-title title="六级标题（再点取消）">H6</button>
+     <button class="ic tb-h needs-file md-h" data-h="1" disabled data-i18n-title title="一级标题（再点取消，Ctrl+Shift+1）">H1</button>
+     <button class="ic tb-h needs-file md-h" data-h="2" disabled data-i18n-title title="二级标题（再点取消，Ctrl+Shift+2）">H2</button>
+     <button class="ic tb-h needs-file md-h" data-h="3" disabled data-i18n-title title="三级标题（再点取消，Ctrl+Shift+3）">H3</button>
+     <button class="ic tb-h needs-file md-h" data-h="4" disabled data-i18n-title title="四级标题（再点取消，Ctrl+Shift+4）">H4</button>
+     <button class="ic tb-h needs-file md-h" data-h="5" disabled data-i18n-title title="五级标题（再点取消，Ctrl+Shift+5）">H5</button>
+     <button class="ic tb-h needs-file md-h" data-h="6" disabled data-i18n-title title="六级标题（再点取消，Ctrl+Shift+6）">H6</button>
      <span class="sep"></span>
      <!-- 行内格式：粗体/删除线/斜体/引用/大小写 -->
      <button id="btnMdBold" class="ic tb-glyph needs-file" disabled data-i18n-title title="粗体（Ctrl+B）">B</button>
@@ -758,7 +759,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnMdOl" class="ic needs-file" disabled data-i18n-title title="有序列表（再点取消）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7.5M7 8h7.5M7 13h7.5"/><text x="0.2" y="5" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">1</text><text x="0.2" y="10" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">2</text><text x="0.2" y="15" font-size="5.6" font-weight="700" font-family="Consolas,monospace" fill="currentColor" stroke="none">3</text></svg>
      </button>
-     <button id="btnMdTask" class="ic needs-file" disabled data-i18n-title title="任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换">
+     <button id="btnMdTask" class="ic needs-file" disabled data-i18n-title title="任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换（Alt+X）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.1" y="2.1" width="11.8" height="11.8" rx="2.2"/><polyline points="5,8.3 7.1,10.4 11,5.7"/></svg>
      </button>
      
@@ -770,10 +771,10 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      <button id="btnFullSpace" class="ic needs-file" disabled data-i18n-title title="插入中文全角空格，用于中文排版">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6v5.8c0 .9.7 1.6 1.6 1.6h6c.9 0 1.6-.7 1.6-1.6V2.6"/></svg>
      </button>
-     <button id="btnInsertComment" class="ic needs-file" disabled data-i18n-title title="HTML 注释：选中则包成 &lt;!--注释--&gt;，未选中则插入模板；仅写作时可见，阅览导出不显示">
+     <button id="btnInsertComment" class="ic needs-file" disabled data-i18n-title title="HTML 注释：选中则包成 &lt;!--注释--&gt;，未选中则插入模板；仅写作时可见，阅览导出不显示（Alt+C）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 2.5h10.4c.7 0 1.3.6 1.3 1.3v5.9c0 .7-.6 1.3-1.3 1.3H5.8l-2.8 2.3v-2.3H2.8c-.7 0-1.3-.6-1.3-1.3V3.8c0-.7.6-1.3 1.3-1.3z"/><path d="M8 4.9v3.1"/><circle cx="8" cy="9.4" r="0.55" fill="currentColor" stroke="none"/></svg>
      </button>
-     <button id="btnMdDate" class="ic needs-file" disabled data-i18n-title title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六">
+     <button id="btnMdDate" class="ic needs-file" disabled data-i18n-title title="插入当前日期时间（含星期），如 2026-09-19 23:45 星期六（Alt+T）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></svg>
      </button>
      <span class="sep"></span>
@@ -781,7 +782,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 4.4C2 4.8 1.4 5.8 1.4 7v3.4h3.2V7.4H3c0-1 .6-1.6 1.5-1.8L3.2 4.4z" fill="currentColor" stroke="none"/><path d="M9.4 4.4c-1.2.4-1.8 1.4-1.8 2.6v3.4h3.2V7.4H9.2c0-1 .6-1.6 1.5-1.8L9.4 4.4z" fill="currentColor" stroke="none"/></svg>
      </button>
      <button id="btnMdCode" class="ic tb-code needs-file" disabled data-i18n-title title="行内代码">&lt;/&gt;</button>
-     <button id="btnMdCodeBlock" class="ic needs-file" disabled data-i18n-title title="代码块（选中多行后点击可包裹）">
+     <button id="btnMdCodeBlock" class="ic needs-file" disabled data-i18n-title title="代码块（选中多行后点击可包裹；Ctrl+Shift+`）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.2,4 1.8,8 5.2,12"/><polyline points="10.8,4 14.2,8 10.8,12"/><path d="M3 14.3h10"/></svg>
      </button>
      <button id="btnPalette" class="ic needs-file" disabled data-i18n-title title="调色盘：选择颜色，确认后把色值插入光标处">
@@ -789,7 +790,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
      </button>
      <span class="sep"></span>
      <!-- 链接/锚点/图片/代码/表格/日期 -->
-     <button id="btnMdLink" class="ic needs-file" disabled data-i18n-title title="插入链接（选中网址可直接包裹）">
+     <button id="btnMdLink" class="ic needs-file" disabled data-i18n-title title="插入链接（选中网址可直接包裹；Ctrl+K）">
        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 9.2a3 3 0 0 0 4.3.4l1.9-1.9a3 3 0 0 0-4.3-4.3L7.6 4.5"/><path d="M9.2 6.8a3 3 0 0 0-4.3-.4L3 8.3a3 3 0 0 0 4.3 4.3l1.1-1.1"/></svg>
      </button>
      <button id="btnMdAnchor" class="ic needs-file" disabled data-i18n-title title="插入锚点（页内跳转标记 &lt;a id=&quot;name&quot;&gt;）">
@@ -847,7 +848,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <div id="projName"></div>
       <button id="sideCollapseBtn" data-i18n-title title="折叠文件目录（腾出编辑空间）" aria-label="折叠文件目录">‹</button>
     </div>
-    <div id="searchBar"><input id="searchInput" data-i18n-ph placeholder="搜索文件内容…" data-i18n-title title="在项目全部文件中搜索，Enter 搜索"><button id="btnSearch" data-i18n-title title="搜索">🔍</button><button id="btnClearSearch" data-i18n-title title="清空搜索，恢复目录显示">✕</button></div>
+    <div id="searchBar"><input id="searchInput" data-i18n-ph placeholder="搜索文件内容…" data-i18n-title title="在项目全部文件中搜索，Enter 搜索（Ctrl+F）"><button id="btnSearch" data-i18n-title title="搜索（Ctrl+F）">🔍</button><button id="btnClearSearch" data-i18n-title title="清空搜索，恢复目录显示">✕</button></div>
     <div id="tree"></div>
     <div id="searchResults" class="hidden"></div>
   </aside>
@@ -1042,6 +1043,13 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏按组操作。</li>
       <li><b>拆分</b>：按光标/标题/关键词拆分，原文件存前半并保留原名，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（原文件排前）；目标名被占用时编号自动顺延、确认后创建；勾选「将文件移动到同名文件夹后再拆分」会先建与文件同名（不含扩展名）的文件夹并移入原文件，拆分产物全部集中其中；目录树可拖动，拖到项目名=移到根目录。</li>
     </ul>
+    <h4>快捷键</h4>
+    <ul>
+      <li><b>文字格式</b>：<code>Ctrl+B</code> / <code>Ctrl+I</code> 粗体/斜体；<code>Ctrl+K</code> 插入链接；<code>Alt+C</code> 当前行加/去注释；<code>Alt+T</code> 插入当前日期时间；<code>Ctrl+Shift+K</code> 删除当前行；<code>Ctrl+J</code> 当前行与下一行合并（中文之间不加空格）。</li>
+      <li><b>标题与列表</b>：<code>Ctrl+Shift+1~6</code> 设为 H1~H6（再按取消）；<code>Ctrl+[</code> / <code>Ctrl+]</code> 列表行减少/增加缩进；<code>Alt+X</code> 任务待办切换；<code>Ctrl+Shift+`</code> 插入代码块围栏；<code>Enter</code> 自动续接列表；<code>Tab</code> 插入两个空格。</li>
+      <li><b>移动行块</b>：<code>Alt+↑</code> / <code>Alt+↓</code> 上移/下移当前行；<code>Alt+Shift+↓</code> 向下复制当前行。</li>
+      <li><b>文件与模式</b>：<code>Ctrl+S</code> 立即保存；<code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> 按目录顺序切下/上一个文件；<code>Alt+1~4</code> 依次为编辑/预览/大纲/阅览；<code>F2</code> 重命名当前文件；<code>Alt+N</code> 新建 txt；<code>Alt+O</code> 打开文件夹；<code>Ctrl+F</code> 聚焦搜索框。</li>
+    </ul>
     <h4>输出</h4>
     <ul>
       <li><b>导出 PDF</b>：阅览预览后点导出，打印目标选「另存为 PDF」。</li>
@@ -1073,7 +1081,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </dialog>
 <div id="recentPop" class="hidden">
   <h3 data-i18n>最近项目</h3>
-  <div style="font-size:12.5px;color:var(--muted)" data-i18n>点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。</div>
+  <div style="font-size:12.5px;color:var(--muted)" data-i18n>点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。键盘：方向键选择、Enter 打开、Tab 切到 ♡/✕ 与按钮、Esc 关闭。</div>
   <div id="recentList"></div>
   <div class="btns" style="justify-content:space-between">
     <button id="recentNew" class="primary" data-i18n>打开新文件夹</button>
@@ -1362,11 +1370,11 @@ window.onerror = function(msg, src, line) {
 const LANG = (function () { try { const s = localStorage.getItem('wt-lang'); if (s === 'en' || s === 'zh') return s; return (navigator.language || 'zh').toLowerCase().slice(0, 2) === 'zh' ? 'zh' : 'en'; } catch (e) { return 'zh'; } })();
 const EN = {
   /* 工具栏按钮 */
-  '打开文件夹': 'Open Folder', '打开文件夹（先显示最近项目）': 'Open folder (shows recent projects first)', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
+  '打开文件夹': 'Open Folder', '打开文件夹（先显示最近项目，Alt+O）': 'Open folder (shows recent projects first; Alt+O)', '继续上次': 'Reopen Last', '新建txt': 'New txt', '新建md': 'New md',
   '版本': 'Version',
   /* 最近项目列表 */
   '最近项目': 'Recent projects', '打开新文件夹': 'Open New Folder',
-  '点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。': 'Click an entry to open it in this tab; ♡ favorites it to a fixed spot (never pushed out, never reordered by use), ✕ removes it; up to 10 unfavorited entries are kept.',
+  '点条目就在当前标签页打开；♡ 收藏后位置固定（不会被挤掉、也不会因使用次数变化），✕ 从列表移除；未收藏最多留 10 条。键盘：方向键选择、Enter 打开、Tab 切到 ♡/✕ 与按钮、Esc 关闭。': 'Click an entry to open it in this tab; ♡ favorites it to a fixed spot (never pushed out, never reordered by use), ✕ removes it; up to 10 unfavorited entries are kept. Keys: arrows to choose, Enter to open, Tab to reach ♡/✕ and buttons, Esc to close.',
   '收藏（位置固定，不会被新记录挤掉）': 'Favorite to a fixed spot (never pushed out by new entries)', '取消收藏': 'Unfavorite',
   '清空列表': 'Clear list', '从列表移除': 'Remove from list',
   '从最近项目列表移除「': 'Remove "', '」？\n（只移除这条记录，不会删除文件夹）': '" from recent projects?\n(Only this entry is removed — the folder itself is not deleted)',
@@ -1462,7 +1470,10 @@ const EN = {
   '拖入 .md / .txt 文件＝直接打开编辑（可写回原文件）': 'Drop .md / .txt files to edit directly (writes back to the files)',
   /* 工具栏 title 提示 */
   '继续上次打开的文件夹（浏览器首次会弹一次授权框，选「每次访问都允许」后不再询问）': 'Reopen the last folder (the browser asks once — choose "Allow on every visit" to stop being asked)',
-  '新建 .txt 文件（按 Markdown 解析），自动编号，每次数值 +10': 'New .txt file (parsed as Markdown), auto-numbered +10',
+  '新建 .txt 文件（按 Markdown 解析，自动编号，每次数值 +10；Alt+N）': 'New .txt file (parsed as Markdown, auto-numbered +10; Alt+N)',
+  '重命名（F2）': 'Rename (F2)',
+  '编辑模式（Alt+1）': 'Edit mode (Alt+1)', '预览模式（Alt+2）': 'Preview mode (Alt+2)',
+  '大纲模式（Alt+3）': 'Outline mode (Alt+3)', '阅览模式（Alt+4）': 'Read mode (Alt+4)',
   '新建 .md 文件，自动编号 +10': 'New .md file, auto-numbered +10',
   '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 columns, ASCII = 0.5)',
   '统一重排所在文件夹内文件和带编号子文件夹为 110、120、130…（不含草稿，原文字保留，无编号自动补）': 'Renumber files and numbered subfolders here as 110, 120, 130… (drafts excluded, text kept, gaps filled)',
@@ -1477,27 +1488,27 @@ const EN = {
   '重置字号：编辑恢复编辑器默认 15px，预览/阅览恢复版式默认（缩放 100%）': 'Reset: editor to 15px in edit mode; layout to 100% zoom in preview/read',
   '软件使用说明': 'User guide',
   '切换明暗主题': 'Toggle light/dark theme',
-  '上一个文件': 'Previous file', '下一个文件': 'Next file',
-  '一级标题（再点取消）': 'Heading 1 (click again to remove)',
-  '二级标题（再点取消）': 'Heading 2 (click again to remove)',
-  '三级标题（再点取消）': 'Heading 3 (click again to remove)',
-  '四级标题（再点取消）': 'Heading 4 (click again to remove)',
-  '五级标题（再点取消）': 'Heading 5 (click again to remove)',
-  '六级标题（再点取消）': 'Heading 6 (click again to remove)',
+  '上一个文件（Ctrl+Alt+←）': 'Previous file (Ctrl+Alt+←)', '下一个文件（Ctrl+Alt+→）': 'Next file (Ctrl+Alt+→)',
+  '一级标题（再点取消，Ctrl+Shift+1）': 'Heading 1 (click again to remove; Ctrl+Shift+1)',
+  '二级标题（再点取消，Ctrl+Shift+2）': 'Heading 2 (click again to remove; Ctrl+Shift+2)',
+  '三级标题（再点取消，Ctrl+Shift+3）': 'Heading 3 (click again to remove; Ctrl+Shift+3)',
+  '四级标题（再点取消，Ctrl+Shift+4）': 'Heading 4 (click again to remove; Ctrl+Shift+4)',
+  '五级标题（再点取消，Ctrl+Shift+5）': 'Heading 5 (click again to remove; Ctrl+Shift+5)',
+  '六级标题（再点取消，Ctrl+Shift+6）': 'Heading 6 (click again to remove; Ctrl+Shift+6)',
   '粗体（Ctrl+B）': 'Bold (Ctrl+B)', '删除线': 'Strikethrough', '斜体（Ctrl+I）': 'Italic (Ctrl+I)',
   '英文大小写循环：首字母大写 → 全大写 → 全小写': 'Cycle case: Capitalize → ALL CAPS → all lower',
   '无序列表（再点取消）': 'Bullet list (click again to remove)',
   '有序列表（再点取消）': 'Numbered list (click again to remove)',
-  '任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换': 'Task list: cycle the line between todo (- [ ]), done (- [x]) and none',
+  '任务列表：当前行在 待办（- [ ]）→ 已完成（- [x]）→ 无 之间循环切换（Alt+X）': 'Task list: cycle the line between todo (- [ ]), done (- [x]) and none (Alt+X)',
   '插入分隔线': 'Insert horizontal rule',
   '插入中文全角空格，用于中文排版': 'Insert a full-width space for CJK typography',
-  'HTML 注释：选中则包成 \x3C!--注释-->，未选中则插入模板；仅写作时可见，阅览导出不显示': 'HTML comment: wraps selection in \x3C!-- --> or inserts a template; editing-only, hidden in Read/export',
-  '插入当前日期时间（含星期），如 2026-09-19 23:45 星期六': 'Insert current date/time with weekday, e.g. 2026-09-19 23:45 Saturday',
+  'HTML 注释：选中则包成 \x3C!--注释-->，未选中则插入模板；仅写作时可见，阅览导出不显示（Alt+C）': 'HTML comment: wraps selection in \x3C!-- --> or inserts a template; editing-only, hidden in Read/export (Alt+C)',
+  '插入当前日期时间（含星期），如 2026-09-19 23:45 星期六（Alt+T）': 'Insert current date/time with weekday, e.g. 2026-09-19 23:45 Saturday (Alt+T)',
   '引用块（再点取消）': 'Blockquote (click again to remove)',
   '行内代码': 'Inline code',
-  '代码块（选中多行后点击可包裹）': 'Code block (select lines first to wrap them)',
+  '代码块（选中多行后点击可包裹；Ctrl+Shift+`）': 'Code block (select lines first to wrap them; Ctrl+Shift+`)',
   '调色盘：选择颜色，确认后把色值插入光标处': 'Palette: pick a color and insert the hex at the cursor',
-  '插入链接（选中网址可直接包裹）': 'Insert link (wraps a selected URL)',
+  '插入链接（选中网址可直接包裹；Ctrl+K）': 'Insert link (wraps a selected URL; Ctrl+K)',
   '插入锚点（页内跳转标记 \x3Ca id="name">）': 'Insert anchor (in-page jump target \x3Ca id="name">)',
   '插入图片（也可粘贴/拖入）；语法: ![](路径 =600x400 center)，宽高可只写一个，对齐 center/left/right': 'Insert image (paste/drop too); syntax ![](path =600x400 center); width/height optional; align center/left/right',
   '查找替换：可在当前文件或整个项目中进行': 'Find & replace in the current file or the whole project',
@@ -1511,8 +1522,8 @@ const EN = {
   '导出 .md：阅览模式按目录顺序合并导出，预览模式仅导出当前文件': 'Export .md: merged in TOC order in Read mode, current file only in Preview',
   '折叠文件目录（腾出编辑空间）': 'Collapse file tree (more editing room)',
   '折叠文件目录': 'Collapse file tree',
-  '在项目全部文件中搜索，Enter 搜索': 'Search across all files in the project, Enter to search',
-  '搜索': 'Search', '清空搜索，恢复目录显示': 'Clear search, show the tree again',
+  '在项目全部文件中搜索，Enter 搜索（Ctrl+F）': 'Search across all files in the project, Enter to search (Ctrl+F)',
+  '搜索（Ctrl+F）': 'Search (Ctrl+F)', '清空搜索，恢复目录显示': 'Clear search, show the tree again',
   '展开文件目录': 'Expand file tree',
   '隐藏右侧预览，专心编辑': 'Hide the preview pane to focus on editing',
   '同步滚动：编辑与预览互相跟随': 'Sync scroll: editor and preview follow each other',
@@ -1671,7 +1682,7 @@ const EN = {
   '光标在第一行，无法拆分': 'Cursor is on the first line; cannot split',
   '光标在最后一行，无法拆分': 'Cursor is on the last line; cannot split',
   '未找到拆分点': 'No split points found', '只有一个拆分块，无需拆分': 'Only one chunk; nothing to split',
-  '粗体': 'Bold', '斜体': 'Italic', '代码': 'Code', '注释': 'Comment',
+  '粗体': 'Bold', '斜体': 'Italic', '代码': 'Code', '注释': 'Comment', '链接文字': 'Link text',
   '同步滚动：开（点击关闭）': 'Sync scroll: on (click to turn off)', '同步滚动：关（点击开启）': 'Sync scroll: off (click to turn on)',
   '显示右侧 Markdown 预览': 'Show the Markdown preview on the right',
   /* ── 树 / 大纲 / 阅览 ── */
@@ -1794,6 +1805,13 @@ const EN_HTML = {
       <li><b>Comments</b>: <code>&lt;!--comments--&gt;</code> shown only while editing, hidden in Read/PDF/HTML export (kept in MD export).</li>\
       <li><b>Merge</b>: Ctrl+click to select multiple files; content goes into the first, the rest deleted; after multi-select, drag/delete/copy/hide act on the whole group.</li>\
       <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original first); taken names skip ahead after confirmation; tick "Move file to a same-named folder before splitting" to create a folder named after the file (without extension), move the file in, and keep all parts together; drag in the tree, drop on the project name = move to root.</li>\
+    </ul>\
+    <h4>Shortcuts</h4>\
+    <ul>\
+      <li><b>Text formatting</b>: <code>Ctrl+B</code> / <code>Ctrl+I</code> bold/italic; <code>Ctrl+K</code> insert link; <code>Alt+C</code> toggle comment on current line(s); <code>Alt+T</code> insert current date/time; <code>Ctrl+Shift+K</code> delete current line; <code>Ctrl+J</code> join current line with the next (no space between CJK characters).</li>\
+      <li><b>Headings &amp; lists</b>: <code>Ctrl+Shift+1~6</code> set H1~H6 (press again to clear); <code>Ctrl+[</code> / <code>Ctrl+]</code> outdent/indent list lines; <code>Alt+X</code> toggle task checkbox; <code>Ctrl+Shift+`</code> insert a code fence; <code>Enter</code> continues a list; <code>Tab</code> inserts two spaces.</li>\
+      <li><b>Move lines</b>: <code>Alt+↑</code> / <code>Alt+↓</code> move the current line up/down; <code>Alt+Shift+↓</code> duplicate it below.</li>\
+      <li><b>Files &amp; modes</b>: <code>Ctrl+S</code> save now; <code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> next/previous file in tree order; <code>Alt+1~4</code> edit/preview/outline/read; <code>F2</code> rename current file; <code>Alt+N</code> new txt; <code>Alt+O</code> open folder; <code>Ctrl+F</code> focus the search box.</li>\
     </ul>\
     <h4>Output</h4>\
     <ul>\
@@ -2110,7 +2128,8 @@ function renderTree() {
     row.ondragend = () => { dragPaths = null; row.classList.remove('drop-target'); };
     row.ondragover = e => {
       if (node.type !== 'dir' || !dragPaths) return;
-      if (dragPaths.some(p => p === node.path || p.startsWith(node.path + '/'))) return;
+      // 防环只挡「文件夹拖进自身/自己的子孙」；拖到祖先是合法上移，不能挡（文件路径不可能成为文件夹前缀）
+      if (dragPaths.some(p => p === node.path || node.path.startsWith(p + '/'))) return;
       e.preventDefault();
       row.classList.add('drop-target');
     };
@@ -5265,13 +5284,23 @@ function updateTableBar() {
 
 /* ================= editor keys ================= */
 $('editor').addEventListener('keydown', e => {
+  if (e.isComposing || e.keyCode === 229) return;   // 中文输入法组词期间不触发任何快捷键
   if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); if (current) { clearTimeout(saveTimer); saveCurrent(); } return; }
-  if (e.altKey && e.key === 'ArrowUp' && !e.shiftKey) { e.preventDefault(); moveLineBlock(-1); return; }
-  if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); if (e.shiftKey) duplicateLineBlock(); else moveLineBlock(1); return; }
-  if (e.key === 'Tab') { e.preventDefault(); insertAtCursor('  '); return; }
+  if (e.altKey && !e.ctrlKey && e.key === 'ArrowUp' && !e.shiftKey) { e.preventDefault(); moveLineBlock(-1); return; }
+  if (e.altKey && !e.ctrlKey && e.key === 'ArrowDown') { e.preventDefault(); if (e.shiftKey) duplicateLineBlock(); else moveLineBlock(1); return; }
+  if (e.key === 'Tab' && !e.ctrlKey && !e.altKey) { e.preventDefault(); insertAtCursor('  '); return; }
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) { listContinue(e); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', E('粗体')); return; }
-  if (e.ctrlKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapInline('*', E('斜体')); return; }
+  if (e.ctrlKey && e.shiftKey && !e.altKey && /^Digit([1-6])$/.test(e.code)) { e.preventDefault(); setHeading(+e.code.slice(5)); return; }
+  if (e.ctrlKey && e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); deleteLineBlock(); return; }
+  if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); wrapLink(); return; }
+  if (e.ctrlKey && e.shiftKey && !e.altKey && e.code === 'Backquote') { e.preventDefault(); insertCodeBlock(); return; }
+  if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); toggleCommentLines(); return; }
+  if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 't') { e.preventDefault(); insertDatetime(); return; }
+  if (e.ctrlKey && !e.altKey && e.code === 'BracketRight') { e.preventDefault(); indentList(1); return; }
+  if (e.ctrlKey && !e.altKey && e.code === 'BracketLeft') { e.preventDefault(); indentList(-1); return; }
+  if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); joinLine(); return; }
+  if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'b') { e.preventDefault(); wrapInline('**', E('粗体')); return; }
+  if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'i') { e.preventDefault(); wrapInline('*', E('斜体')); return; }
 });
 // 行内包裹：有选区包选区，无选区插占位符
 function wrapInline(marker, ph) {
@@ -5281,6 +5310,72 @@ function wrapInline(marker, ph) {
   const inner = sel || ph;
   editReplace(ed, s, e, marker + inner + marker);
   ed.setSelectionRange(s + marker.length, s + marker.length + inner.length);
+}
+// Ctrl+K：链接。有选区 [文字](https://) 并选中网址；无选区用占位文字
+function wrapLink() {
+  const ed = $('editor');
+  const s = ed.selectionStart, e = ed.selectionEnd;
+  const text = ed.value.slice(s, e) || E('链接文字');
+  const url = 'https://';
+  editReplace(ed, s, e, '[' + text + '](' + url + ')');
+  const u0 = s + 1 + text.length + 2;   // '[' + 文字 + '](' 之后
+  ed.setSelectionRange(u0, u0 + url.length);
+}
+// Alt+C：当前行（或选区各行）切换 <!-- 注释 -->；非空行全是注释则取消；空行插入注释占位
+function toggleCommentLines() {
+  const ed = $('editor');
+  const v = ed.value;
+  const a = v.lastIndexOf('\n', ed.selectionStart - 1) + 1;
+  let b = v.indexOf('\n', ed.selectionEnd); if (b < 0) b = v.length;
+  const block = v.slice(a, b);
+  // 光标在单个空行上时，走「插入注释」按钮行为：插入 <!--注释--> 并选中占位文字
+  if (!block.trim() && block.indexOf('\n') < 0) { insertComment(); return; }
+  const nonEmpty = block.split('\n').filter(l => l.trim());
+  const on = nonEmpty.length > 0 && nonEmpty.every(l => /^\s*<!-- .* -->\s*$/.test(l));
+  transformSelectedLines(l => {
+    if (!l.trim()) return l;
+    if (on) {
+      const m = l.match(/^(\s*)<!-- (.*) -->\s*$/);
+      return m ? m[1] + m[2] : l;
+    }
+    const ind = (l.match(/^\s*/) || [''])[0];
+    return ind + '<!-- ' + l.slice(ind.length) + ' -->';
+  });
+}
+// Ctrl+Shift+K：删除光标行/选区覆盖的整行（含行尾换行）
+function deleteLineBlock() {
+  const ed = $('editor');
+  const v = ed.value, s = ed.selectionStart, en = ed.selectionEnd;
+  const a = v.lastIndexOf('\n', s - 1) + 1;
+  let b = (en > s && v[en - 1] === '\n') ? en - 1 : v.indexOf('\n', en);
+  if (b < 0) b = v.length; else b += 1;
+  editReplace(ed, a, b, '');
+  ed.setSelectionRange(a, a);
+}
+// Ctrl+] / Ctrl+[：列表行（含任务行）增加/减少两级缩进，非列表行不动
+function indentList(dir) {
+  const ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/;
+  transformSelectedLines(l => {
+    if (!l.trim() || !ITEM.test(l)) return l;
+    if (dir > 0) return '  ' + l;
+    const m = l.match(/^ {1,2}/);
+    return m ? l.slice(m[0].length) : l;
+  });
+}
+// Ctrl+J：当前行与下一行合并，去掉中间换行与多余空白；任一侧为中日韩字符则不加空格
+function joinLine() {
+  const ed = $('editor');
+  const v = ed.value, s = ed.selectionStart;
+  const a = v.lastIndexOf('\n', s - 1) + 1;
+  const b = v.indexOf('\n', s);
+  if (b < 0) return;   // 已在最后一行
+  const ne = (i => { const x = v.indexOf('\n', i); return x < 0 ? v.length : x; })(b + 1);
+  const left = v.slice(a, b).replace(/\s+$/, '');
+  const right = v.slice(b + 1, ne).replace(/^\s+/, '');
+  const cjk = ch => /[㐀-䶿一-鿿぀-ヿ\u3000-〿＀-￯]/.test(ch);
+  const sep = (left && cjk(left[left.length - 1])) || (right && cjk(right[0])) ? '' : ' ';
+  editReplace(ed, a, ne, left + sep + right);
+  ed.setSelectionRange(a + (left + sep).length, a + (left + sep).length);
 }
 // 光标（或选区）覆盖的行块：a/b 为块首行起点、块末行终点（不含换行），sel 为块内选区偏移
 function lineBlock() {
@@ -5914,6 +6009,10 @@ function fmtRecentTime(t) {
 }
 async function renderRecent() {
   const box = $('recentList'), list = await loadRecent();
+  // 重渲染（收藏/移除）后把焦点送回原卡片，键盘操作不中断
+  const af = document.activeElement;
+  const prevCard = af && box.contains(af) ? af.closest('.recent-card') : null;
+  const prevKey = prevCard ? prevCard.dataset.key : null;
   box.innerHTML = '';
   if (!list.length) {
     box.innerHTML = '<div class="recent-empty">' + esc(E('还没有记录：用「打开文件夹」选一个书稿目录，之后会出现在这里')) + '</div>';
@@ -5922,6 +6021,8 @@ async function renderRecent() {
   list.forEach(it => {
     const card = document.createElement('div');
     card.className = 'recent-card' + (it.pin ? ' pinned' : '');
+    card.tabIndex = -1;   // 漫游焦点：方向键在卡片间移动，Tab 到卡内 ♡/✕ 与底部按钮
+    card.dataset.key = it.at + '|' + it.name;
     const nm = document.createElement('div');
     nm.className = 'rc-name'; nm.textContent = it.name; nm.title = it.name;
     const tm = document.createElement('span');
@@ -5968,6 +6069,10 @@ async function renderRecent() {
     card.onclick = () => openRecent(it);
     box.appendChild(card);
   });
+  if (prevKey) {
+    const same = [...box.children].find(c => c.dataset && c.dataset.key === prevKey);
+    if (same) same.focus();
+  }
 }
 // 在当前标签页打开该项目（先落盘当前文件；权限由 useRoot 处理，必要时会弹授权）
 async function openRecent(it) {
@@ -5980,7 +6085,7 @@ $('recentNew').onclick = () => { hideRecentPop(); pickFolder(); };
 $('recentClose').onclick = () => hideRecentPop();
 /* 单击展开、点面板外/Escape 收起（不用定时器，无头测试也能跑） */
 function recentVisible() { return !$('recentPop').classList.contains('hidden'); }
-function hideRecentPop() { $('recentPop').classList.add('hidden'); }
+function hideRecentPop() { $('recentPop').classList.add('hidden'); $('btnOpen').focus(); }
 async function showRecentPop() {
   const list = await loadRecent();
   if (!list.length) { hideRecentPop(); return; }   // 没有记录就不弹（直接把点击让给系统选择器）
@@ -5990,10 +6095,39 @@ async function showRecentPop() {
   const w = pop.offsetWidth || 680;
   pop.style.left = Math.max(8, Math.min(b.left, window.innerWidth - w - 8)) + 'px';
   pop.style.top = Math.round(b.bottom) + 2 + 'px';
+  $('recentList').querySelector('.recent-card')?.focus();   // 焦点进面板，支持全程键盘
 }
 const inRecentArea = t => !!(t && ($('recentPop').contains(t) || $('btnOpen').contains(t)));
 document.addEventListener('click', e => { if (recentVisible() && !inRecentArea(e.target)) hideRecentPop(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && recentVisible()) hideRecentPop(); });
+/* 面板内键盘导航：←→ 逐张、↑↓ 按行（列数按实际布局算）、Home/End 首尾、Enter 打开 */
+$('recentPop').addEventListener('keydown', e => {
+  const cards = [...$('recentList').querySelectorAll('.recent-card')];
+  if (!cards.length) return;
+  const curCard = e.target.closest && e.target.closest('.recent-card');
+  const i = cards.indexOf(curCard);
+  const onBtn = e.target.tagName === 'BUTTON';
+  // 回车/空格：焦点在卡片本体（非 ♡/✕ 按钮）上时打开项目；按钮交给原生行为
+  if ((e.key === 'Enter' || e.key === ' ') && curCard && !onBtn) { e.preventDefault(); curCard.click(); return; }
+  const NAV = ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
+  if (!NAV.includes(e.key)) return;
+  // 列数按当前实际网格布局（首行卡片数）计算
+  const top = cards[0].offsetTop;
+  let cols = 0; while (cols < cards.length && cards[cols].offsetTop === top) cols++;
+  cols = Math.max(1, cols);
+  let next;
+  if (i < 0) next = (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'End') ? cards.length - 1 : 0;
+  else if (e.key === 'ArrowRight') next = i + 1;
+  else if (e.key === 'ArrowLeft') next = i - 1;
+  else if (e.key === 'ArrowDown') next = i + cols;
+  else if (e.key === 'ArrowUp') next = i - cols;
+  else next = e.key === 'Home' ? 0 : cards.length - 1;
+  next = Math.max(0, Math.min(cards.length - 1, next));
+  if (next === i) return;
+  e.preventDefault();
+  cards[next].focus();
+  cards[next].scrollIntoView({ block: 'nearest' });
+});
 // 「打开文件夹」：单击展开 / 再单击收起；无记录时直接走系统选择器
 async function openRecentDlg() {
   const list = await loadRecent();
@@ -6391,7 +6525,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.8';
+const APP_VER = 'v3.1.9';
 $('aboutVer').textContent = APP_VER;
 $('welcomeVer').textContent = E('版本') + ' ' + APP_VER;   // 欢迎页作者行末尾显示版本号
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
@@ -6803,6 +6937,44 @@ $('toTop').onclick = () => {
 // Esc 清空多选
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && multiSel.length) { multiSel = []; renderTree(); updateToolbar(); }
+});
+/* ================= global keys ================= */
+// 全局快捷键：输入法组词中、任何模态对话框打开时一律不触发
+document.addEventListener('keydown', e => {
+  if (e.isComposing || e.keyCode === 229) return;
+  if (document.querySelector('dialog[open]')) return;
+  // Ctrl+Alt+→ / ←：目录顺序切下/上一个文件（Ctrl+Tab 被浏览器抢占故不绑）
+  let navDir = 0;
+  if (e.ctrlKey && e.altKey && !e.shiftKey && e.key === 'ArrowRight') { e.preventDefault(); navDir = 1; }
+  else if (e.ctrlKey && e.altKey && !e.shiftKey && e.key === 'ArrowLeft') { e.preventDefault(); navDir = -1; }
+  if (navDir) { if (rootHandle) navFile(navDir); return; }
+  // Alt+1~4：编辑/预览/大纲/阅览（与标签顺序一致；e.code 不受键盘布局影响；排除 AltGr=Ctrl+Alt）
+  if (e.altKey && !e.ctrlKey && !e.shiftKey && /^Digit([1-4])$/.test(e.code)) {
+    if (rootHandle) { e.preventDefault(); setMode(['edit', 'preview', 'outline', 'read'][+e.code.slice(5) - 1]); }
+    return;
+  }
+  // Alt 字母键：O 打开文件夹、N 新建 txt、X 任务待办切换（仅编辑器聚焦）
+  if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+    const k = e.key.toLowerCase();
+    if (k === 'o') { e.preventDefault(); $('btnOpen').click(); return; }
+    if (k === 'n') { if (rootHandle) { e.preventDefault(); newFile('txt'); } return; }
+    if (k === 'x') {
+      if (current && document.activeElement === $('editor')) { e.preventDefault(); toggleTask(); }
+      return;
+    }
+  }
+  // Ctrl+F：聚焦项目搜索框（替换浏览器页内查找）
+  if (e.ctrlKey && !e.altKey && e.key.toLowerCase() === 'f') {
+    if (rootHandle) { e.preventDefault(); const si = $('searchInput'); si.focus(); si.select(); }
+    return;
+  }
+  // F2：重命名当前文件（焦点在输入框/下拉框时让位给浏览器默认）
+  if (e.key === 'F2') {
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'SELECT')) return;
+    const n = selectedNode || (current ? current.node : null);
+    if (n && !n.external && rootHandle) { e.preventDefault(); renameNode(); }
+  }
 });
 
 /* ================= init ================= */
