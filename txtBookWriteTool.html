@@ -723,7 +723,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
  </div>
  <div class="tb-row tb-row2">
    <div class="tabs">
-     <button data-mode="edit" class="active" disabled data-i18n data-i18n-title title="编辑模式（Alt+1）">编辑</button>
+     <button data-mode="edit" class="active" disabled data-i18n data-i18n-title title="编辑模式（Alt+1；已在编辑时再按切换右侧预览显隐）">编辑</button>
      <button data-mode="preview" disabled data-i18n data-i18n-title title="预览模式（Alt+2）">预览</button>
      <button data-mode="outline" disabled data-i18n data-i18n-title title="大纲模式（Alt+3）">大纲</button>
      <button data-mode="read" disabled data-i18n data-i18n-title title="阅览模式（Alt+4）">阅览</button>
@@ -915,7 +915,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 </div>
 
 <footer id="statusbar">
-  <span id="stPath"></span><button id="btnExtDir" class="hidden" data-i18n data-i18n-title title="选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）">打开所在文件夹</button>
+  <span id="stPath"></span><button id="btnExtDir" class="hidden" data-i18n data-i18n-title title="打开该文件所在的文件夹作为书稿项目：已在最近项目中则直接打开，否则弹窗选择文件夹">打开所在文件夹</button>
   <span class="flex"></span>
   <span id="stCount"></span>
   <span id="stSave"></span>
@@ -1048,7 +1048,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>文字格式</b>：<code>Ctrl+B</code> / <code>Ctrl+I</code> 粗体/斜体；<code>Ctrl+K</code> 插入链接；<code>Alt+C</code> 当前行加/去注释；<code>Alt+T</code> 插入当前日期时间；<code>Ctrl+Shift+K</code> 删除当前行；<code>Ctrl+J</code> 当前行与下一行合并（中文之间不加空格）。</li>
       <li><b>标题与列表</b>：<code>Ctrl+Shift+1~6</code> 设为 H1~H6（再按取消）；<code>Ctrl+[</code> / <code>Ctrl+]</code> 列表行减少/增加缩进；<code>Alt+X</code> 任务待办切换；<code>Ctrl+Shift+`</code> 插入代码块围栏；<code>Enter</code> 自动续接列表；<code>Tab</code> 插入两个空格。</li>
       <li><b>移动行块</b>：<code>Alt+↑</code> / <code>Alt+↓</code> 上移/下移当前行；<code>Alt+Shift+↓</code> 向下复制当前行。</li>
-      <li><b>文件与模式</b>：<code>Ctrl+S</code> 立即保存；<code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> 按目录顺序切下/上一个文件；<code>Alt+1~4</code> 依次为编辑/预览/大纲/阅览；<code>F2</code> 重命名当前文件；<code>Alt+N</code> 新建 txt；<code>Alt+O</code> 打开文件夹；<code>Ctrl+F</code> 聚焦搜索框。</li>
+      <li><b>文件与模式</b>：<code>Ctrl+S</code> 立即保存；<code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> 按目录顺序切下/上一个文件；<code>Alt+1~4</code> 依次为编辑/预览/大纲/阅览（已在编辑模式时再按 <code>Alt+1</code> 切换右侧预览显隐）；<code>F2</code> 重命名当前文件；<code>Alt+N</code> 新建 txt；<code>Alt+O</code> 打开文件夹；<code>Ctrl+F</code> 聚焦搜索框。</li>
     </ul>
     <h4>输出</h4>
     <ul>
@@ -1472,7 +1472,7 @@ const EN = {
   '继续上次打开的文件夹（浏览器首次会弹一次授权框，选「每次访问都允许」后不再询问）': 'Reopen the last folder (the browser asks once — choose "Allow on every visit" to stop being asked)',
   '新建 .txt 文件（按 Markdown 解析，自动编号，每次数值 +10；Alt+N）': 'New .txt file (parsed as Markdown, auto-numbered +10; Alt+N)',
   '重命名（F2）': 'Rename (F2)',
-  '编辑模式（Alt+1）': 'Edit mode (Alt+1)', '预览模式（Alt+2）': 'Preview mode (Alt+2)',
+  '编辑模式（Alt+1；已在编辑时再按切换右侧预览显隐）': 'Edit mode (Alt+1; press again in edit mode to toggle the side preview)', '预览模式（Alt+2）': 'Preview mode (Alt+2)',
   '大纲模式（Alt+3）': 'Outline mode (Alt+3)', '阅览模式（Alt+4）': 'Read mode (Alt+4)',
   '新建 .md 文件，自动编号 +10': 'New .md file, auto-numbered +10',
   '按第一行文字自动命名：110.txt → 110-标题.txt（超 16 字宽截断，英文算半个字）': 'Rename from first line: 110.txt → 110-title.txt (cut at 16 columns, ASCII = 0.5)',
@@ -1527,7 +1527,7 @@ const EN = {
   '展开文件目录': 'Expand file tree',
   '隐藏右侧预览，专心编辑': 'Hide the preview pane to focus on editing',
   '同步滚动：编辑与预览互相跟随': 'Sync scroll: editor and preview follow each other',
-  '选择该文件所在的文件夹作为书稿项目（选中后自动打开此文件）': 'Use the file\'s folder as the book project (opens that file)',
+  '打开该文件所在的文件夹作为书稿项目：已在最近项目中则直接打开，否则弹窗选择文件夹': 'Open the file\'s folder as the project: opens directly if already in recent projects, otherwise asks you to pick the folder',
   '自定义颜色': 'Custom color',
   '返回顶部': 'Back to top', '切换界面语言': 'Toggle UI language',
   '张亮军　无锡·海岸城': 'Zhang Liangjun · Wuxi, China',
@@ -1575,7 +1575,7 @@ const EN = {
   '已打开：': 'Opened: ', '已打开外部文件：': 'Opened external file: ',
   '已打开文件夹，其余拖入项已忽略': 'Folder opened; other dropped items ignored',
   '仅支持打开文件夹或 .md / .txt 文件；图片请在编辑项目内文件时拖入': 'Only folders or .md / .txt files can be opened; drop images inside a project file',
-  '📄 外部文件：': '📄 External file: ',
+  '⚠️ 外部文件：': '⚠️ External file: ',
   '[图]': '[image]',
   '> 读取失败: ': '> Failed to read: ',
   '已恢复上次编辑：': 'Reopened last edit: ',
@@ -1811,7 +1811,7 @@ const EN_HTML = {
       <li><b>Text formatting</b>: <code>Ctrl+B</code> / <code>Ctrl+I</code> bold/italic; <code>Ctrl+K</code> insert link; <code>Alt+C</code> toggle comment on current line(s); <code>Alt+T</code> insert current date/time; <code>Ctrl+Shift+K</code> delete current line; <code>Ctrl+J</code> join current line with the next (no space between CJK characters).</li>\
       <li><b>Headings &amp; lists</b>: <code>Ctrl+Shift+1~6</code> set H1~H6 (press again to clear); <code>Ctrl+[</code> / <code>Ctrl+]</code> outdent/indent list lines; <code>Alt+X</code> toggle task checkbox; <code>Ctrl+Shift+`</code> insert a code fence; <code>Enter</code> continues a list; <code>Tab</code> inserts two spaces.</li>\
       <li><b>Move lines</b>: <code>Alt+↑</code> / <code>Alt+↓</code> move the current line up/down; <code>Alt+Shift+↓</code> duplicate it below.</li>\
-      <li><b>Files &amp; modes</b>: <code>Ctrl+S</code> save now; <code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> next/previous file in tree order; <code>Alt+1~4</code> edit/preview/outline/read; <code>F2</code> rename current file; <code>Alt+N</code> new txt; <code>Alt+O</code> open folder; <code>Ctrl+F</code> focus the search box.</li>\
+      <li><b>Files &amp; modes</b>: <code>Ctrl+S</code> save now; <code>Ctrl+Alt+→</code> / <code>Ctrl+Alt+←</code> next/previous file in tree order; <code>Alt+1~4</code> edit/preview/outline/read (in edit mode, <code>Alt+1</code> again toggles the side preview); <code>F2</code> rename current file; <code>Alt+N</code> new txt; <code>Alt+O</code> open folder; <code>Ctrl+F</code> focus the search box.</li>\
     </ul>\
     <h4>Output</h4>\
     <ul>\
@@ -2427,7 +2427,7 @@ async function extReloadFromDisk() {
 function updateStatus() {
   const ext = !!(current && current.node.external);
   $('stPath').textContent = current
-    ? (ext ? E('📄 外部文件：') + current.node.name : current.node.path)
+    ? (ext ? E('⚠️ 外部文件：') + current.node.name : current.node.path)
     : (rootHandle ? rootHandle.name : '');
   $('btnExtDir').classList.toggle('hidden', !ext);
   $('stCount').textContent = current ? countChars(current.content) + E(' 字') : '';
@@ -3660,22 +3660,19 @@ function normalizeBookCfg(raw) {
   return out;
 }
 let bookCfg = BOOK_DEFAULT_CFG;
-try { bookCfg = normalizeBookCfg(JSON.parse(localStorage.getItem('wt-book-cfg') || '{}')); } catch (e) {}
 document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
-// 从项目根目录的 settings.json 读取成书设置；项目里没有这个文件就回到内置默认
-// （否则会沿用上一个项目留在 localStorage 缓存里的书名/作者/日期——多份副本共用一份 localStorage）
+// 从项目根目录的 settings.json 读取成书设置；项目里没有这个文件（或 JSON 损坏）就回到内置默认
+//（不再缓存 localStorage：file:// 下多副本共用同一份 localStorage，会导致版式串扰）
 async function loadBookCfgFile() {
   if (!rootHandle) return;
   try {
     const text = await (await (await rootHandle.getFileHandle(BOOK_CFG_NAME)).getFile()).text();
     bookCfg = normalizeBookCfg(JSON.parse(text));
   } catch (e) { bookCfg = normalizeBookCfg({}); }
-  localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
   document.documentElement.style.setProperty('--md-pdf-bg', bookCfg.pdfBg || '#ffffff');
 }
-// 保存成书设置：localStorage + 项目根 settings.json
+// 保存成书设置：写入项目根 settings.json（一项目一份，以文件为权威；不再缓存 localStorage，避免 file:// 多副本共用一份 localStorage 导致串扰）
 async function saveBookCfg() {
-  localStorage.setItem('wt-book-cfg', JSON.stringify(bookCfg));
   if (!rootHandle) return;
   const json = JSON.stringify(bookCfg, null, 2) + '\n';
   try {
@@ -6143,19 +6140,38 @@ $('recentClear').onclick = async () => {
   renderRecent();
   toast(E('已清空最近项目'));
 };
-// 外部标签「打开所在文件夹」：选目录后定位
+// 外部文件「打开所在文件夹」：API 无法从文件句柄推导父目录，故先用 resolve 在当前项目/最近项目
+// 句柄中定位（命中即直接打开，体验同「继续上次」）；都未命中才回退到目录选择器
 $('btnExtDir').onclick = async () => {
   const fh = current && current.node.external ? current.node.handle : null;
   if (!fh || !window.showDirectoryPicker) return;
+  const locate = async (dir) => {
+    let parts = null;
+    try { parts = await dir.resolve(fh); } catch (e) { return false; }
+    if (!parts || !parts.length) return false;
+    try {   // 命中后才请求授权，避免对未命中候选逐个弹授权框
+      let perm = await dir.queryPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') perm = await dir.requestPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') return false;
+    } catch (e) { return false; }
+    await flushSave();
+    await useRoot(dir);
+    const node = findNode(tree, parts.join('/'));
+    if (node) { selectedNode = node; await openFile(node); renderTree(); }
+    return true;
+  };
   try {
+    const cands = [];
+    if (rootHandle) cands.push(rootHandle);
+    for (const it of await loadRecent()) { if (it.handle) cands.push(it.handle); }
+    for (const dir of cands) { if (await locate(dir)) return; }
+    // 回退：手动选择目录
     await flushSave();
     const dir = await showDirectoryPicker({ mode: 'readwrite' });
     await useRoot(dir);
     const parts = await dir.resolve(fh);
-    if (parts && parts.length) {
-      const node = findNode(tree, parts.join('/'));
-      if (node) { selectedNode = node; await openFile(node); renderTree(); return; }
-    }
+    const node = parts && parts.length ? findNode(tree, parts.join('/')) : null;
+    if (node) { selectedNode = node; await openFile(node); renderTree(); return; }
     toast(E('所选文件夹中没有该文件'));
   } catch (e) { if (e.name !== 'AbortError') toast(E('打开失败：') + e.message); }
 };
@@ -6525,7 +6541,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.9';
+const APP_VER = 'v3.1.10';
 $('aboutVer').textContent = APP_VER;
 $('welcomeVer').textContent = E('版本') + ' ' + APP_VER;   // 欢迎页作者行末尾显示版本号
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
@@ -6949,8 +6965,13 @@ document.addEventListener('keydown', e => {
   else if (e.ctrlKey && e.altKey && !e.shiftKey && e.key === 'ArrowLeft') { e.preventDefault(); navDir = -1; }
   if (navDir) { if (rootHandle) navFile(navDir); return; }
   // Alt+1~4：编辑/预览/大纲/阅览（与标签顺序一致；e.code 不受键盘布局影响；排除 AltGr=Ctrl+Alt）
+  // Alt+1 两层：非编辑模式→切到编辑；已是编辑模式→切换右侧预览显隐
   if (e.altKey && !e.ctrlKey && !e.shiftKey && /^Digit([1-4])$/.test(e.code)) {
-    if (rootHandle) { e.preventDefault(); setMode(['edit', 'preview', 'outline', 'read'][+e.code.slice(5) - 1]); }
+    if (rootHandle) {
+      e.preventDefault();
+      if (e.code === 'Digit1' && mode === 'edit') togglePreviewPane();
+      else setMode(['edit', 'preview', 'outline', 'read'][+e.code.slice(5) - 1]);
+    }
     return;
   }
   // Alt 字母键：O 打开文件夹、N 新建 txt、X 任务待办切换（仅编辑器聚焦）
