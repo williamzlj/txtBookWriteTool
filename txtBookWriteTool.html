@@ -340,7 +340,7 @@ body[data-mode="edit"] #syncScrollBtn { display: flex; }
   --md-h1-color: #eeeeee; --md-h2-color: #e4e5e7; --md-h3-color: #d9dbdf;
   --md-h4-color: #cfd1d6; --md-h5-color: #c5c8ce; --md-h6-color: #bcc0c8;
   --md-link-color: var(--md-accent);
-  --md-task-done-color: var(--md-accent);
+  --md-task-done-color: var(--md-muted-color);
   --md-task-todo-color: var(--md-muted-color);
 }
 
@@ -989,6 +989,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div class="row hidden" id="spCursorRow"><label style="width:64px" data-i18n>光标行：</label>
     <span id="spCursorInfo" style="font-size:12.5px;color:var(--muted)"></span>
   </div>
+  <div class="row"><label data-i18n-block data-i18n-title title="在同级目录创建与文件同名（不含扩展名）的文件夹，把原文件移入后再拆分，拆分产物集中其中"><input type="checkbox" id="spMoveFolder"> 将文件移动到同名文件夹后再拆分</label></div>
   <div id="spInfo" style="font-size:12.5px;color:var(--muted);margin:6px 0">​</div>
   <div class="btns">
     <button id="spCancel" data-i18n>取消</button>
@@ -1039,7 +1040,7 @@ dialog .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
       <li><b>替换</b>：可选单文件或全项目 md/txt（含草稿需确认），替换前自动存「历史版本」。</li>
       <li><b>注释</b>：<code>&lt;!--注释--&gt;</code> 仅编辑可见，阅览/PDF/导出 HTML 不显示（导出 MD 保留）。</li>
       <li><b>合并</b>：Ctrl+点选多文件，内容并入第一个、其余删除；多选后拖动/删除/复制/隐藏按组操作。</li>
-      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件存前半并保留原名，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（原文件排前）；目标名被占用时编号自动顺延、确认后创建；目录树可拖动，拖到项目名=移到根目录。</li>
+      <li><b>拆分</b>：按光标/标题/关键词拆分，原文件存前半并保留原名，后续 <code>base_2.txt</code>、<code>base_3.txt</code>…（原文件排前）；目标名被占用时编号自动顺延、确认后创建；勾选「将文件移动到同名文件夹后再拆分」会先建与文件同名（不含扩展名）的文件夹并移入原文件，拆分产物全部集中其中；目录树可拖动，拖到项目名=移到根目录。</li>
     </ul>
     <h4>输出</h4>
     <ul>
@@ -1407,6 +1408,11 @@ const EN = {
   '只按该级别标题拆分，忽略其他级别': 'Split only by headings of this level, ignore others',
   '关键词：': 'Keyword:', '行首出现该关键词的行即拆分点': 'Lines starting with this keyword become split points',
   '光标行：': 'Cursor line:',
+  '将文件移动到同名文件夹后再拆分': 'Move file to a same-named folder before splitting',
+  '在同级目录创建与文件同名（不含扩展名）的文件夹，把原文件移入后再拆分，拆分产物集中其中': 'Create a folder named after the file (without extension) in the same directory, move the file into it, and split there so all parts stay together',
+  '同名条目是文件，无法创建文件夹：': 'A same-named entry is a file; cannot create folder: ',
+  '文件夹中已存在同名文件，未做任何改动：': 'A same-named file already exists in the folder; nothing was changed: ',
+  '，已集中到文件夹 ': ', gathered into folder ',
   /* 外部修改 */
   '文件已被外部修改': 'File changed outside the editor',
   /* 回收站 / 历史 */
@@ -1787,7 +1793,7 @@ const EN_HTML = {
       <li><b>Replace</b>: one file or the whole project md/txt (drafts need confirmation); a history version is archived first.</li>\
       <li><b>Comments</b>: <code>&lt;!--comments--&gt;</code> shown only while editing, hidden in Read/PDF/HTML export (kept in MD export).</li>\
       <li><b>Merge</b>: Ctrl+click to select multiple files; content goes into the first, the rest deleted; after multi-select, drag/delete/copy/hide act on the whole group.</li>\
-      <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original first); taken names skip ahead after confirmation; drag in the tree, drop on the project name = move to root.</li>\
+      <li><b>Split</b>: by cursor/heading/keyword; the first half keeps the original name, the rest become <code>base_2.txt</code>, <code>base_3.txt</code>… (original first); taken names skip ahead after confirmation; tick "Move file to a same-named folder before splitting" to create a folder named after the file (without extension), move the file in, and keep all parts together; drag in the tree, drop on the project name = move to root.</li>\
     </ul>\
     <h4>Output</h4>\
     <ul>\
@@ -4823,8 +4829,14 @@ function splitParams() {
     kw: $('spKeyword').value.trim()
   };
 }
+// 同名文件夹名＝文件名去掉扩展名（110.txt → 110）；注意不能用 splitNameInfo 的 base（会丢掉 _N 后缀）
+function splitFolderName(name) {
+  const dot = name.lastIndexOf('.');
+  return dot > 0 ? name.slice(0, dot) : name;
+}
 function updateSplitInfo() {
   const p = splitParams();
+  const pre = $('spMoveFolder').checked ? esc(splitFolderName(spTarget.name)) + '/' : '';
   if (p.mode === 'keyword' && !p.kw) { $('spInfo').textContent = E('请输入关键词'); return; }
   if (p.mode === 'cursor') {
     const lines = spText.split('\n');
@@ -4832,7 +4844,7 @@ function updateSplitInfo() {
     if (spCursorLine <= 0) { $('spInfo').textContent = E('光标在第一行，无法拆分'); return; }
     if (spCursorLine >= lines.length) { $('spInfo').textContent = E('光标在最后一行，无法拆分'); return; }
     const { base, ext, startNum } = splitNameInfo(spTarget.name);
-    $('spInfo').innerHTML = `${E('将拆为 2 份：<div class="sp-names">· ')}${esc(spTarget.name)}${E('（原文件截断为前 ')}${spCursorLine}${E(' 行）<br>· ')}${esc(base + '_' + startNum + ext)}${E('（光标行起）</div>')}`;
+    $('spInfo').innerHTML = `${E('将拆为 2 份：<div class="sp-names">· ')}${pre}${esc(spTarget.name)}${E('（原文件截断为前 ')}${spCursorLine}${E(' 行）<br>· ')}${pre}${esc(base + '_' + startNum + ext)}${E('（光标行起）</div>')}`;
     return;
   }
   const parts = splitParts(spText, p.mode, p.level, p.kw);
@@ -4841,8 +4853,8 @@ function updateSplitInfo() {
   const names = [];
   for (let k = 0; k < parts.length - 1 && names.length < 3; k++) names.push(base + '_' + (startNum + k) + ext);
   $('spInfo').innerHTML = E('找到 ') + (parts.length - 1) + E(' 个拆分点，将拆为 ') + parts.length + E(' 份：<div class="sp-names">· ')
-    + esc(spTarget.name) + E('（第一个拆分块）<br>')
-    + names.map(n => '· ' + esc(n)).join('<br>')
+    + pre + esc(spTarget.name) + E('（第一个拆分块）<br>')
+    + names.map(n => '· ' + pre + esc(n)).join('<br>')
     + (parts.length > 4 ? '<br>…' : '') + '</div>';
 }
 async function openSplit() {
@@ -4859,6 +4871,7 @@ async function openSplit() {
   spCursorLine = (ed.value.slice(0, ed.selectionStart).match(/\n/g) || []).length;
   $('spName').textContent = n.name;
   $('spKeyword').value = '';
+  $('spMoveFolder').checked = false;
   document.querySelector('input[name="spMode"][value="cursor"]').checked = true;
   $('spHeadingRow').classList.add('hidden');
   $('spKeywordRow').classList.add('hidden');
@@ -4876,6 +4889,7 @@ document.querySelectorAll('input[name="spMode"]').forEach(r => r.onchange = () =
 });
 $('spLevel').onchange = updateSplitInfo;
 $('spKeyword').oninput = updateSplitInfo;
+$('spMoveFolder').onchange = updateSplitInfo;
 $('spCancel').onclick = () => $('dlgSplit').close();
 $('spOk').onclick = async () => {
   const node = spTarget;
@@ -4885,8 +4899,33 @@ $('spOk').onclick = async () => {
   const parts = splitParts(spText, p.mode, p.level, p.kw, spCursorLine);
   if (parts.length < 2) { toast(parts.length ? E('只有一个拆分块，无需拆分') : E('未找到拆分点')); return; }
   const { base, ext, startNum } = splitNameInfo(node.name);
+  const toFolder = $('spMoveFolder').checked;
+  const folderName = splitFolderName(node.name);
   try {
-    const dir0 = await getDirHandleByPath(parentPath(node.path));
+    const parentDir = await getDirHandleByPath(parentPath(node.path));
+    let dir0 = parentDir;
+    let origPath = node.path;
+    // 勾选「移动到同名文件夹」：先建/取同名文件夹（无扩展名），冲突一律中止不覆盖
+    if (toFolder) {
+      try {
+        await parentDir.getFileHandle(folderName);
+        throw new Error(E('同名条目是文件，无法创建文件夹：') + folderName);
+      } catch (e) { if (e.name !== 'NotFoundError') throw e; }
+      let folder;
+      try { folder = await parentDir.getDirectoryHandle(folderName); }
+      catch (e) {
+        if (e.name !== 'NotFoundError') throw e;
+        folder = await parentDir.getDirectoryHandle(folderName, { create: true });
+      }
+      try {
+        await folder.getFileHandle(node.name);
+        throw new Error(E('文件夹中已存在同名文件，未做任何改动：') + folderName + '/' + node.name);
+      } catch (e) { if (e.name !== 'NotFoundError') throw e; }
+      dir0 = folder;
+      const pp = parentPath(node.path);
+      origPath = (pp ? pp + '/' : '') + folderName + '/' + node.name;
+    }
+    const loc = toFolder ? folderName + '/' : '';
     // 统一命名规则：原文件保留原名写 parts[0]，parts[1..] 写成 base_N.ext
     // 下划线 '_' 码位 95 > '.' 46，Windows 排序原文件永远在前
     // 已是拆分产物时从原编号+1 续号；目标名已存在时起始编号自动顺延到空闲段，顺延后需用户确认（不覆盖已有文件）
@@ -4901,10 +4940,16 @@ $('spOk').onclick = async () => {
     while (start < 2000 && !(await rangeFree(start))) start++;
     if (start > startNum) {   // 仅因冲突顺延时才确认，正常续号不弹窗
       const names = [];
-      for (let k = 1; k < total; k++) names.push(base + '_' + (start + k - 1) + ext);
-      if (!confirm(E('目标文件名已被占用，编号已自动顺延：\n\n') + node.name + E('（第一个拆分块）\n') + names.join('\n') + E('\n\n仍按以上名称创建吗？'))) return;
+      for (let k = 1; k < total; k++) names.push(loc + base + '_' + (start + k - 1) + ext);
+      if (!confirm(E('目标文件名已被占用，编号已自动顺延：\n\n') + loc + node.name + E('（第一个拆分块）\n') + names.join('\n') + E('\n\n仍按以上名称创建吗？'))) return;
     }
     await backupHistory(node, spText);
+    if (toFolder) {
+      // 先把原文件移入同名文件夹（.history 镜像随迁），后续拆分都在该文件夹内进行
+      await moveEntry(node, dir0);
+      await moveHistoryDir(node.path, origPath);
+      histBaseRename(node.path, origPath);
+    }
     // 原文件就地覆盖为 parts[0]（光标前 / 第一个拆分块）
     let fh0 = await dir0.getFileHandle(node.name);
     let w0 = await fh0.createWritable(); await w0.write(parts[0].replace(/\s+$/, '') + '\n'); await w0.close();
@@ -4916,13 +4961,20 @@ $('spOk').onclick = async () => {
     }
     $('dlgSplit').close();
     clearTimeout(saveTimer);
+    const wasOpen = current && current.node === node;
+    if (toFolder) expanded.add(parentPath(origPath));   // 展开同名文件夹，让拆分结果立即可见
     await refreshTree();
-    if (current && current.node === node) {
-      await openFile(node);   // 刷新编辑器（原文件内容已截断/重写）
-    } else { renderTree(); updateToolbar(); }
-    const suffix = p.mode === 'cursor'
+    const targetNode = findNode(tree, origPath);
+    if (wasOpen) {
+      if (targetNode) { selectedNode = targetNode; await openFile(targetNode); }   // 刷新编辑器（原文件已移动并截断）
+    } else {
+      if (targetNode) selectedNode = targetNode;
+      renderTree(); updateToolbar();
+    }
+    const suffix = (toFolder ? `${E('，已集中到文件夹 ')}${folderName}/` : '')
+      + (p.mode === 'cursor'
       ? `${E('，原文件保留前 ')}${spCursorLine}${E(' 行，光标行起写入 ')}${base}_${start}${ext}`
-      : `${E('，后续 ')}${parts.length - 1}${E(' 份为 ')}${base}_${start}${ext} ~ ${base}_${start + parts.length - 2}${ext}`;
+      : `${E('，后续 ')}${parts.length - 1}${E(' 份为 ')}${base}_${start}${ext} ~ ${base}_${start + parts.length - 2}${ext}`);
     toast(`${E('已拆分为 ')}${parts.length}${E(' 份')}${suffix}`);
   } catch (e) { toast(E('拆分失败：') + e.message); }
 };
@@ -6339,7 +6391,7 @@ $('btnLang').onclick = async () => {
   location.reload();
 };
 /* 版本号：发版时只改这一处（与 git tag / GitHub Release 保持一致） */
-const APP_VER = 'v3.1.7';
+const APP_VER = 'v3.1.8';
 $('aboutVer').textContent = APP_VER;
 $('welcomeVer').textContent = E('版本') + ' ' + APP_VER;   // 欢迎页作者行末尾显示版本号
 $('btnAbout').onclick = () => $('dlgAbout').showModal();
