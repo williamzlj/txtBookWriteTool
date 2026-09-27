@@ -1,0 +1,15 @@
+# agent 项目记忆/配置文件，禁止入库
+handoff.txt
+handoff.md
+.trae/
+
+# 构建工具与源码（A 档混淆构建仅在本地进行，公开仓库只放产物）
+build.mjs
+package.json
+package-lock.json
+node_modules/
+txtBookWriteTool.src.html
+
+# 本地资料，不入库
+description.md
+备份/
